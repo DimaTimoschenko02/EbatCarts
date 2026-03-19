@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://launcher01"]
+
+[ext_resource type="PackedScene" path="res://assets/weapons/missile_launcher.glb" id="1_launcher"]
+[ext_resource type="PackedScene" path="res://scenes/missile_visual.tscn" id="2_missile"]
+[ext_resource type="Script" path="res://scripts/launcher_visual.gd" id="3_script"]
+
+[node name="Launcher" type="Node3D"]
+script = ExtResource("3_script")
+
+[node name="LauncherMesh" parent="." instance=ExtResource("1_launcher")]
+transform = Transform3D(-1.7484556e-08, 0, -0.4, 0, 0.4, 0, 0.4, 0, -1.7484556e-08, 0, 0, 0)
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.002576217, 0.042096138, 0.47036648)
+
+[node name="MissileVisual" parent="Muzzle" instance=ExtResource("2_missile")]

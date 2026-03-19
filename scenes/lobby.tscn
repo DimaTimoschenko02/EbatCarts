@@ -1,0 +1,83 @@
+[gd_scene load_steps=2 format=3 uid="uid://lobby001"]
+
+[ext_resource type="Script" path="res://scripts/lobby.gd" id="1_lobby"]
+
+[node name="Lobby" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_lobby")
+
+[node name="BG" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.10, 0.16, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_left = 0.25
+anchor_top = 0.15
+anchor_right = 0.75
+anchor_bottom = 0.90
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="VBox"]
+text = "SmashKarts Clone"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(1.0, 0.8, 0.1, 1)
+
+[node name="Divider" type="HSeparator" parent="VBox"]
+
+[node name="NameRow" type="HBoxContainer" parent="VBox"]
+theme_override_constants/separation = 10
+
+[node name="NameLbl" type="Label" parent="VBox/NameRow"]
+text = "Name:"
+custom_minimum_size = Vector2(80, 0)
+vertical_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="VBox/NameRow"]
+size_flags_horizontal = 3
+placeholder_text = "Enter your name…"
+text = "Player"
+theme_override_font_sizes/font_size = 16
+
+[node name="HostRow" type="HBoxContainer" parent="VBox"]
+alignment = 1
+
+[node name="HostBtn" type="Button" parent="VBox/HostRow"]
+text = "Host Game"
+custom_minimum_size = Vector2(160, 44)
+theme_override_font_sizes/font_size = 16
+
+[connection signal="pressed" from="VBox/HostRow/HostBtn" to="." method="_on_host_pressed"]
+
+[node name="JoinSep" type="HSeparator" parent="VBox"]
+
+[node name="JoinRow" type="HBoxContainer" parent="VBox"]
+theme_override_constants/separation = 8
+
+[node name="IPLbl" type="Label" parent="VBox/JoinRow"]
+text = "IP:"
+custom_minimum_size = Vector2(30, 0)
+vertical_alignment = 1
+
+[node name="IPInput" type="LineEdit" parent="VBox/JoinRow"]
+size_flags_horizontal = 3
+placeholder_text = "127.0.0.1"
+text = "127.0.0.1"
+theme_override_font_sizes/font_size = 16
+
+[node name="JoinBtn" type="Button" parent="VBox/JoinRow"]
+text = "Join"
+custom_minimum_size = Vector2(90, 44)
+theme_override_font_sizes/font_size = 16
+
+[connection signal="pressed" from="VBox/JoinRow/JoinBtn" to="." method="_on_join_pressed"]
+
+[node name="StatusLabel" type="Label" parent="VBox"]
+text = ""
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 1.0, 0.6, 1)

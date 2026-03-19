@@ -1,0 +1,89 @@
+63f7b34db8d8cdea90c76aacccf841ec
+::res://::1773871963
+.mcp.json::JSON::-1::1773858758::0::1::::<><><>0<>0<><>::
+CLAUDE.md::TextFile::-1::1773601996::0::1::::<><><>0<>0<><>::
+dev_params.json::JSON::-1::1773765292::0::1::::<><><>0<>0<><>::
+icon.svg::CompressedTexture2D::5437829086209547246::1773593494::1773593893::1::::<><><>0<>0<>6a1593802ffe4b7d22b7db5a1d463000<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
+::res://addons/::1773858303
+::res://addons/addons/::1773858303
+::res://addons/addons/godot_mcp/::1773858303
+::res://addons/addons/godot_mcp/tools/::1773858303
+::res://addons/godot_mcp/::1773857915
+mcp_client.gd::GDScript::1162944733981827398::1773857915::0::1::::MCPClient<>Node<><>0<>1<><>::
+plugin.cfg::TextFile::-1::1773857915::0::1::::<><><>0<>0<><>::
+plugin.gd::GDScript::4481292871079238229::1773857915::0::1::::<>EditorPlugin<><>0<>1<><>::
+tool_executor.gd::GDScript::4057858734285800894::1773857915::0::1::::ToolExecutor<>Node<><>0<>1<><>::
+::res://addons/godot_mcp/tools/::1773857915
+asset_tools.gd::GDScript::3231393839726275104::1773857915::0::1::::AssetTools<>Node<><>0<>1<><>::
+file_tools.gd::GDScript::203064182350674562::1773857915::0::1::::FileTools<>Node<><>0<>1<><>::
+project_tools.gd::GDScript::5324228254567255942::1773857915::0::1::::ProjectTools<>Node<><>0<>1<><>::
+scene_tools.gd::GDScript::5800870414879361832::1773857915::0::1::::SceneTools<>Node<><>0<>1<><>::
+script_tools.gd::GDScript::4123183728843417443::1773857915::0::1::::ScriptTools<>Node<><>0<>1<><>::
+visualizer_tools.gd::GDScript::5812933693816328525::1773857915::0::1::::VisualizerTools<>Node<><>0<>1<><>::
+::res://addons/ScatterTool/::1773856976
+foliage_data.gd::GDScript::8651987382883142536::1773856883::0::1::::FoliageData<>Resource<><>0<>0<><>::
+object_data.gd::GDScript::1256170289734607852::1773856883::0::1::::ObjectData<>Resource<><>0<>0<><>::
+plugin.cfg::TextFile::-1::1773856883::0::1::::<><><>0<>0<><>::
+ScatterTool_Icon.png::CompressedTexture2D::6057555783865919830::1773856883::1773856976::1::::<><><>0<>0<>b7bcf5c6e8871055f39d4e78cce1bf26<>res://.godot/imported/ScatterTool_Icon.png-57482d462f2045673944a7331364357f.ctex::
+scatter_data.gd::GDScript::1076705402527439223::1773856883::0::1::::ScatterData<>Resource<><>0<>0<><>::
+scatter_plugin.gd::GDScript::8638906118027736917::1773856883::0::1::::<>EditorPlugin<><>0<>1<><>::
+scatter_tool.gd::GDScript::815082629904807172::1773856883::0::1::::ScatterTool<>Node3D<><>0<>1<><>::
+scene_data.gd::GDScript::3775376658236073351::1773856883::0::1::::SceneData<>Resource<><>0<>0<><>::
+::res://assets/::1773768395
+::res://assets/carts/::1773766643
+kart-ooli.glb::PackedScene::8261606223730049116::1773766234::1773766396::1::::<><><>0<>0<>b5e9c1c75e900f444a05a679d604e3c9<>res://.godot/imported/kart-ooli.glb-de43a38bd81c0adab551659ef9bbdb38.scn::
+taxi.glb::PackedScene::8800098944900940263::1773766641::1773766643::1::::<><><>0<>0<>aa150517dde66183df37ef4eb5fd278c<>res://.godot/imported/taxi.glb-ebdccfcc6aa88b6c1b6116ff180de1b2.scn::
+::res://assets/maps/::1773769262
+low_poly_map.glb::PackedScene::8798729755993687779::1773767708::1773769262::1::::<><><>0<>0<>022a3f323178778d11a95b148dbcea59<>res://.godot/imported/low_poly_map.glb-a7ae19bc847afc856b55a42e995b1457.scn::
+::res://assets/materials/::1773593182
+::res://assets/models/::1773593182
+::res://assets/weapons/::1773767058
+missile.glb::PackedScene::1401378383863311716::1773766641::1773766643::1::::<><><>0<>0<>e281a1d9e08a831e8fdf2fce529268e0<>res://.godot/imported/missile.glb-31fd6ccc6c4b803bf816e7884c8894ea.scn::uid://dkrk8aagw4fw5::::res://assets/weapons/missile_0.png
+missile_0.png::CompressedTexture2D::7896911010708327718::1773766641::1773767058::1::::<><><>0<>0<>96284d51dcc58d9b7a29b57e465455b7<>res://.godot/imported/missile_0.png-5b6bea3dc34264872a53b10c87cee99a.s3tc.ctex::
+missile_launcher.glb::PackedScene::5248847501812251112::1773766641::1773766643::1::::<><><>0<>0<>fcc07f5cbcaece3007d3f76cf773b95e<>res://.godot/imported/missile_launcher.glb-9e1d6a884dc7fd86121eeef7ffdc3ca3.scn::uid://c6ehq1t6i57nu::::res://assets/weapons/missile_launcher_0.png
+missile_launcher_0.png::CompressedTexture2D::6957408019212081758::1773766641::1773767058::1::::<><><>0<>0<>18ad9c0f567c42065a3599a204a30fec<>res://.godot/imported/missile_launcher_0.png-d901677a3c21f6d02fdf1e18f6638950.s3tc.ctex::
+missile_texture.png::CompressedTexture2D::7691526901322340799::1773766642::1773766642::1::::<><><>0<>0<>464e974998556453e5d8a3dddbfefd5e<>res://.godot/imported/missile_texture.png-2f76ae984edf623232ed07668a1678fa.ctex::
+::res://docs/::1773756942
+::res://docs/superpowers/::1773764561
+::res://docs/superpowers/plans/::1773764744
+2026-03-17-debug-overlay-hot-reload.md::TextFile::-1::1773764744::0::1::::<><><>0<>0<><>::
+::res://docs/superpowers/specs/::1773764748
+2026-03-17-debug-overlay-hot-reload-design.md::TextFile::-1::1773764748::0::1::::<><><>0<>0<><>::
+::res://Map materials/::1773856978
+fence-doorway.glb::PackedScene::6494909113282572700::1773856885::1773856978::1::::<><><>0<>0<>cf92bc2dfe0559bf6dc55077e42a80f1<>res://.godot/imported/fence-doorway.glb-22bf0e4e4a088f369e01fd2bfc2cf62d.scn::uid://ck464kcovs1dh::::res://Map materials/Textures/colormap.png
+fence-fortified.glb::PackedScene::6670000980858198687::1773856885::1773856978::1::::<><><>0<>0<>57af027c0d559556b7a98a0e4006de1f<>res://.godot/imported/fence-fortified.glb-9b58728f8af70ce34e4c27a1c6fc4f7e.scn::uid://ck464kcovs1dh::::res://Map materials/Textures/colormap.png
+grass-large.glb::PackedScene::2098133484924521559::1773856885::1773856978::1::::<><><>0<>0<>d6f8fcecb61ba65c3e1038c04a779ae9<>res://.godot/imported/grass-large.glb-499e6638b78472be7b27ccb9d5467579.scn::uid://cqw4tsxr57ced::::res://Map materials/grass-large_grass-large.res
+grass-large_grass-large.res::ArrayMesh::5943074880823012435::1773856978::0::1::::<><><>0<>0<><>::uid://ck464kcovs1dh::::res://Map materials/Textures/colormap.png
+rock-flat.glb::PackedScene::5209976278453037195::1773856885::1773856978::1::::<><><>0<>0<>40551c14931276a4ae3b8e759a5cdf6f<>res://.godot/imported/rock-flat.glb-da80c383aa8bcac81bdc99c10091ae9c.scn::uid://bw57r4gf8tsax::::res://Map materials/rock-flat_rock-flat.res
+rock-flat_rock-flat.res::ArrayMesh::3994481411334541351::1773856978::0::1::::<><><>0<>0<><>::uid://ck464kcovs1dh::::res://Map materials/Textures/colormap.png
+tree-log-small.glb::PackedScene::6567087026943250028::1773856886::1773856978::1::::<><><>0<>0<>5a6759603915aaeab1196fa9dc91058b<>res://.godot/imported/tree-log-small.glb-d8499a6812110f7b1797ab3e8e89db21.scn::uid://b1s1pvyif5jht::::res://Map materials/tree-log-small_tree-log-small.res
+tree-log-small_tree-log-small.res::ArrayMesh::4250095987012534373::1773856978::0::1::::<><><>0<>0<><>::uid://ck464kcovs1dh::::res://Map materials/Textures/colormap.png
+tree.glb::PackedScene::457773965267639040::1773856886::1773856978::1::::<><><>0<>0<>ccc8085f6a700b183d342f321b3bf521<>res://.godot/imported/tree.glb-a3c248220c8d387da1a8fc8cadc352a4.scn::uid://dwgncv2yh2t7e::::res://Map materials/tree_tree.res
+tree_tree.res::ArrayMesh::8716596915935109144::1773856978::0::1::::<><><>0<>0<><>::uid://ck464kcovs1dh::::res://Map materials/Textures/colormap.png
+::res://Map materials/Textures/::1773856977
+colormap.png::CompressedTexture2D::5536531302421268725::1773856894::1773856977::1::::<><><>0<>0<>216c15ee818ce04250f251c2f924a5c6<>res://.godot/imported/colormap.png-00bb2903c7f7474d757e58b7da05aced.s3tc.ctex::
+::res://Maps/::1773858798
+map_1.tscn::PackedScene::7806234551427107803::1773859486::0::1::::<><><>0<>0<><>::uid://lu3j6mchxl4w::::res://addons/ScatterTool/scatter_tool.gd<>uid://dvjc76fgfypjk::::res://addons/ScatterTool/foliage_data.gd<>uid://r5q687xqgsau::::res://addons/ScatterTool/object_data.gd<>uid://dwgncv2yh2t7e::::res://Map materials/tree_tree.res<>uid://bt125wxdjk1ip::::res://addons/ScatterTool/scene_data.gd<>uid://b1s1pvyif5jht::::res://Map materials/tree-log-small_tree-log-small.res<>uid://pltge4dfo656::::res://addons/ScatterTool/scatter_data.gd<>uid://bw57r4gf8tsax::::res://Map materials/rock-flat_rock-flat.res<>uid://cqw4tsxr57ced::::res://Map materials/grass-large_grass-large.res<>uid://cysgg7a874lku::::res://Map materials/fence-doorway.glb<>uid://c2a87as3afd00::::res://Map materials/fence-fortified.glb
+::res://scenes/::1773871745
+game.tscn::PackedScene::9285049520::1773871012::0::1::::<><><>0<>0<><>::res://scripts/game_world.gd<>res://scripts/hud.gd<>res://scenes/weapon_pickup.tscn<>res://Maps/map_1.tscn
+kart.tscn::PackedScene::15471538424::1773871745::0::1::::<><><>0<>0<><>::res://scripts/kart_controller.gd<>res://assets/carts/taxi.glb<>res://scenes/launcher.tscn
+launcher.tscn::PackedScene::668957570294336::1773766941::0::1::::<><><>0<>0<><>::res://assets/weapons/missile_launcher.glb<>res://scenes/missile_visual.tscn<>res://scripts/launcher_visual.gd
+lobby.tscn::PackedScene::599431858240::1773593383::0::1::::<><><>0<>0<><>::res://scripts/lobby.gd
+missile_visual.tscn::PackedScene::-1::1773766815::0::1::::<><><>0<>0<><>::res://assets/weapons/missile.glb
+rocket.tscn::PackedScene::31097373370216::1773607412::0::1::::<><><>0<>0<><>::res://scripts/rocket.gd
+weapon_pickup.tscn::PackedScene::27210666683720::1773594692::0::1::::<><><>0<>0<><>::res://scripts/weapon_pickup.gd
+::res://scripts/::1773871772
+arena_builder.gd::GDScript::6507829158788945831::1773768068::0::1::::<>Node3D<><>0<>0<><>::
+arena_map.gd::GDScript::2729205340732205008::1773857611::0::1::::<>Node3D<><>0<>0<><>::
+debug_overlay.gd::GDScript::2426581291643665064::1773765313::0::1::::<>Node<><>0<>0<><>::
+dev_params.gd::GDScript::3037706894709205564::1773765406::0::1::::<>Node<><>0<>0<><>::
+game_manager.gd::GDScript::4145286119564303531::1773593204::0::1::::<>Node<><>0<>0<><>::
+game_world.gd::GDScript::6756780003637324392::1773871533::0::1::::<>Node3D<><>0<>0<><>::
+hud.gd::GDScript::1367467687064531317::1773606613::0::1::::<>CanvasLayer<><>0<>0<><>::
+kart_controller.gd::GDScript::6372014367557782798::1773871772::0::1::::<>RigidBody3D<><>0<>0<><>::
+launcher_visual.gd::GDScript::1786402901998544071::1773766949::0::1::::<>Node3D<><>0<>0<><>::
+lobby.gd::GDScript::6167600178463194330::1773593316::0::1::::<>Control<><>0<>0<><>::
+network_manager.gd::GDScript::217896344099057359::1773593192::0::1::::<>Node<><>0<>0<><>::
+player_data.gd::GDScript::5441338007625591559::1773593210::0::1::::<>Node<><>0<>0<><>::
+rocket.gd::GDScript::8586544236073965324::1773765391::0::1::::<>Area3D<><>0<>0<><>::
+weapon_pickup.gd::GDScript::4701315459144794817::1773603042::0::1::::<>Area3D<><>0<>0<><>::

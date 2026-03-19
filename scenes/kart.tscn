@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3 uid="uid://kart001"]
+
+[ext_resource type="Script" path="res://scripts/kart_controller.gd" id="1_kart"]
+[ext_resource type="PackedScene" path="res://assets/carts/taxi.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://scenes/launcher.tscn" id="3_launcher"]
+
+[sub_resource type="BoxShape3D" id="BoxShape_body"]
+size = Vector3(1.4, 0.7, 2.4)
+
+[node name="Kart" type="RigidBody3D"]
+mass = 400.0
+gravity_scale = 2.0
+linear_damp = 0.0
+angular_damp = 0.0
+can_sleep = false
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+script = ExtResource("1_kart")
+
+[node name="KartModel" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="ModelInstance" parent="KartModel" instance=ExtResource("2_model")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="LauncherLeft" parent="KartModel" instance=ExtResource("3_launcher")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44938105, 0.7024865, 1.1983335)
+
+[node name="LauncherRight" parent="KartModel" instance=ExtResource("3_launcher")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.44089156, 0.68249404, 1.205587)
+
+[node name="LauncherCenter" parent="KartModel" instance=ExtResource("3_launcher")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44456613, 0.94410515)
+
+[node name="BodyCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+shape = SubResource("BoxShape_body")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+current = true
+fov = 75.0
+
+[node name="NameLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+text = ""
+font_size = 28
+outline_size = 6
+billboard = 1

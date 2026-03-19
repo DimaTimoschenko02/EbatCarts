@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://rocket001"]
+
+[ext_resource type="Script" path="res://scripts/rocket.gd" id="1_rocket"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
+radius = 0.28
+height = 1.1
+
+[sub_resource type="StandardMaterial3D" id="Mat_rocket"]
+albedo_color = Color(1, 0.45, 0.05, 1)
+emission_enabled = true
+emission = Color(1, 0.4, 0.0, 1.0)
+emission_energy_multiplier = 18.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_1"]
+radius = 0.28
+height = 1.1
+
+[node name="Rocket" type="Area3D"]
+script = ExtResource("1_rocket")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_1")
+surface_material_override/0 = SubResource("Mat_rocket")
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape_1")
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
