@@ -1,4 +1,4 @@
-extends RigidBody3D
+extends CharacterBody3D
 
 # ── Физика ───────────────────────────────────────────────────────────────────
 var MAX_SPEED      : float = 35.0    # м/с
@@ -47,9 +47,13 @@ var _steer_input: float = 0.0
 
 @onready var camera:          Camera3D = $Camera3D
 @onready var name_label:      Label3D  = $NameLabel
-@onready var _launcher_left:  Node3D   = $KartModel/LauncherLeft
-@onready var _launcher_right: Node3D   = $KartModel/LauncherRight
-@onready var _launcher_center:Node3D   = $KartModel/LauncherCenter
+@onready var _launcher_left:  Node3D   = $BaseCar/Socket_Left
+@onready var _launcher_right: Node3D   = $BaseCar/Socket_Right
+@onready var _launcher_center:Node3D   = $BaseCar/Socket_Center
+@onready var l_drift:         Node3D   = $BaseCar/FirstCar/LeftDrift
+@onready var r_drift:         Node3D   = $BaseCar/FirstCar/RT/RightDrift
+@onready var l_smoke: GPUParticles3D = $FirstCar/LeftDrift/GPUParticles3D
+@onready var r_smoke: GPUParticles3D = $FirstCar/RT/RightDrift/GPUParticles3D
 
 func _ready() -> void:
 	_net_pos = global_position
@@ -58,8 +62,7 @@ func _ready() -> void:
 	name_label.text = player_name
 	add_to_group("karts")
 	# Удалённые карты двигаем вручную — без симуляции физики
-	if player_id != multiplayer.get_unique_id():
-		freeze = true
+	
 	if OS.is_debug_build() and not OS.has_feature("web"):
 		DevParams.params_changed.connect(_on_dev_params_changed)
 
@@ -84,11 +87,57 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if multiplayer.get_unique_id() == player_id:
+		# 1. Ввод
 		_throttle    = Input.get_axis("move_backward", "move_forward")
 		_steer_input = Input.get_axis("steer_right",   "steer_left")
+		
+		# 2. Гравитация
+		if not is_on_floor():
+			velocity.y -= 35.0 * delta
+		else:
+			velocity.y = 0
+		
+		# 3. Направление и расчет скорости
+		var forward_dir = -global_transform.basis.z
+		var side_dir = global_transform.basis.x
+		
+		var effective_throttle = _throttle
+		# УВЕЛИЧИВАЕМ РАДИУС: увеличиваем "тягу" при повороте без газа
+		if _throttle == 0 and _steer_input != 0:
+			effective_throttle = 0.6 # Было 0.4, теперь круг станет заметно шире
+			
+		var target_speed = effective_throttle * MAX_SPEED
+		var current_fwd_speed = velocity.dot(forward_dir)
+		
+		# Плавная инерция хода
+		if effective_throttle != 0:
+			current_fwd_speed = move_toward(current_fwd_speed, target_speed, ACCELERATION * delta)
+		else:
+			current_fwd_speed = lerp(current_fwd_speed, 0.0, 1.2 * delta)
+
+		# 4. Повороты
+		var rotation_speed = STEERING_SPEED
+		if _throttle == 0: 
+			rotation_speed *= 1.4 # Чуть уменьшил множитель, чтобы круг не был слишком "сжатым"
+			
+		rotate_y(_steer_input * rotation_speed * delta)
+		
+		# 5. СБОРКА ВЕКТОРА (Убираем резкое выравнивание)
+		var current_side_speed = velocity.dot(side_dir)
+		
+		# УМЕНЬШАЕМ ТРЕНИЕ: теперь даже когда руль отпущен, боковая скорость гасится медленно
+		# 3.0 — машина будет долго "скользить" боком после поворота
+		var drift_resistance = 3.0 if _steer_input != 0 else 4.0 
+		current_side_speed = lerp(current_side_speed, 0.0, drift_resistance * delta)
+		
+		velocity = (forward_dir * current_fwd_speed) + (side_dir * current_side_speed) + Vector3(0, velocity.y, 0)
+		
+		move_and_slide()
+		# --- КОНЕЦ БЛОКА ФИЗИКИ ---
+		
 		if Input.is_action_just_pressed("fire") and has_weapon:
 			_fire()
-		_try_spawn_smoke(delta)
+		
 		if OS.is_debug_build():
 			var h : float = 0.0
 			var space := get_world_3d().direct_space_state
@@ -115,7 +164,7 @@ func _physics_process(delta: float) -> void:
 		_sync_timer += delta
 		if _sync_timer >= SYNC_INTERVAL:
 			_sync_timer = 0.0
-			_rpc_sync.rpc(global_position, global_rotation, linear_velocity)
+			_rpc_sync.rpc(global_position, global_rotation, velocity)
 	else:
 		# Плавная интерполяция позиции удалённого карта
 		global_position = global_position.lerp(_net_pos, 12.0 * delta)
@@ -131,48 +180,7 @@ func _physics_process(delta: float) -> void:
 # гравитации, но до разрешения контактов. Это единственное место, где безопасно
 # переопределять linear_velocity/angular_velocity (docs.godotengine.org → RigidBody3D).
 
-func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
-	if is_dead or multiplayer.get_unique_id() != player_id:
-		return
 
-	var delta : float   = state.step
-	var fwd   : Vector3 = -state.transform.basis.z
-	var right : Vector3 =  state.transform.basis.x
-
-	# Проекция на текущий базис для вычисления тяги
-	var fwd_vel : float = state.linear_velocity.dot(fwd)
-
-	# Тяга / торможение — изменяем ТОЛЬКО переднюю составляющую скорости.
-	# Боковая и вертикальная скорости не тронуты → занос накапливается естественно.
-	var new_fwd_vel: float
-	if _throttle > 0.0:
-		new_fwd_vel = move_toward(fwd_vel,  MAX_SPEED * _throttle,          ACCELERATION * delta)
-	elif _throttle < 0.0:
-		new_fwd_vel = move_toward(fwd_vel, -MAX_SPEED * 0.4 * (-_throttle), BRAKE_DECEL  * delta)
-	else:
-		new_fwd_vel = move_toward(fwd_vel, 0.0, COAST_DECEL * delta)
-	state.linear_velocity += fwd * (new_fwd_vel - fwd_vel)
-
-	# Боковое сцепление — медленно гасим боковую составляющую.
-	# Высокая скорость + поворот = низкое сцепление = занос сохраняется долго.
-	var speed_n    : float = clampf(absf(fwd_vel) / MAX_SPEED, 0.0, 1.0)
-	var turn_effort: float = absf(_steer_input)
-	var grip_mix   : float = clampf(speed_n * turn_effort * 0.7, 0.0, 1.0)
-	var grip       : float = lerpf(HIGH_GRIP, LOW_GRIP, grip_mix)
-	var lat_vel    : float = state.linear_velocity.dot(right)
-	state.linear_velocity -= right * lat_vel * clampf(grip * delta, 0.0, 1.0)
-
-	# Поворот
-	var steer_authority: float = lerpf(0.35, 1.0, speed_n)
-	var fwd_sign       : float = signf(fwd_vel) if absf(fwd_vel) > 0.5 else signf(_throttle)
-	var target_yaw     : float = _steer_input * STEERING_SPEED * steer_authority * fwd_sign
-	state.angular_velocity = Vector3(0.0, lerpf(state.angular_velocity.y, target_yaw, 7.0 * delta), 0.0)
-
-	_dbg_fwd_vel  = new_fwd_vel
-	_dbg_lat_vel  = lat_vel
-	_dbg_vert_vel = state.linear_velocity.y
-	_dbg_angular  = state.angular_velocity.y
-	_dbg_on_floor = state.get_contact_count() > 0
 
 # ── Камера ────────────────────────────────────────────────────────────────────
 
@@ -254,65 +262,25 @@ func _rpc_spawn_rocket(shooter_id: int, pos: Vector3, rot: Vector3) -> void:
 	get_tree().current_scene.add_child(rocket)
 
 # ── Дымок при скольжении ──────────────────────────────────────────────────────
+func _update_vfx(delta: float) -> void:
+	# 1. Проверяем занос и скорость
+	var side_speed = abs(velocity.dot(global_transform.basis.x))
+	var total_speed = velocity.length()
+	
+	# Условие: дрифт на земле при минимальной скорости
+	var is_drifting = (side_speed > 2.8) and (total_speed > 1.5) and is_on_floor()
+	
+	# 2. Управляем частицами напрямую
+	# Если условие дрифта верно — включаем выброс новых частиц
+	# Если неверно — выключаем. Те, что уже вылетели, сами доживут свой Lifetime и исчезнут.
+	if l_smoke.emitting != is_drifting:
+		l_smoke.emitting = is_drifting
+	if r_smoke.emitting != is_drifting:
+		r_smoke.emitting = is_drifting
 
-func _try_spawn_smoke(delta: float) -> void:
-	if not is_inside_tree():
-		return
-	var lat_vel := absf(linear_velocity.dot(global_transform.basis.x))
-	if lat_vel < 2.5:
-		return
-	_smoke_timer += delta
-	if _smoke_timer < 0.07:
-		return
-	_smoke_timer = 0.0
-	_mark_timer += 0.07
-	var spawn_marks := _mark_timer >= 0.14
-	if spawn_marks:
-		_mark_timer = 0.0
-	for ox in [-0.65, 0.65]:
-		var sp: Vector3 = global_position + global_transform.basis.x * ox + global_transform.basis.z * 0.75 + Vector3.UP * 0.05
-		_spawn_smoke_puff(sp)
-		if spawn_marks:
-			_spawn_tire_mark(sp)
-
-func _spawn_tire_mark(pos: Vector3) -> void:
-	var m   := MeshInstance3D.new()
-	var qm  := QuadMesh.new()
-	qm.size = Vector2(0.24, 0.38)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color  = Color(0.07, 0.07, 0.07, 0.72)
-	mat.transparency  = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode  = BaseMaterial3D.SHADING_MODE_UNSHADED
-	qm.material = mat
-	m.mesh = qm
-	# Кладём след плашмя на пол: rotate_x(-PI/2) переводит нормаль квада вверх
-	m.global_position = Vector3(pos.x, 0.22, pos.z)
-	m.rotation = Vector3(-PI / 2.0, global_rotation.y, 0.0)
-	get_tree().current_scene.add_child(m)
-	# Живёт 3 сек, затем 1 сек плавно исчезает через альфу материала
-	var tw := m.create_tween()
-	tw.tween_interval(3.0)
-	tw.tween_method(func(a: float) -> void: mat.albedo_color.a = a, 0.72, 0.0, 1.0)
-	tw.tween_callback(m.queue_free)
-
-func _spawn_smoke_puff(pos: Vector3) -> void:
-	var m := MeshInstance3D.new()
-	var sm := SphereMesh.new()
-	sm.radius = 1.0
-	sm.height = 2.0
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.72, 0.76, 0.80, 0.50)
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	sm.material = mat
-	m.mesh = sm
-	m.scale = Vector3.ONE * 0.12
-	m.global_position = pos
-	get_tree().current_scene.add_child(m)
-	var tw := m.create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(m, "scale", Vector3.ONE * randf_range(0.28, 0.42), 0.4)
-	tw.tween_callback(m.queue_free).set_delay(0.4)
+	# Контейнеры и декали оставляем видимыми, чтобы частицы не исчезали мгновенно
+	l_drift.visible = true
+	r_drift.visible = true
 
 # ── Сетевая синхронизация ─────────────────────────────────────────────────────
 
@@ -345,8 +313,7 @@ func _rpc_update_hp(new_hp: int) -> void:
 func _die() -> void:
 	is_dead = true
 	visible = false
-	linear_velocity  = Vector3.ZERO
-	angular_velocity = Vector3.ZERO
+	velocity  = Vector3.ZERO
 
 @rpc("authority", "call_local", "reliable")
 func respawn(spawn_pos: Vector3) -> void:
@@ -354,7 +321,6 @@ func respawn(spawn_pos: Vector3) -> void:
 	visible = true
 	current_hp    = GameManager.MAX_HP
 	global_position  = spawn_pos
-	linear_velocity  = Vector3.ZERO
-	angular_velocity = Vector3.ZERO
+	velocity  = Vector3.ZERO
 	_throttle    = 0.0
 	_steer_input = 0.0

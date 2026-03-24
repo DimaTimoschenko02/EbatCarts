@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://pia681su2ghf"]
+
+[ext_resource type="Script" uid="uid://cw1we7npbhxy1" path="res://scripts/kart_controller.gd" id="1_1rmgi"]
+[ext_resource type="PackedScene" uid="uid://cupdu5hd0xxsr" path="res://scenes/base_car.tscn" id="2_6lm7g"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1rmgi"]
+size = Vector3(1, 0.74264526, 2.8049316)
+
+[node name="PlayerKart" type="CharacterBody3D" unique_id=905050086]
+script = ExtResource("1_1rmgi")
+
+[node name="BaseCar" parent="." unique_id=358117560 instance=ExtResource("2_6lm7g")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="BodyCollision" type="CollisionShape3D" parent="." unique_id=1044797573]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38932073, 0.004272461)
+shape = SubResource("BoxShape3D_1rmgi")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=872941527]
+
+[node name="NameLabel" type="Label3D" parent="." unique_id=1512045965]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7066083, 0)
+
+[editable path="BaseCar"]
+[editable path="BaseCar/FirstCar"]

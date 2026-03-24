@@ -1,9 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://game001"]
+[gd_scene format=3 uid="uid://game001"]
 
-[ext_resource type="Script" path="res://scripts/game_world.gd" id="1_game"]
-[ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
-[ext_resource type="PackedScene" path="res://scenes/weapon_pickup.tscn" id="4_pickup"]
-[ext_resource type="PackedScene" path="res://Maps/map_1.tscn" id="5_map"]
+[ext_resource type="Script" uid="uid://c3jbgdqmiqn25" path="res://scripts/game_world.gd" id="1_game"]
+[ext_resource type="Script" uid="uid://tqn806ruiaen" path="res://scripts/hud.gd" id="3_hud"]
+[ext_resource type="PackedScene" uid="uid://pickup001" path="res://scenes/weapon_pickup.tscn" id="4_pickup"]
+[ext_resource type="PackedScene" uid="uid://djhnspgwjeakx" path="res://Maps/map_1.tscn" id="5_map"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -12,92 +12,98 @@ ambient_light_source = 1
 ambient_light_color = Color(0.4, 0.4, 0.5, 1)
 ambient_light_energy = 0.6
 
-[node name="Game" type="Node3D"]
+[node name="Game" type="Node3D" unique_id=253985591]
 script = ExtResource("1_game")
 
-[node name="Arena" type="Node3D" parent="."]
+[node name="Arena" type="Node3D" parent="." unique_id=664895253]
 
-[node name="Map" parent="Arena" instance=ExtResource("5_map")]
-position = Vector3(0, 0, 0)
+[node name="Map" parent="Arena" unique_id=1718737009 instance=ExtResource("5_map")]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-rotation = Vector3(-0.7853982, -0.5235988, 0)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=730329120]
+transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 0, 0)
 light_energy = 1.2
 shadow_enabled = true
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1460970225]
 environment = SubResource("Environment_1")
 
-[node name="Karts" type="Node3D" parent="."]
+[node name="Karts" type="Node3D" parent="." unique_id=830106612]
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/kart.tscn")
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=793776720]
+_spawnable_scenes = PackedStringArray("uid://kart001")
 spawn_path = NodePath("../Karts")
 
-[node name="Pickup_N" parent="." instance=ExtResource("4_pickup")]
-position = Vector3(0, 0, -13)
+[node name="Pickup_N" parent="." unique_id=2001760647 instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13)
 
-[node name="Pickup_S" parent="." instance=ExtResource("4_pickup")]
-position = Vector3(0, 0, 13)
+[node name="Pickup_S" parent="." unique_id=131910977 instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 13)
 
-[node name="Pickup_E" parent="." instance=ExtResource("4_pickup")]
-position = Vector3(13, 0, 0)
+[node name="Pickup_E" parent="." unique_id=1620338182 instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 0)
 
-[node name="Pickup_W" parent="." instance=ExtResource("4_pickup")]
-position = Vector3(-13, 0, 0)
+[node name="Pickup_W" parent="." unique_id=1936469637 instance=ExtResource("4_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, 0)
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=28972132]
 script = ExtResource("3_hud")
 
-[node name="ScorePanel" type="PanelContainer" parent="HUD"]
+[node name="ScorePanel" type="PanelContainer" parent="HUD" unique_id=488928596]
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 230.0
 offset_bottom = 210.0
 
-[node name="MarginContainer" type="MarginContainer" parent="HUD/ScorePanel"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="MarginContainer" type="MarginContainer" parent="HUD/ScorePanel" unique_id=1828523961]
+layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 6
 
-[node name="VBox" type="VBoxContainer" parent="HUD/ScorePanel/MarginContainer"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="VBox" type="VBoxContainer" parent="HUD/ScorePanel/MarginContainer" unique_id=661914373]
+layout_mode = 2
 
-[node name="HPBar" type="ProgressBar" parent="HUD"]
+[node name="HPBar" type="ProgressBar" parent="HUD" unique_id=371305876]
+anchors_preset = -1
 anchor_left = 0.3
-anchor_right = 0.7
 anchor_top = 1.0
+anchor_right = 0.7
 anchor_bottom = 1.0
 offset_top = -40.0
 offset_bottom = -10.0
 grow_vertical = 0
-min_value = 0.0
-max_value = 100.0
 value = 100.0
 show_percentage = false
 
-[node name="WeaponLabel" type="Label" parent="HUD"]
+[node name="WeaponLabel" type="Label" parent="HUD" unique_id=616414472]
+anchors_preset = 7
 anchor_left = 0.5
-anchor_right = 0.5
 anchor_top = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -80.0
-offset_right = 80.0
 offset_top = -68.0
+offset_right = 80.0
 offset_bottom = -44.0
+theme_override_font_sizes/font_size = 15
 text = "[ no weapon ]"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 15
 
-[node name="KillFeed" type="VBoxContainer" parent="HUD"]
+[node name="KillFeed" type="VBoxContainer" parent="HUD" unique_id=2000796046]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -280.0
-offset_right = -10.0
 offset_top = 10.0
+offset_right = -10.0
 offset_bottom = 200.0
 theme_override_constants/separation = 4
+
+[editable path="Arena/Map"]
+[editable path="Arena/Map/fence-doorway2"]
+[editable path="Arena/Map/fence-fortified2"]
+[editable path="Arena/Map/fence-fortified3"]
+[editable path="Arena/Map/fence-fortified5"]
+[editable path="Arena/Map/fence-doorway3"]
+[editable path="Arena/Map/fence-doorway3/fence-fortified4"]

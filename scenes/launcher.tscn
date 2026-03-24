@@ -1,16 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://launcher01"]
+[gd_scene format=3 uid="uid://bm6ukqukp6xam"]
 
-[ext_resource type="PackedScene" path="res://assets/weapons/missile_launcher.glb" id="1_launcher"]
-[ext_resource type="PackedScene" path="res://scenes/missile_visual.tscn" id="2_missile"]
-[ext_resource type="Script" path="res://scripts/launcher_visual.gd" id="3_script"]
+[ext_resource type="PackedScene" uid="uid://bs4ysvakpk6fg" path="res://weapons/missile_launcher.glb" id="1_w37im"]
+[ext_resource type="PackedScene" uid="uid://bx2wxssrwc4ii" path="res://scenes/missile.tscn" id="2_m736f"]
 
-[node name="Launcher" type="Node3D"]
-script = ExtResource("3_script")
+[node name="launcher" type="Node3D" unique_id=992529402]
 
-[node name="LauncherMesh" parent="." instance=ExtResource("1_launcher")]
+[node name="blockbench_export" parent="." unique_id=1408724360 instance=ExtResource("1_w37im")]
 transform = Transform3D(-1.7484556e-08, 0, -0.4, 0, 0.4, 0, 0.4, 0, -1.7484556e-08, 0, 0, 0)
 
-[node name="Muzzle" type="Marker3D" parent="."]
+[node name="Muzzle" type="Marker3D" parent="." unique_id=1830291244]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.002576217, 0.042096138, 0.47036648)
 
-[node name="MissileVisual" parent="Muzzle" instance=ExtResource("2_missile")]
+[node name="Node3D" parent="Muzzle" unique_id=923433537 instance=ExtResource("2_m736f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.002576217, 0.024665207, 0.016982734)
+
+[editable path="Muzzle/Node3D"]
+[editable path="Muzzle/Node3D/blockbench_export"]

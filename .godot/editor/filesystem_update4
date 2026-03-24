@@ -1,0 +1,22 @@
+res://Map materials/grass-large_grass-large.res
+res://Map materials/rock-flat_rock-flat.res
+res://Map materials/tree-log-small_tree-log-small.res
+res://Map materials/tree_tree.res
+res://scenes/base_car.tscn
+res://scenes/player_kart.tscn
+res://scenes/kart.tscn
+res://scripts/game_world.gd
+res://scenes/launcher.tscn
+res://weapons/missile_material.tres
+res://scenes/missile.tscn
+res://scripts/kart_controller.gd
+res://scenes/game.tscn
+res://map_materials/grass-large_grass-large.res
+res://map_materials/rock-flat_rock-flat.res
+res://map_materials/tree-log-small_tree-log-small.res
+res://map_materials/tree_tree.res
+res://assets/map_materials/grass-large_grass-large.res
+res://assets/map_materials/rock-flat_rock-flat.res
+res://assets/map_materials/tree-log-small_tree-log-small.res
+res://assets/map_materials/tree_tree.res
+res://assets/weapons/missile_material.tres

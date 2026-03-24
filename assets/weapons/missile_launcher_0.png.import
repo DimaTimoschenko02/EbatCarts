@@ -2,11 +2,14 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6ehq1t6i57nu"
+uid="uid://c8lqce4yh60hu"
 path.s3tc="res://.godot/imported/missile_launcher_0.png-d901677a3c21f6d02fdf1e18f6638950.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
+}
+generator_parameters={
+"md5": "9f352b838d3d66498006f0feaa002d99"
 }
 
 [deps]

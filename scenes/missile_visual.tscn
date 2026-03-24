@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://missile_vis01"]
-
-[ext_resource type="PackedScene" path="res://assets/weapons/missile.glb" id="1_mis"]
-
-[node name="MissileVisual" type="Node3D"]
-
-[node name="Mesh" parent="." instance=ExtResource("1_mis")]
-transform = Transform3D(-1.3113417e-08, 0, -0.3, 0, 0.3, 0, 0.3, 0, -1.3113417e-08, 0, 0, 0)

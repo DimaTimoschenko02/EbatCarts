@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://bx2wxssrwc4ii"]
+
+[ext_resource type="PackedScene" uid="uid://b0xv8w7ardw67" path="res://weapons/missile.glb" id="1_u28tq"]
+[ext_resource type="ArrayMesh" uid="uid://cbofocoqddlk1" path="res://weapons/missile_material.tres" id="2_bkb3y"]
+[ext_resource type="Texture2D" uid="uid://5acjac71vj" path="res://assets/Explosions/5/5_5.png" id="3_bkb3y"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_5epdn"]
+direction = Vector3(-1, 0, 0)
+spread = 3.0
+initial_velocity_min = 5.0
+initial_velocity_max = 10.0
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d3kn2"]
+transparency = 1
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("3_bkb3y")
+billboard_mode = 1
+
+[sub_resource type="QuadMesh" id="QuadMesh_brtn2"]
+material = SubResource("StandardMaterial3D_d3kn2")
+size = Vector2(0.1, 0.1)
+
+[node name="Node3D" type="Node3D" unique_id=923433537]
+
+[node name="blockbench_export" parent="." unique_id=853175268 instance=ExtResource("1_u28tq")]
+transform = Transform3D(-1.3113417e-08, 0, -0.3, 0, 0.3, 0, 0.3, 0, -1.3113417e-08, 0, 0, 0)
+
+[node name="Cylinder_Material001_0" parent="blockbench_export" index="0" unique_id=1966133903]
+mesh = ExtResource("2_bkb3y")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="blockbench_export" unique_id=29407648]
+amount = 100
+process_material = SubResource("ParticleProcessMaterial_5epdn")
+draw_pass_1 = SubResource("QuadMesh_brtn2")
+
+[editable path="blockbench_export"]

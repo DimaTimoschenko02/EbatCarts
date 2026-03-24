@@ -1,0 +1,8 @@
+CollisionShape3D
+StaticBody3D
+Node3D
+Node
+MeshInstance3D
+Label3D
+Camera3D
+CharacterBody3D

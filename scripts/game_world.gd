@@ -1,6 +1,6 @@
 extends Node3D
 
-const KART_SCENE := preload("res://scenes/kart.tscn")
+const KART_SCENE := preload("res://scenes/player_kart.tscn")
 
 # Spawn points around the arena
 const SPAWN_POINTS: Array[Vector3] = [
