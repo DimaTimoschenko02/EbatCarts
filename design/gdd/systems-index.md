@@ -21,7 +21,7 @@ last-updated: 2026-04-03
 | # | System | Category | Layer | Milestone | Status |
 |---|--------|----------|-------|-----------|--------|
 | 1 | State Machine | Foundation | 1 | MVP | Implemented |
-| 2 | Network Layer | Foundation | 1 | MVP | Designed |
+| 2 | Network Layer | Foundation | 1 | MVP | Implemented |
 | 3 | HTML5 Export Pipeline | Infrastructure | 1 | MVP | Broken |
 | 4 | Health & Damage | Core | 2 | MVP | Designed |
 | 5 | Camera System | Core | 2 | MVP | Designed |
@@ -166,7 +166,7 @@ MVP systems first, ordered by dependencies (can't design #9 before #8, etc.)
 | System | GDD | Implemented | Tested | Notes |
 |--------|-----|-------------|--------|-------|
 | State Machine | Designed | Implemented | - | design/gdd/state-machine.md, scripts/game_states.gd, scripts/state_manager.gd |
-| Network Layer | Designed | Partial | - | design/gdd/network-layer.md |
+| Network Layer | Designed | Implemented | - | design/gdd/network-layer.md, scripts/snapshot_buffer.gd, scripts/network_manager.gd |
 | HTML5 Export Pipeline | - | Broken | - | Gray screen issue |
 | Health & Damage | Designed | Partial | - | design/gdd/health-damage.md |
 | Camera System | Designed | Partial | - | design/gdd/camera-system.md |

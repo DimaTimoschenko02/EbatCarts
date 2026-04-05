@@ -31,7 +31,7 @@ config_version=5
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/ScatterTool/plugin.cfg")
+enabled=PackedStringArray()
 
 [input]
 

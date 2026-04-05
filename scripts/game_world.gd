@@ -37,6 +37,15 @@ func _ready() -> void:
 	StateManager.kart_state_changed.connect(_on_kart_state_changed)
 
 
+func _exit_tree() -> void:
+	if GameManager.scores_updated.is_connected(hud.update_scores):
+		GameManager.scores_updated.disconnect(hud.update_scores)
+	if StateManager.kart_state_changed.is_connected(_on_kart_state_changed):
+		StateManager.kart_state_changed.disconnect(_on_kart_state_changed)
+	if multiplayer.is_server() and NetworkManager.player_disconnected.is_connected(_on_player_disconnected):
+		NetworkManager.player_disconnected.disconnect(_on_player_disconnected)
+
+
 # ── Client → Server: "я загрузился, вот моё имя" ────────────────────────────
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -46,16 +55,55 @@ func _register(player_name: String) -> void:
 	var pid := multiplayer.get_remote_sender_id()
 	print("[GameWorld] _register from pid=", pid, " name=", player_name)
 
+	# 1. Send full world state FIRST (before spawning karts)
+	_rpc_world_state.rpc_id(pid, _build_world_state())
+
+	# 2. Spawn existing karts for new client
 	for existing_pid in _players:
 		var info = _players[existing_pid]
 		var kart_node = karts.get_node_or_null(str(existing_pid))
 		var pos = kart_node.global_position if kart_node else info["pos"]
 		_rpc_spawn_kart.rpc_id(pid, existing_pid, info["name"], pos)
 
+	# 3. Spawn new player's kart (on all clients)
 	_spawn_for_player(pid, player_name)
+
+	# 4. Peer ready for sync RPCs (all spawns sent reliable → arrive in order)
 	synced_peers.append(pid)
-	# Send current states of all karts to new peer
+
+	# 5. Send current states
 	StateManager.sync_state_to_peer(pid)
+
+
+# ── World State (late join sync) ─────────────────────────────────────────────
+
+func _build_world_state() -> Dictionary:
+	var pickup_states := {}
+	for pickup in get_tree().get_nodes_in_group("pickups"):
+		if pickup.has_method("_set_state"):
+			pickup_states[pickup.get_path()] = pickup.active
+
+	return {
+		"scores": GameManager.players.duplicate(true),
+		"pickups": pickup_states,
+		"match_state": StateManager.get_match_state(),
+	}
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_world_state(state: Dictionary) -> void:
+	print("[GameWorld] Received world_state")
+	# Apply scores
+	if "scores" in state:
+		GameManager.players = state["scores"]
+		GameManager.scores_updated.emit(GameManager.players)
+
+	# Apply pickup states
+	if "pickups" in state:
+		for path in state["pickups"]:
+			var pickup := get_node_or_null(path)
+			if pickup and pickup.has_method("_set_state"):
+				pickup._set_state(state["pickups"][path])
 
 
 # ── Spawning ──────────────────────────────────────────────────────────────────
@@ -100,7 +148,6 @@ func _on_kart_respawning(pid: int) -> void:
 		return
 	var spawn_pos := SPAWN_POINTS[randi() % SPAWN_POINTS.size()]
 	kart.respawn.rpc(spawn_pos)
-	# Start invuln timer (RESPAWNING → DRIVING)
 	StateManager.server_respawn_complete(pid)
 
 
@@ -109,9 +156,20 @@ func _on_kart_respawning(pid: int) -> void:
 func _on_player_disconnected(pid: int) -> void:
 	if not multiplayer.is_server():
 		return
+	# Broadcast disconnect to all clients BEFORE cleanup
+	_rpc_kart_disconnect.rpc(pid)
 	GameManager.unregister_player(pid)
 	_players.erase(pid)
 	synced_peers.erase(pid)
+	var kart := karts.get_node_or_null(str(pid))
+	if kart:
+		kart.queue_free()
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_kart_disconnect(pid: int) -> void:
+	print("[GameWorld] Kart disconnect: pid=", pid)
+	GameManager.players.erase(pid)
 	var kart := karts.get_node_or_null(str(pid))
 	if kart:
 		kart.queue_free()
