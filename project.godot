@@ -23,6 +23,7 @@ StateManager="*res://scripts/state_manager.gd"
 PlayerData="*res://scripts/player_data.gd"
 DebugOverlay="*res://scripts/debug_overlay.gd"
 DevParams="*res://scripts/dev_params.gd"
+McpInteractionServer="*res://scripts/mcp_interaction_server.gd"
 
 [configuration]
 
