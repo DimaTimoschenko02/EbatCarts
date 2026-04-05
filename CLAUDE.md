@@ -260,7 +260,7 @@ RELEASE (будущее):
 |--------|-----|---------------|
 | State Machine | `state-machine.md` | **Implemented** (game_states.gd + state_manager.gd) |
 | Network Layer | `network-layer.md` | **Implemented** (snapshot buffer, ping/pong, timeout, late join, disconnect broadcast) |
-| Health & Damage | `health-damage.md` | Partial (needs refactor) |
+| Health & Damage | `health-damage.md` | **Implemented** (HealthComponent, DamageInfo, EventBus, AOE falloff) |
 | Kart Physics | `kart-physics.md` | Partial (drift needs tuning) |
 | Camera System | `camera-system.md` | Partial (extract from kart_controller) |
 | Spawn System | `spawn-system.md` | Partial (hardcoded points) |
@@ -289,7 +289,7 @@ RELEASE (будущее):
 
 ## Текущий статус проекта
 
-**Phase**: Implementation (steps 1-2/10 done)
+**Phase**: Implementation (steps 1-3/10 done)
 **Что работает сейчас**: базовый мультиплеер (lobby → game → rockets → kill/respawn), State Machine (StateManager + GameStates autoloads)
 **Что сломано**: explosion VFX (stub), drift feel
 **Что нужно**: рефакторинг по GDD спецификациям (шаги 3-10), затем новые фичи

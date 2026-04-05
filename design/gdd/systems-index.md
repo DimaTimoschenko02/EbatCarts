@@ -168,7 +168,7 @@ MVP systems first, ordered by dependencies (can't design #9 before #8, etc.)
 | State Machine | Designed | Implemented | - | design/gdd/state-machine.md, scripts/game_states.gd, scripts/state_manager.gd |
 | Network Layer | Designed | Implemented | - | design/gdd/network-layer.md, scripts/snapshot_buffer.gd, scripts/network_manager.gd |
 | HTML5 Export Pipeline | - | Broken | - | Gray screen issue |
-| Health & Damage | Designed | Partial | - | design/gdd/health-damage.md |
+| Health & Damage | Designed | Implemented | - | design/gdd/health-damage.md, scripts/health_component.gd, scripts/damage_info.gd, scripts/event_bus.gd |
 | Camera System | Designed | Partial | - | design/gdd/camera-system.md |
 | Kart Physics | Designed | Partial | - | design/gdd/kart-physics.md |
 | Kart Classes | - | - | - | |
