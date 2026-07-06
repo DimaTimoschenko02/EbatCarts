@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Map Editor — Kenney Space Kit</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #12122a; color: #00ffee; font-family: "Courier New", monospace; }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  #topbar {
+    height: 44px; flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+    padding: 0 12px; background: #1a1a3a; border-bottom: 1px solid #00ffee55;
+  }
+  #topbar .title { color: #00ffee99; font-size: 12px; margin-right: 12px; letter-spacing: 1px; }
+
+  button, .file-btn {
+    background: #12122a; color: #00ffee; border: 1px solid #00ffee88;
+    padding: 6px 14px; cursor: pointer; font-family: inherit; font-size: 13px; border-radius: 4px;
+  }
+  button:hover, .file-btn:hover { background: #00ffee22; }
+
+  #main { flex: 1; display: flex; min-height: 0; }
+
+  #sidebar {
+    width: 220px; flex: 0 0 auto; overflow-y: auto; background: #161636;
+    border-right: 1px solid #00ffee33; padding: 10px;
+  }
+  .category-label {
+    font-size: 11px; letter-spacing: 1px; color: #00ffee99;
+    margin: 14px 0 4px; text-transform: uppercase;
+  }
+  .category-label:first-child { margin-top: 0; }
+  .palette-btn {
+    display: block; width: 100%; text-align: left; margin-bottom: 4px;
+    background: #12122a; color: #cde; border: 1px solid #333366;
+    padding: 6px 8px; cursor: pointer; font-family: inherit; font-size: 12px; border-radius: 3px;
+  }
+  .palette-btn:hover { border-color: #00ffee88; }
+  .palette-btn.active { background: #00ffee33; border-color: #00ffee; color: #00ffee; }
+
+  #canvas-container { flex: 1; position: relative; min-width: 0; }
+  #canvas-container canvas { display: block; }
+
+  #statusbar {
+    height: 28px; flex: 0 0 auto; display: flex; align-items: center; gap: 18px;
+    padding: 0 12px; background: #1a1a3a; border-top: 1px solid #00ffee33;
+    font-size: 12px; white-space: pre; overflow: hidden;
+  }
+  #statusHint { color: #ffcc00; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <span class="title">MAP EDITOR</span>
+    <button id="btnExport">Export</button>
+    <label class="file-btn" for="fileImport">Import</label>
+    <input type="file" id="fileImport" accept="application/json" style="display:none">
+    <button id="btnClear">Clear</button>
+    <button id="btnDrive">Drive</button>
+  </div>
+  <div id="main">
+    <div id="sidebar"></div>
+    <div id="canvas-container"></div>
+  </div>
+  <div id="statusbar">
+    <span id="statusMain">loading assets…</span>
+    <span id="statusHint"></span>
+  </div>
+</div>
+<script type="module" src="/src/editor/main.ts"></script>
+</body>
+</html>

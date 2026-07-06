@@ -20,11 +20,13 @@ import type { PhysicsInput } from "./physics/types";
 import { RearSkidMarks } from "./game/skidMarks";
 import { loadAssetLibrary, loadKartModel } from "./game/assetLoader";
 import { GameMap } from "./game/mapLoader";
+import { createSpaceSky } from "./game/sky";
 
 // ── Scene ──────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0a1a);
 scene.fog = new THREE.Fog(0x0a0a1a, 60, 140);
+createSpaceSky(scene);
 
 const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 300);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -55,9 +57,11 @@ scene.add(backdrop);
 // fallback (height 0) and switches to the map heightfield when it arrives.
 // __ready flips only after everything is in — agent-driven tests wait on it.
 let map: GameMap | null = null;
+// Keep in sync with the editor palette (src/editor/main.ts) — a map driven
+// from the editor must not silently drop tiles the game never preloaded.
 const MAP_ASSETS = [
   "terrain", "terrain_ramp", "terrain_roadStraight", "terrain_roadCorner",
-  "terrain_side", "terrain_sideCorner",
+  "terrain_roadCross", "terrain_side", "terrain_sideCorner", "terrain_sideCornerInner",
   "rock_largeA", "rock_crystals", "rocks_smallA", "rocks_smallB",
 ] as const;
 
@@ -92,7 +96,12 @@ scene.add(kart);
 (async () => {
   try {
     const lib = await loadAssetLibrary(MAP_ASSETS);
-    map = await GameMap.load("/maps/arena_slice.json", lib);
+    // Editor hand-off: /?map=editor + a map JSON stashed in localStorage by
+    // the "Drive" button in the browser map editor (see src/editor/main.ts).
+    const driveJson = new URLSearchParams(location.search).get("map") === "editor"
+      ? localStorage.getItem("editor-drive-map")
+      : null;
+    map = driveJson ? GameMap.fromJson(JSON.parse(driveJson), lib) : await GameMap.load("/maps/arena_slice.json", lib);
     scene.add(map.root);
     // Debug handles for agent-driven inspection (vertex reads, cell probes).
     (window as unknown as Record<string, unknown>).__map = map;
