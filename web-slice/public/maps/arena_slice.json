@@ -1,0 +1,70 @@
+{
+  "_comment": "Basic 24x24 arena for the web slice: flat ground, a rectangular ring road, and a central 6x6 plateau (level 1) with side skirts and two 2-tile ramps (west + east). Deliberately simple — ground, roads, one elevation.",
+  "meta": {
+    "name": "arena_slice",
+    "tile_size": 1.0,
+    "level_height": 0.5,
+    "origin_offset": [-11.5, 0, -11.5]
+  },
+  "rect_fills": [
+    {"_": "Ground north band", "asset": "terrain", "x_min": 0, "z_min": 0, "x_max": 23, "z_max": 3, "y_level": 0, "rot": 0},
+    {"_": "Ground south band", "asset": "terrain", "x_min": 0, "z_min": 20, "x_max": 23, "z_max": 23, "y_level": 0, "rot": 0},
+    {"_": "Ground west band", "asset": "terrain", "x_min": 0, "z_min": 4, "x_max": 3, "z_max": 19, "y_level": 0, "rot": 0},
+    {"_": "Ground east band", "asset": "terrain", "x_min": 20, "z_min": 4, "x_max": 23, "z_max": 19, "y_level": 0, "rot": 0},
+    {"_": "Ground inside ring", "asset": "terrain", "x_min": 5, "z_min": 5, "x_max": 18, "z_max": 18, "y_level": 0, "rot": 0},
+
+    {"_": "Ring road north edge (runs along X)", "asset": "terrain_roadStraight", "x_min": 5, "z_min": 4, "x_max": 18, "z_max": 4, "y_level": 0, "rot": 90},
+    {"_": "Ring road south edge (runs along X)", "asset": "terrain_roadStraight", "x_min": 5, "z_min": 19, "x_max": 18, "z_max": 19, "y_level": 0, "rot": 90},
+    {"_": "Ring road west edge (runs along Z)", "asset": "terrain_roadStraight", "x_min": 4, "z_min": 5, "x_max": 4, "z_max": 18, "y_level": 0, "rot": 0},
+    {"_": "Ring road east edge (runs along Z)", "asset": "terrain_roadStraight", "x_min": 19, "z_min": 5, "x_max": 19, "z_max": 18, "y_level": 0, "rot": 0},
+
+    {"_": "Central plateau (level 1)", "asset": "terrain", "x_min": 9, "z_min": 9, "x_max": 14, "z_max": 14, "y_level": 1, "rot": 0}
+  ],
+  "cells": [
+    {"_": "Road corner NW", "asset": "terrain_roadCorner", "x": 4, "z": 4, "y_level": 0, "rot": 0},
+    {"_": "Road corner NE", "asset": "terrain_roadCorner", "x": 19, "z": 4, "y_level": 0, "rot": -90},
+    {"_": "Road corner SE", "asset": "terrain_roadCorner", "x": 19, "z": 19, "y_level": 0, "rot": 180},
+    {"_": "Road corner SW", "asset": "terrain_roadCorner", "x": 4, "z": 19, "y_level": 0, "rot": 90},
+
+    {"_": "Plateau skirt north (descends -Z)", "asset": "terrain_side", "x": 9, "z": 8, "y_level": 1, "rot": 0},
+    {"asset": "terrain_side", "x": 10, "z": 8, "y_level": 1, "rot": 0},
+    {"asset": "terrain_side", "x": 11, "z": 8, "y_level": 1, "rot": 0},
+    {"asset": "terrain_side", "x": 12, "z": 8, "y_level": 1, "rot": 0},
+    {"asset": "terrain_side", "x": 13, "z": 8, "y_level": 1, "rot": 0},
+    {"asset": "terrain_side", "x": 14, "z": 8, "y_level": 1, "rot": 0},
+
+    {"_": "Plateau skirt south (descends +Z)", "asset": "terrain_side", "x": 9, "z": 15, "y_level": 1, "rot": 180},
+    {"asset": "terrain_side", "x": 10, "z": 15, "y_level": 1, "rot": 180},
+    {"asset": "terrain_side", "x": 11, "z": 15, "y_level": 1, "rot": 180},
+    {"asset": "terrain_side", "x": 12, "z": 15, "y_level": 1, "rot": 180},
+    {"asset": "terrain_side", "x": 13, "z": 15, "y_level": 1, "rot": 180},
+    {"asset": "terrain_side", "x": 14, "z": 15, "y_level": 1, "rot": 180},
+
+    {"_": "Plateau skirt west (descends -X), gap for ramp at z 11-12", "asset": "terrain_side", "x": 8, "z": 9, "y_level": 1, "rot": 90},
+    {"asset": "terrain_side", "x": 8, "z": 10, "y_level": 1, "rot": 90},
+    {"asset": "terrain_side", "x": 8, "z": 13, "y_level": 1, "rot": 90},
+    {"asset": "terrain_side", "x": 8, "z": 14, "y_level": 1, "rot": 90},
+
+    {"_": "Plateau skirt east (descends +X), gap for ramp at z 11-12", "asset": "terrain_side", "x": 15, "z": 9, "y_level": 1, "rot": -90},
+    {"asset": "terrain_side", "x": 15, "z": 10, "y_level": 1, "rot": -90},
+    {"asset": "terrain_side", "x": 15, "z": 13, "y_level": 1, "rot": -90},
+    {"asset": "terrain_side", "x": 15, "z": 14, "y_level": 1, "rot": -90},
+
+    {"_": "West ramp up (ascends +X), 2 tiles wide", "asset": "terrain_ramp", "x": 8, "z": 11, "y_level": 0, "rot": 0},
+    {"asset": "terrain_ramp", "x": 8, "z": 12, "y_level": 0, "rot": 0},
+    {"_": "East ramp up (ascends -X), 2 tiles wide", "asset": "terrain_ramp", "x": 15, "z": 11, "y_level": 0, "rot": 180},
+    {"asset": "terrain_ramp", "x": 15, "z": 12, "y_level": 0, "rot": 180},
+
+    {"_": "Skirt corners. NB: sideCorner rises ABOVE its pivot (ramp-like, y in [0, +0.5]) so y_level = LOW level, unlike plain sides", "asset": "terrain_sideCorner", "x": 8, "z": 8, "y_level": 0, "rot": 90},
+    {"asset": "terrain_sideCorner", "x": 15, "z": 8, "y_level": 0, "rot": 0},
+    {"asset": "terrain_sideCorner", "x": 15, "z": 15, "y_level": 0, "rot": -90},
+    {"asset": "terrain_sideCorner", "x": 8, "z": 15, "y_level": 0, "rot": 180}
+  ],
+  "props": [
+    {"_": "Rock on plateau center", "asset": "rock_largeA", "x": 11.5, "z": 11.5, "y_level": 1, "rot": 30, "scale": 0.8},
+    {"_": "Crystals NW field", "asset": "rock_crystals", "x": 2.0, "z": 2.0, "y_level": 0, "rot": 0, "scale": 0.9},
+    {"_": "Small rocks NE", "asset": "rocks_smallA", "x": 21.0, "z": 2.5, "y_level": 0, "rot": 45, "scale": 1.0},
+    {"_": "Small rocks SW", "asset": "rocks_smallB", "x": 2.5, "z": 21.0, "y_level": 0, "rot": 200, "scale": 1.0},
+    {"_": "Crystals SE", "asset": "rock_crystals", "x": 21.5, "z": 21.0, "y_level": 0, "rot": 120, "scale": 0.7}
+  ]
+}

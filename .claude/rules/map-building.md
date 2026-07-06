@@ -93,10 +93,24 @@ Godot Y-rotation: положительный угол = CCW при взгляд�
 
 ✅ Проверено через vertex inspection в `test_plateau.json`.
 
-### `terrain_sideCorner`, `terrain_sideCornerInner`, `terrain_sideEnd`, `terrain_sideCliff`
+### `terrain_sideCorner` (внешний угол плато) — ✅ проверено 2026-07-06
 
-- Не протестированы. Требуют индивидуальной диагностики.
-- `sideCorner` — внешний угол выпуклого плато
+**ВАЖНО, ловушка:** в отличие от `terrain_side` (геометрия НИЖЕ пивота, y∈[-0.5, 0]), `sideCorner` построен **как ramp — НАД пивотом, y∈[0, +0.5]**. Поэтому `y_level` для него = **НИЗКИЙ** уровень (как у ramp), а не высокий (как у side). Если поставить на высокий — угол торчит «плавником» над плато на +0.5м.
+
+Подтверждено vertex-чтением в three.js (web-slice): при rot=90 высокая точка (y=+0.5) сидит в углу клетки **+X +Z**, спуск диагональной дугой к краям −X и −Z.
+
+| rot  | Высокий угол в | Для юбки плато: какой угол |
+|------|----------------|----------------------------|
+| 90   | +X +Z          | NW (x < plateau, z < plateau) |
+| 0    | −X +Z          | NE (x > plateau, z < plateau) |
+| -90  | −X −Z          | SE (x > plateau, z > plateau) |
+| 180  | +X −Z          | SW (x < plateau, z > plateau) |
+
+Пример (плато 9..14, юбка на кольце 8/15): `{"asset": "terrain_sideCorner", "x": 8, "z": 8, "y_level": 0, "rot": 90}` — см. `web-slice/public/maps/arena_slice.json`.
+
+### `terrain_sideCornerInner`, `terrain_sideEnd`, `terrain_sideCliff`
+
+- Не протестированы. Требуют индивидуальной диагностики — в т.ч. проверять Y-span: может быть как у side (ниже пивота), так и как у sideCorner (выше)!
 - `sideCornerInner` — внутренний угол вогнутого плато
 - `sideEnd` — острый конец выступа (полуостров в 1 cell)
 - `sideCliff` — крутой обрыв (возможно 1 уровень высоты вместо 0.5)
