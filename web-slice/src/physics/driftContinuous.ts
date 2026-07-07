@@ -6,9 +6,16 @@
 // drives every drift output proportionally:
 //
 //   rear grip loss     ∝ |D_fast| (× thermal release factor)
-//   yaw bonus          ∝ D_fast (signed)
-//   visual yaw offset  ∝ D_fast (signed, single-stage — no re-lerp)
-//   forward assist     ∝ |D_fast|
+//   yaw bonus          ∝ D_fast (signed) × instantaneous speedGate
+//   visual yaw offset  ∝ D_fast (signed, single-stage — no re-lerp) × speedGate
+//   forward assist     ∝ |D_fast| × speedGate
+//   exit boost         ∝ release rate × speedGate
+//
+// The speedGate factor above is the SAME smoothstep(driftSpeedGateLo/Hi,
+// |speed|) used to gate the intent filter's input, but applied a second time
+// directly to these outputs (not lagged through D_fast). Without it a drift
+// spun up at speed keeps yawing the car after it coasts to a near-stop,
+// since D_fast only decays at driftEngageOutRate — i.e. "drifting" in place.
 //
 // Wide-entry-then-tighten arc (the v3.2 "thermal fade" intent) emerges from
 // the RACE between the fast intent filter (D_fast) and a slow "tire heat"
@@ -118,9 +125,16 @@ export class ContinuousDrift {
     const absD = Math.abs(this.dFast);
     const baseMult = lerp(1, p.driftRearGripMult, absD);
     const rearGripMult = Math.max(p.driftGripFloor, baseMult * releaseFactor);
-    const yawBonus = p.driftYawBonus * this.dFast; // signed
-    const visualYawOffset = degToRad(p.driftVisualOffsetDeg) * this.dFast; // signed, single-stage
-    const fwdAssist = p.driftForwardAssist * absD;
+    // Every yaw/motion-affecting output is additionally scaled by the
+    // INSTANTANEOUS speedGate (not the lagged dFast filter) computed above.
+    // Without this, a drift spun up at speed keeps yawing/pushing the kart
+    // after it has coasted down to near-zero speed, because dFast only
+    // decays at driftEngageOutRate — you could "drift" on the spot. Reusing
+    // speedGate here (rather than a fresh param) keeps "how fast is fast
+    // enough for drift" a single tunable concept for both entry and output.
+    const yawBonus = p.driftYawBonus * this.dFast * speedGate; // signed
+    const visualYawOffset = degToRad(p.driftVisualOffsetDeg) * this.dFast * speedGate; // signed, single-stage
+    const fwdAssist = p.driftForwardAssist * absD * speedGate;
 
     // 7. Energy accumulator + analytic release-rate boost.
     const powerRate = 1 / Math.max(p.driftPowerTau, 0.05);
@@ -129,7 +143,7 @@ export class ContinuousDrift {
     // Analytic dE/dt (sign-flipped): positive only while E is draining toward
     // a lower |D_fast| — i.e. right after releasing a sustained drift.
     const releaseRate = powerRate * (energyBefore - absD);
-    const exitBoost = p.driftExitBoostK * Math.max(0, releaseRate);
+    const exitBoost = p.driftExitBoostK * Math.max(0, releaseRate) * speedGate;
 
     // 8. VFX/audio hysteresis flag — never read by physics.
     const hystHigh = p.driftActiveThreshold + 0.02;

@@ -7,6 +7,10 @@ import { DEFAULT_KART_PHYSICS_PARAMS } from "./types";
 
 const DT = 1 / 120;
 
+function lerpNum(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
 function makeDrift(overrides: Partial<typeof DEFAULT_KART_PHYSICS_PARAMS> = {}) {
   return new ContinuousDrift({ ...DEFAULT_KART_PHYSICS_PARAMS, ...overrides });
 }
@@ -34,8 +38,11 @@ describe("ContinuousDrift v4.0 — engagement", () => {
       expect(o.engageFactor).toBeGreaterThanOrEqual(prev - 1e-9);
       prev = o.engageFactor;
     }
-    // after 2 s at inRate=1: 1 - e^-2 ≈ 0.86
-    expect(outs[outs.length - 1].engageFactor).toBeGreaterThan(0.8);
+    // 2s at DEFAULT_KART_PHYSICS_PARAMS.driftEngageInRate (req 4: fast
+    // engage, no ~1s waiting) — derived from the param, not hardcoded, so
+    // this test doesn't silently go stale the next time the rate is tuned.
+    const expected = 1 - Math.exp(-DEFAULT_KART_PHYSICS_PARAMS.driftEngageInRate * 2);
+    expect(outs[outs.length - 1].engageFactor).toBeGreaterThan(expected - 0.05);
     expect(outs[outs.length - 1].direction).toBe(1);
   });
 
@@ -106,9 +113,17 @@ describe("ContinuousDrift v4.0 — smoothness metrics (spec §5)", () => {
     for (let i = 1; i < grips.length; i++) {
       maxStep = Math.max(maxStep, Math.abs(grips[i] - grips[i - 1]));
     }
-    // v3.1's exit snap could move grip by ~1.2 within a couple frames.
-    // Continuous model: per-tick change stays tiny.
-    expect(maxStep).toBeLessThan(0.02);
+    // v3.1's exit snap could move grip by ~1.2 within a couple frames. The
+    // continuous model's per-tick change is bounded by how fast dFast itself
+    // can move (2 * max(inRate,outRate) * dt on a full-range flick, same
+    // bound as metric 1 above) times grip's sensitivity to dFast
+    // (|1 - driftRearGripMult|). Derived from the params (not hardcoded) so
+    // tuning driftEngageInRate/OutRate doesn't make this test stale — this
+    // is still WAY below v3.1's ~1.2 snap regardless of rate tuning.
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const gripDeltaBound = Math.abs(1 - p.driftRearGripMult) * 2 * Math.max(p.driftEngageInRate, p.driftEngageOutRate) * DT * 1.5;
+    expect(maxStep).toBeLessThan(gripDeltaBound);
+    expect(maxStep).toBeLessThan(0.3); // still nowhere near v3.1's ~1.2 snap
     // and grip fully recovers to 1 after release settles
     expect(grips[grips.length - 1]).toBeGreaterThan(0.97);
   });
@@ -124,9 +139,14 @@ describe("ContinuousDrift v4.0 — smoothness metrics (spec §5)", () => {
     const longPeak = Math.max(...longRelease.map(o => o.exitBoostForce));
     expect(longPeak).toBeGreaterThan(1); // meaningful boost after sustained drift
 
-    // short tap → release: boost negligible, no threshold param needed
+    // short tap → release: boost negligible, no threshold param needed.
+    // "Short" is relative to driftEngageInRate — at the faster v4.1 default
+    // (req 4: near-instant engage) a 0.2s tap is no longer short enough to
+    // stay clearly below full engagement, so this uses a tap duration tied
+    // to the rate's own time constant instead of a fixed tick count.
     const tap = makeDrift();
-    run(tap, 24, { speed: 15, steer: 1, throttle: 1 }); // 0.2 s tap
+    const tapTicks = Math.max(2, Math.round(0.15 / DEFAULT_KART_PHYSICS_PARAMS.driftEngageInRate / DT));
+    run(tap, tapTicks, { speed: 15, steer: 1, throttle: 1 });
     const tapRelease = run(tap, 240, { speed: 15, steer: 0, throttle: 1 });
     const tapPeak = Math.max(...tapRelease.map(o => o.exitBoostForce));
     expect(tapPeak).toBeLessThan(longPeak * 0.25);
@@ -181,5 +201,80 @@ describe("ContinuousDrift v4.0 — thermal fade (wide entry)", () => {
       expect(o.rearGripMultiplier).toBeGreaterThanOrEqual(prev - 1e-9);
       prev = o.rearGripMultiplier;
     }
+  });
+});
+
+describe("ContinuousDrift v4.0 — req 3: yaw effects die out with CURRENT speed, not just intent", () => {
+  it("v=0 + full steer/throttle produces zero yaw bonus, zero visual offset, zero forward assist, even with a hot dFast", () => {
+    const drift = makeDrift();
+    // Spin up a strong drift at speed first, so dFast/heat/energy are all
+    // saturated — this is exactly the "drift on the spot" bug scenario: can
+    // a car that WAS drifting keep yawing once speed drops to zero?
+    run(drift, 240, { speed: 15, steer: 1, throttle: 1 });
+    expect(Math.abs(drift.getDFast())).toBeGreaterThan(0.7); // confirm it's genuinely engaged
+
+    // Now speed instantaneously reads 0 (e.g. car slammed into a wall) while
+    // steer/throttle are still held — the OUTPUT must reflect current speed
+    // immediately, not wait for dFast to decay.
+    const out = drift.update(0, 1, true, 1, DT);
+    expect(out.yawBonusRadPerSec).toBeCloseTo(0, 6);
+    expect(out.visualYawOffsetRad).toBeCloseTo(0, 6);
+    expect(out.forwardAssistForce).toBeCloseTo(0, 6);
+    expect(out.exitBoostForce).toBeCloseTo(0, 6);
+  });
+
+  it("yaw bonus fades continuously (no jump) as speed ramps down through the speed gate", () => {
+    const drift = makeDrift();
+    run(drift, 240, { speed: 15, steer: 1, throttle: 1 }); // saturate dFast at high speed
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const speeds: number[] = [];
+    // Ramp speed down from well above gateHi to 0 over 1s (60 ticks at DT).
+    const steps = 60;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      speeds.push(lerpNum(p.driftSpeedGateHi + 3, 0, t));
+    }
+    const yawBonuses: number[] = [];
+    for (const s of speeds) {
+      yawBonuses.push(drift.update(s, 1, true, 1, DT).yawBonusRadPerSec);
+    }
+    // Monotonically non-increasing overall (speed only drops) and ends at ~0.
+    // Small tolerance: dFast itself can still be inching toward saturation
+    // during the early part of the ramp (while speedGate is still ~1), which
+    // can offset the speed-driven decrease by a tiny fraction — the metric
+    // that actually matters (no discrete JUMP) is asserted separately below.
+    let prev = Infinity;
+    for (const y of yawBonuses) {
+      expect(y).toBeLessThanOrEqual(prev + 1e-3);
+      prev = y;
+    }
+    expect(yawBonuses[yawBonuses.length - 1]).toBeCloseTo(0, 3);
+    // No discrete jump anywhere in the descent.
+    let maxStep = 0;
+    for (let i = 1; i < yawBonuses.length; i++) {
+      maxStep = Math.max(maxStep, Math.abs(yawBonuses[i - 1] - yawBonuses[i]));
+    }
+    expect(maxStep).toBeLessThan(0.3);
+  });
+});
+
+describe("ContinuousDrift v4.0 — req 4: low-speed drift pickup (no ~1s wait)", () => {
+  it("full steer+throttle at a low, drift-gate-open speed (~2.5 m/s) engages substantially within a few tenths of a second", () => {
+    const drift = makeDrift();
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const speed = 2.5; // within [driftSpeedGateLo, driftSpeedGateHi] = [1.5, 3] by default
+    const outs = run(drift, Math.round(0.35 / DT), { speed, steer: 1, throttle: 1 }); // 0.35s
+    expect(outs[outs.length - 1].engageFactor).toBeGreaterThan(0.5);
+    // and it actually produces a nonzero yaw bonus at this speed (speedGate is open)
+    expect(Math.abs(outs[outs.length - 1].yawBonusRadPerSec)).toBeGreaterThan(0);
+    void p;
+  });
+
+  it("stays gated near-zero just below driftSpeedGateLo, confirming the pickup above isn't from steer/throttle gates alone", () => {
+    const drift = makeDrift();
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const speed = p.driftSpeedGateLo - 0.3;
+    const outs = run(drift, Math.round(0.5 / DT), { speed, steer: 1, throttle: 1 });
+    expect(outs[outs.length - 1].engageFactor).toBeLessThan(0.05);
   });
 });

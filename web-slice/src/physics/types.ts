@@ -37,7 +37,6 @@ export interface KartPhysicsParams {
   // Steering
   steerLowSpeedMult: number; // STEER_LOW_MULT
   steerHighSpeedMult: number; // STEER_HIGH_MULT
-  stationarySteerThreshold: number; // STATIONARY_STEER_THRESHOLD
 
   // Bicycle v3.0 (two-axle)
   maxSteerAngleDeg: number; // MAX_STEER_ANGLE_DEG
@@ -46,9 +45,14 @@ export interface KartPhysicsParams {
   tireSaturationSpeed: number; // TIRE_SATURATION
   inertiaScale: number; // INERTIA_SCALE
   omegaDamping: number; // OMEGA_DAMPING
-  stationaryOmegaKick: number; // STATIONARY_OMEGA_KICK
   driftMaxSlipSpeed: number; // DRIFT_MAX_SLIP_SPEED
   omegaLeanScale: number; // OMEGA_LEAN_SCALE (visual only, kept for parity)
+
+  // Kinematic/dynamic blend (low-speed nose-tracking — replaces the old
+  // "standstill steering aid" hack; see bicyclePhysics.ts step G/H).
+  kinematicBlendLoSpeed: number; // KINEMATIC_BLEND_LO_SPEED — at/under this, pure kinematic (no slip)
+  kinematicBlendHiSpeed: number; // KINEMATIC_BLEND_HI_SPEED — at/over this, pure dynamic tire model
+  kinematicLateralMute: number; // KINEMATIC_LATERAL_MUTE — residual tire-force sideways push at full-kinematic speed
 
   // Drift signal shaping (bicycle_physics.gd J/K steps)
   driftMinSpeed: number; // DRIFT_MIN_SPEED
@@ -57,6 +61,7 @@ export interface KartPhysicsParams {
   driftDragMultiplier: number; // DRIFT_DRAG_MULTIPLIER
   driftRollingMultiplier: number; // DRIFT_ROLLING_MULTIPLIER
   corneringDragCoeff: number; // CORNERING_DRAG_COEFF
+  corneringDragDriftMult: number; // CORNERING_DRAG_DRIFT_MULT — extra multiplier while actively drifting
 
   // Collision / mass — not exposed in dev_params.json (tuner doesn't surface
   // it yet); keep the kart_physics_resource.gd default.
@@ -119,7 +124,6 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
 
   steerLowSpeedMult: 1.1,
   steerHighSpeedMult: 0.85,
-  stationarySteerThreshold: 2,
 
   maxSteerAngleDeg: 35,
   frontGripStiffness: 17.5,
@@ -127,16 +131,20 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   tireSaturationSpeed: 5,
   inertiaScale: 2,
   omegaDamping: 5,
-  stationaryOmegaKick: 1.5,
   driftMaxSlipSpeed: 8,
   omegaLeanScale: 2,
+
+  kinematicBlendLoSpeed: 1.5,
+  kinematicBlendHiSpeed: 6,
+  kinematicLateralMute: 0.1,
 
   driftMinSpeed: 2.5,
   slipSmoothing: 5,
   driftActiveThreshold: 0.55,
   driftDragMultiplier: 1,
   driftRollingMultiplier: 5,
-  corneringDragCoeff: 16,
+  corneringDragCoeff: 5,
+  corneringDragDriftMult: 4,
 
   mass: 1.0,
 
@@ -149,8 +157,8 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftExitSpeed: 4,
   driftExitDuration: 0.3,
   driftVisualOffsetDeg: 39,
-  driftEngageInRate: 1,
-  driftEngageOutRate: 1.5,
+  driftEngageInRate: 7,
+  driftEngageOutRate: 2.5,
   driftRecoveryRate: 5,
   driftExitGripMult: 2.2,
   driftRearGripMult: 0.25,
@@ -166,8 +174,8 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
 
   driftSteerGateLo: 0.35,
   driftSteerGateHi: 0.55,
-  driftSpeedGateLo: 4,
-  driftSpeedGateHi: 5,
+  driftSpeedGateLo: 1.5,
+  driftSpeedGateHi: 3,
   driftThrottleGate: 0.1,
   driftHeatTau: 0.8,
   driftGripReleasePeak: 0.6,

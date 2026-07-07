@@ -135,26 +135,45 @@ export class BicyclePhysics {
     const vLatRearL = vLatRear;
     const vLatRearR = vLatRear;
 
-    // F. Yaw torque integration.
+    // F. Yaw torque integration (dynamic / tire-slip model).
     // τ_y = -half_wb × F_front_x + half_wb × F_rear_x = half_wb × (F_rear - F_front)
     const torque = (fRearTotal - fFront) * halfWb;
     const moi = p.mass * (halfWb * halfWb) * Math.max(p.inertiaScale, 0.01);
     const omegaAccel = torque / Math.max(moi, 0.001);
-    this.omega += omegaAccel * delta;
+    let omegaDynamic = this.omega + omegaAccel * delta;
 
     // Angular damping — framerate-independent exponential decay.
-    this.omega *= Math.exp(-p.omegaDamping * delta);
+    omegaDynamic *= Math.exp(-p.omegaDamping * delta);
 
-    // G. Standstill steering aid.
-    if (inp.onFloor && Math.abs(fwdSpeed) < p.stationarySteerThreshold) {
-      const blend = 1 - smoothstep(0, p.stationarySteerThreshold, Math.abs(fwdSpeed));
-      const kick = inp.steerInput * p.stationaryOmegaKick * blend;
-      this.omega += kick * delta;
-    }
+    // G. Kinematic bicycle blend (low-speed nose-tracking).
+    // At low speed the saturating tire model produces tiny slip angles → tiny
+    // lateral forces → tiny yaw torque, so the dynamic model alone barely
+    // turns the car's nose even at full lock — yet that same weak front
+    // force still pushes sideSpeed sideways (step H), so the whole body
+    // appears to crab sideways instead of pivoting. Fix: blend the dynamic
+    // torque-integrated omega toward the classic KINEMATIC bicycle model
+    // (omega = fwdSpeed * tan(steerAngle) / wheelbase — the car's reference
+    // point exactly tracks the steered wheel angle, zero slip by
+    // construction) as speed drops. `blend` is a smoothstep of |fwdSpeed|:
+    // 0 (fully kinematic, nose leads exactly) at/under
+    // kinematicBlendLoSpeed, 1 (fully dynamic tire-slip model, drift-capable)
+    // at/over kinematicBlendHiSpeed. No standalone "standstill steering aid"
+    // is needed anymore — at fwdSpeed=0 the kinematic formula itself is 0,
+    // so a stationary kart never yaws from steering input alone.
+    const kinematicOmega = (fwdSpeed / this.wheelbase) * Math.tan(steerAngle);
+    const kinematicBlend = smoothstep(p.kinematicBlendLoSpeed, p.kinematicBlendHiSpeed, Math.abs(fwdSpeed));
+    this.omega = lerp(kinematicOmega, omegaDynamic, kinematicBlend);
 
-    // H. Apply lateral tire forces to body velocity.
+    // H. Apply lateral tire forces to body velocity — muted in the kinematic
+    // zone (see step G): a car turning purely by kinematic nose-tracking
+    // shouldn't ALSO be shoved sideways by the tire force whose yaw
+    // contribution we just overrode. `kinematicLateralMute` is the residual
+    // fraction of that push still felt at full-kinematic speeds (small, not
+    // necessarily zero, for a touch of low-speed feel); it fades to full
+    // (1.0) strength together with the dynamic model by kinematicBlendHiSpeed.
+    const lateralMute = lerp(p.kinematicLateralMute, 1, kinematicBlend);
     const fTotalLat = fFront + fRearTotal;
-    sideSpeed += (fTotalLat / Math.max(p.mass, 0.001)) * delta;
+    sideSpeed += ((fTotalLat * lateralMute) / Math.max(p.mass, 0.001)) * delta;
 
     // I. Longitudinal forces.
     let thrust = 0;
@@ -170,10 +189,17 @@ export class BicyclePhysics {
     const rolling = -p.kRolling * rollingMult * fwdSpeed;
     // Continuous force blends (smooth-values rule): no discrete jumps on
     // continuous physics terms. cornering_drag fades in across [0..0.2] m/s.
+    // corneringDragCoeff alone is the ORDINARY-turn braking (kept gentle so
+    // coasting through a turn doesn't nearly stop the kart); it's scaled up
+    // by corneringDragDriftMult while an actual drift is active so THAT loses
+    // noticeably more speed than a plain turn. Reads last tick's
+    // driftIntensity — same one-tick-lag pattern as dragMult/rollingMult
+    // just above, already an established convention in this step.
     let corneringDrag = 0;
     if (p.corneringDragCoeff > 0) {
       const cdBlend = smoothstep(0, 0.2, Math.abs(fwdSpeed));
-      corneringDrag = -Math.sign(fwdSpeed) * p.corneringDragCoeff * Math.abs(sideSpeed) * 0.5 * cdBlend;
+      const cdDriftScale = lerp(1, p.corneringDragDriftMult, this.driftIntensity);
+      corneringDrag = -Math.sign(fwdSpeed) * p.corneringDragCoeff * cdDriftScale * Math.abs(sideSpeed) * 0.5 * cdBlend;
     }
     // brake force blends in across [0..0.6] m/s.
     let brake = 0;

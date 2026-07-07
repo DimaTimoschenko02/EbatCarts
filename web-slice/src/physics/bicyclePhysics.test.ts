@@ -179,6 +179,94 @@ describe("BicyclePhysics — reverse driving gate", () => {
   });
 });
 
+describe("BicyclePhysics — standstill steering (req 1: no standstill steering aid)", () => {
+  it("stationary kart (fwdSpeed=0) never yaws from steer input alone, even over many ticks", () => {
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    const velocity = { x: 0, y: 0, z: 0 };
+    for (let i = 0; i < 120; i++) {
+      // full lock, no throttle — a real player holding A/D at a dead stop.
+      const state = bike.step(freshInput({ velocity, throttle: 0, steerInput: 1 }), DT);
+      expect(state.omega).toBeCloseTo(0, 9);
+      expect(state.newVelocity.x).toBeCloseTo(0, 9);
+      expect(state.newVelocity.z).toBeCloseTo(0, 9);
+    }
+  });
+
+  it("has no stationarySteerThreshold/stationaryOmegaKick fields left on the params object", () => {
+    expect((DEFAULT_KART_PHYSICS_PARAMS as unknown as Record<string, unknown>).stationarySteerThreshold).toBeUndefined();
+    expect((DEFAULT_KART_PHYSICS_PARAMS as unknown as Record<string, unknown>).stationaryOmegaKick).toBeUndefined();
+  });
+});
+
+describe("BicyclePhysics — kinematic/dynamic blend (req 2: nose leads at low speed)", () => {
+  it("at low speed (below kinematicBlendLoSpeed) omega matches the pure kinematic bicycle formula", () => {
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const bike = new BicyclePhysics(p, DEFAULT_AXLE_GEOMETRY);
+    const fwdSpeedIn = 1.0; // strictly below kinematicBlendLoSpeed=1.5 -> blend=0 exactly
+    const velocity = { x: 0, y: 0, z: -fwdSpeedIn };
+    const state = bike.step(freshInput({ velocity, throttle: 1, steerInput: 1 }), DT);
+
+    // Reproduce step B (steer angle) exactly as the implementation does.
+    const maxAngleRad = (p.maxSteerAngleDeg * Math.PI) / 180;
+    const spdRatio = Math.min(Math.max(fwdSpeedIn / p.maxSpeed, 0), 1);
+    const steerMult = p.steerLowSpeedMult + (p.steerHighSpeedMult - p.steerLowSpeedMult) * spdRatio;
+    const steerAngle = 1 * maxAngleRad * steerMult;
+    const expectedOmega = (fwdSpeedIn / DEFAULT_AXLE_GEOMETRY.wheelbase) * Math.tan(steerAngle);
+
+    expect(state.omega).toBeCloseTo(expectedOmega, 4);
+    // Nose leads, not a parallel sideways crab: lateral velocity stays tiny.
+    expect(Math.abs(state.sideSpeed)).toBeLessThan(0.05);
+  });
+
+  it("sideSpeed stays small through a sustained low-speed turn (not just the first tick)", () => {
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    let velocity = { x: 0, y: 0, z: 0 };
+    let maxAbsSide = 0;
+    // Accelerate from rest with full steer — track sideSpeed while still
+    // under kinematicBlendLoSpeed.
+    for (let i = 0; i < 60; i++) {
+      const state = bike.step(freshInput({ velocity, throttle: 1, steerInput: 1 }), DT);
+      velocity = state.newVelocity;
+      if (Math.abs(state.fwdSpeed) <= DEFAULT_KART_PHYSICS_PARAMS.kinematicBlendLoSpeed) {
+        maxAbsSide = Math.max(maxAbsSide, Math.abs(state.sideSpeed));
+      }
+    }
+    expect(maxAbsSide).toBeLessThan(0.1);
+  });
+
+  it("blend is continuous across the Lo..Hi speed range — no jump in omega's rate of change", () => {
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    let velocity = { x: 0, y: 0, z: 0 };
+    const omegas: number[] = [];
+    // Ramp from rest through and past kinematicBlendHiSpeed under full steer.
+    for (let i = 0; i < 500; i++) {
+      const state = bike.step(freshInput({ velocity, throttle: 1, steerInput: 1 }), DT);
+      velocity = state.newVelocity;
+      omegas.push(state.omega);
+    }
+    let maxStep = 0;
+    for (let i = 1; i < omegas.length; i++) {
+      maxStep = Math.max(maxStep, Math.abs(omegas[i] - omegas[i - 1]));
+    }
+    // Generous bound (per-tick omega change at DT=1/120): a genuine
+    // discontinuity at the blend boundary would show up as a step far above
+    // the smooth per-tick evolution seen everywhere else in the trace.
+    expect(maxStep).toBeLessThan(0.5);
+  });
+
+  it("at high speed (above kinematicBlendHiSpeed) sideSpeed can develop real slip (dynamic model, drift-capable)", () => {
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    let velocity = { x: 0, y: 0, z: -15 }; // well above kinematicBlendHiSpeed=6
+    let lastSide = 0;
+    for (let i = 0; i < 60; i++) {
+      const state = bike.step(freshInput({ velocity, throttle: 1, steerInput: 1, rearGripMultiplier: 0.25 }), DT);
+      velocity = state.newVelocity;
+      lastSide = state.sideSpeed;
+    }
+    expect(Math.abs(lastSide)).toBeGreaterThan(0.3);
+  });
+});
+
 describe("BicyclePhysics — reset", () => {
   it("clears omega, driftIntensity, isDrifting", () => {
     const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
