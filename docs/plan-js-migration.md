@@ -134,7 +134,19 @@ MVP редактора (одна сессия):
 
 **Критерий выхода:** скиллы written, каталог ассетов готов, main.ts тонкий, новая машинка = новый конфиг без правки физики.
 
-### P2 — Мультиплеер на Colyseus + перенос имеющегося — ⬜ pending
+### P2 — Мультиплеер на Colyseus + перенос имеющегося — 🔄 ядро готово 2026-07-07, ждёт живого теста
+
+**Сделано (коммиты `a39f711`, `f58ace0`, `5c4d42b`, `5233add`):**
+- Colyseus 0.17 сервер (`web-slice/server/`, :8091, `npm run server` — tsx ОБЯЗАТЕЛЬНО с `--tsconfig server/tsconfig.json`), owner-authoritative движение, snapshot-buffer интерполяция (~120мс).
+- Боевая вертикаль: ракеты (WEAPON_TYPES registry, 40 m/s, веер 3×±10°), server-authoritative урон/AOE/kill/респавн (farthest-точка, лицом к центру, 2с invuln), weapon-боксы (подбор по близости, игнор при заряженном — как в Godot-коде), kills/deaths в schema. Ракеты — broadcast + аналитический полёт (не schema). Серверная коллизия ракет с рельефом через `src/shared/heightfield.ts` (чистая математика, общая клиент/сервер).
+- Лобби `lobby.html`: ник (localStorage sk-nick) + create/join по 6-символьному коду → `/?room=CODE`, filterBy("code") — друзья по ссылке попадают в одну комнату. Vite multi-entry build (index/editor/lobby).
+- HUD: hp, weapon, K/D, kill feed, respawn overlay. `window.__net` телеметрия. Смоуки: `tools/net_smoke.mjs`, `tools/combat_smoke.mjs` (полный цикл: подбор→выстрел→урон→смерть→счёт→респавн). 78/78 тестов.
+
+**Осталось в P2:**
+- ⬜ Живой тест Димы: лобби → 2 вкладки → бой. Итерация по фидбеку (feel стрельбы!).
+- ⬜ Профили/статистика: master Express (:8080) остаётся — порт auth-флоу (без /api/profile/claim в браузер!), submit матча из Colyseus (контракт в p2-port-notes), таймер/конец матча + final score.
+- ⬜ Спавн-точки и боксы из map JSON (сейчас хардкод в server/config/arena.ts).
+- ⬜ Known: smoke-скрипты на Windows likely оставляют node-процесс на :8091 (shell:true + child.kill убивает только cmd-обёртку) — проверять netstat после прогонов.
 
 1. Colyseus server: комната = match. **Решение 2026-07-07 (упрощение против исходного плана):** движение — owner-authoritative (клиент владеет своим картом, шлёт позицию, сервер релеит через state) — как в Godot-версии с MultiplayerSynchronizer. Серверная bicycle-физика + prediction/reconciliation НЕ делаем в MVP (игра для компании друзей, не конкурентка; экономит самый дорогой кусок). Server-authoritative остаются: урон/kill, weapon-боксы, спавн, таймер матча. Апгрейд до server-auth физики — post-MVP, если появится читерство.
 2. Клиент: подключение, интерполяция удалённых картов через snapshot buffer (~100-150мс задержка, аналог Godot snapshot_buffer). Прогноз своего не нужен (own kart локальный).
