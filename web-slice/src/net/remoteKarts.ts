@@ -6,6 +6,10 @@ import { loadKartModel } from "../map/assetLoader";
 import { RemoteInterpolator } from "./snapshotBuffer";
 import type { RemotePlayerState } from "./netClient";
 import type { KartObstacle } from "../physics/kartCollision";
+import type { GameMap } from "../map/mapLoader";
+import { forwardOf, rightOf } from "../kart/kart";
+import { computeAttitudeTarget } from "../kart/attitude";
+import { DEFAULT_AXLE_GEOMETRY, DEFAULT_KART_PHYSICS_PARAMS } from "../physics/types";
 
 // Adaptive render delay, jitter buffering, and post-interpolation smoothing
 // all live in RemoteInterpolator (snapshotBuffer.ts) now — see that file's
@@ -15,22 +19,40 @@ import type { KartObstacle } from "../physics/kartCollision";
 const KART_MODEL = "craft_racer";
 const KART_LENGTH = 2.2;
 
+// A remote kart is treated as "airborne" (body levels toward flat instead of
+// following the heightfield slope) once its synced Y sits this far above the
+// LOCALLY sampled ground at its XZ. Remote karts have no synced vy/airborne
+// flag (out of scope — see net/netClient.ts RemotePlayerState); this is
+// inferred purely from height vs. the same map the local kart drives on, per
+// the design brief's "> ~0.3m" heuristic.
+const REMOTE_AIRBORNE_HEIGHT = 0.3;
+
 interface RemoteKart {
   group: THREE.Group;
   interp: RemoteInterpolator;
   modelReady: boolean;
   alive: boolean;
+  pitchSm: number;
+  rollSm: number;
 }
 
 export class RemoteKartManager {
   private readonly karts = new Map<string, RemoteKart>();
   private lastUpdateMs = performance.now();
+  private map: GameMap | null = null;
 
   constructor(private readonly scene: THREE.Scene) {}
+
+  // Set once the map finishes its async load (see main.ts) — remote kart
+  // tilt is computed purely client-side from this, no extra wire data.
+  setMap(map: GameMap): void {
+    this.map = map;
+  }
 
   add(sessionId: string, player: RemotePlayerState): void {
     if (this.karts.has(sessionId)) return;
     const group = new THREE.Group();
+    group.rotation.order = "YXZ"; // matches the local Kart's convention (kart.ts syncVisual)
     // Placeholder box while the glb loads async, swapped in-place below —
     // mirrors Kart.buildPlaceholderMesh()/loadModel() in kart/kart.ts.
     const placeholder = new THREE.Mesh(
@@ -47,6 +69,8 @@ export class RemoteKartManager {
       interp: new RemoteInterpolator({ x: player.x, y: player.y, z: player.z, yaw: player.yaw }),
       modelReady: false,
       alive: player.alive,
+      pitchSm: 0,
+      rollSm: 0,
     };
     entry.interp.push(performance.now(), { x: player.x, y: player.y, z: player.z, yaw: player.yaw });
     this.karts.set(sessionId, entry);
@@ -93,6 +117,31 @@ export class RemoteKartManager {
       const pose = kart.interp.update(now, dt);
       kart.group.position.set(pose.x, pose.y, pose.z);
       kart.group.rotation.y = pose.yaw;
+
+      // Body attitude — same heightfield-probe helper the local kart uses
+      // (kart/attitude.ts), computed here purely from the map + the
+      // network-synced pose, no server-side tilt data needed.
+      const groundHere = this.map?.sampleHeight(pose.x, pose.z) ?? null;
+      const airborne = groundHere === null || pose.y - groundHere > REMOTE_AIRBORNE_HEIGHT;
+      const target = airborne
+        ? { pitch: 0, roll: 0 }
+        : computeAttitudeTarget(
+            this.map,
+            pose.x,
+            pose.z,
+            forwardOf(pose.yaw),
+            rightOf(pose.yaw),
+            DEFAULT_AXLE_GEOMETRY.wheelbase * 0.5,
+            DEFAULT_AXLE_GEOMETRY.trackWidth * 0.5
+          );
+      const rate = airborne
+        ? DEFAULT_KART_PHYSICS_PARAMS.attitudeAirborneRelaxRate
+        : DEFAULT_KART_PHYSICS_PARAMS.attitudeFollowRate;
+      const alpha = 1 - Math.exp(-rate * dt);
+      kart.pitchSm += (target.pitch - kart.pitchSm) * alpha;
+      kart.rollSm += (target.roll - kart.rollSm) * alpha;
+      kart.group.rotation.x = kart.pitchSm;
+      kart.group.rotation.z = kart.rollSm;
     }
   }
 

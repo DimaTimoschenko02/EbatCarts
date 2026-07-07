@@ -107,6 +107,18 @@ export interface KartPhysicsParams {
   driftGripFloor: number; // absolute min rear grip mult
   driftPowerTau: number; // boost energy charge time constant (s)
   driftExitBoostK: number; // boost force per unit release rate
+
+  // Vertical physics (src/physics/vertical.ts) — added after owner playtest
+  // feedback: ramps/cliffs need to actually launch the kart into the air
+  // instead of gluing Y to the heightfield no matter how steep the drop.
+  verticalGravity: number; // VERTICAL_GRAVITY
+  verticalGroundFollowRate: number; // VERTICAL_GROUND_FOLLOW_RATE
+  verticalAirborneDropThreshold: number; // VERTICAL_AIRBORNE_DROP_THRESHOLD
+  verticalLandingMargin: number; // VERTICAL_LANDING_MARGIN
+
+  // Body attitude (pitch/roll) follow — src/kart/kart.ts step 8b/8d.
+  attitudeFollowRate: number; // ATTITUDE_FOLLOW_RATE — grounded slope-follow speed
+  attitudeAirborneRelaxRate: number; // ATTITUDE_AIRBORNE_RELAX_RATE — how fast the body levels out while airborne
 }
 
 // Values pulled straight from dev_params.json (repo root) on 2026-07-06.
@@ -182,6 +194,24 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftGripFloor: 0.05,
   driftPowerTau: 0.5,
   driftExitBoostK: 7.0,
+
+  // Vertical physics — see vertical.ts header for the launch-detection design.
+  // gravity 22 m/s² is arcade-light (real gravity 9.8 feels floaty/slow for
+  // a kart game); groundFollowRate 20 matches the pre-existing hardcoded
+  // exp-follow rate kart.ts used before this was parameterized.
+  verticalGravity: 22,
+  verticalGroundFollowRate: 20,
+  verticalAirborneDropThreshold: 2.5,
+  verticalLandingMargin: 0.04,
+
+  // 20 (up from the old hardcoded pitch-only rate of 10) — a plain 10 let a
+  // kart crossing a ramp tile at top speed clear it before the filter caught
+  // up, so the tilt read as "barely there" even though the underlying slope
+  // math was correct (see kart.ts step 8b comment / gameplay-programmer
+  // pitch diagnosis). 20 keeps the body visibly banked through a ramp at any
+  // speed in this vertical slice's speed range.
+  attitudeFollowRate: 20,
+  attitudeAirborneRelaxRate: 3,
 };
 
 // Axle geometry — separate from KartPhysicsParams because it's measured from

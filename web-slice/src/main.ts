@@ -100,6 +100,7 @@ let map: GameMap | null = null;
     map = driveJson ? GameMap.fromJson(JSON.parse(driveJson), lib) : await GameMap.load("/maps/arena_slice.json", lib);
     scene.add(map.root);
     telemetry.setMapHandles(map, scene);
+    net.setMap(map); // remote-kart body tilt (src/net/remoteKarts.ts) needs the heightfield too
     await kart.loadModel(stats.model, stats.modelLength);
   } catch (e) {
     console.error("[boot] asset load failed, driving on the fallback plane", e);

@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { NetClient, type NetCallbacks, type RemotePose } from "./netClient";
 import { RemoteKartManager } from "./remoteKarts";
 import type { KartObstacle } from "../physics/kartCollision";
+import type { GameMap } from "../map/mapLoader";
 
 // Returned by initNet() — bundles the NetClient (combat wiring, getSelf/
 // getBoxes/sendFire, see main.ts + combat/index.ts) with a way to read the
@@ -16,6 +17,11 @@ import type { KartObstacle } from "../physics/kartCollision";
 export interface NetHandle {
   client: NetClient;
   getObstacles: () => KartObstacle[];
+  // Hand the map to the remote-kart renderer once it finishes loading (map
+  // load is async, initNet() itself runs before it's ready — see main.ts).
+  // Used purely for remote-kart body tilt (net/remoteKarts.ts), no wire
+  // protocol change needed.
+  setMap: (map: GameMap) => void;
 }
 
 export interface InitNetOptions {
@@ -70,5 +76,5 @@ export function initNet(opts: InitNetOptions): NetHandle {
   }
   requestAnimationFrame(frame);
 
-  return { client, getObstacles: () => remotes.getObstacles() };
+  return { client, getObstacles: () => remotes.getObstacles(), setMap: map => remotes.setMap(map) };
 }
