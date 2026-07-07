@@ -176,11 +176,22 @@ export class BicyclePhysics {
     sideSpeed += ((fTotalLat * lateralMute) / Math.max(p.mass, 0.001)) * delta;
 
     // I. Longitudinal forces.
+    // Reverse-thrust is gated by CURRENT forward speed (reverseEngageGate):
+    // while still rolling forward, holding the brake/reverse key (S) should
+    // only brake (see `brake` below) — exactly like a real car braking to a
+    // stop before reverse gear engages. Without this gate, thrust and brake
+    // fired simultaneously the instant S was pressed (thrust up to
+    // accelForce*reverseRatio ADDED to brakeForce), which is what made
+    // braking from a cruise feel near-instant instead of a real deceleration
+    // process (owner playtest feedback). The gate is a smoothstep of
+    // fwdSpeed itself (continuous, no discrete flip) — full reverse thrust
+    // only once fwdSpeed has coasted/braked down to ~reverseEngageSpeed.
     let thrust = 0;
     if (inp.throttle > 0.01) {
       thrust = inp.throttle * p.accelForce;
     } else if (inp.throttle < -0.01) {
-      thrust = inp.throttle * p.accelForce * p.reverseRatio;
+      const reverseEngageGate = smoothstep(p.reverseEngageSpeed, 0, fwdSpeed);
+      thrust = inp.throttle * p.accelForce * p.reverseRatio * reverseEngageGate;
     }
 
     const dragMult = lerp(1, p.driftDragMultiplier, this.driftIntensity);

@@ -26,6 +26,7 @@ export interface KartPhysicsParams {
   kRolling: number; // K_ROLLING
   brakeForce: number; // BRAKE_FORCE
   reverseRatio: number; // REVERSE_RATIO
+  reverseEngageSpeed: number; // REVERSE_ENGAGE_SPEED — fwdSpeed below which reverse-gear thrust fully engages (see bicyclePhysics.ts step I); above it, holding S only brakes, mirroring a real car braking to a stop before reverse engages.
 
   // Input smoothing (applied by caller before building PhysicsInput — see
   // kart_controller.gd _smooth_input; kept here so the web port has the same
@@ -127,17 +128,45 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   accelForce: 20,
   kDrag: 0.07,
   kRolling: 1.1,
-  brakeForce: 40,
+  // 40 -> 5 (owner playtest 2026-07-07): braking from a cruise used to be
+  // near-instant (~0.18s to a dead stop) because reverse-thrust and brake
+  // BOTH fired the instant S was pressed (see step I's reverseEngageSpeed
+  // gate, added same session — that gate removes the double-dip). With ONLY
+  // that gate fixed, 40 alone still stopped a cruise (~10.7 m/s) in ~0.4s —
+  // still reads as a wall. 5 brings a cruise-to-near-stop down over ~0.87s
+  // (~0.52s down to 3 m/s), mirroring the ~0.84s a natural throttle-off
+  // coast takes to lose the same speed (brakeForce is a real but gentle
+  // ASSIST on top of drag/rolling, not a separate instant-stop mechanic).
+  // See tools/diagnose_longitudinal.ts for the full sweep.
+  brakeForce: 5,
   reverseRatio: 0.7,
+  // NEW (owner playtest 2026-07-07): fwdSpeed below which reverse-gear
+  // thrust actually engages while S is held — see bicyclePhysics.ts step I
+  // comment. 1.2 m/s is comfortably inside "basically stopped" so a player
+  // braking hard from speed never feels thrust fighting the brake, but
+  // reverse still kicks in essentially the instant the kart is stationary.
+  reverseEngageSpeed: 1.2,
 
-  steerSlewRateIn: 3,
+  // steerSlewRateIn 3 -> 2.2 (owner playtest: "steering has no weight" —
+  // slower ramp-up to full lock gives the wheel a touch of heft without
+  // hurting responsiveness, still under 0.5s to ~85% of full lock).
+  steerSlewRateIn: 2.2,
   steerSlewRateOut: 11,
   throttleSlewRate: 2,
 
-  steerLowSpeedMult: 1.1,
+  // steerLowSpeedMult 1.1 -> 0.9, maxSteerAngleDeg 35 -> 28 (owner playtest:
+  // low/mid-speed turning felt "too sharp, no effort" — this pair was the
+  // actual cause, NOT the kinematic blend formula itself (see diagnosis in
+  // the session report): the old 1.1x low-speed boost stacked on top of the
+  // already-instant, zero-slip kinematic omega formula (step G) to produce
+  // ~227 deg/s turn rate at the top of the blend zone (6 m/s). Dropping the
+  // low-speed boost below 1.0 (matching/undercutting steerHighSpeedMult
+  // instead of exceeding it) and trimming the shared max-angle knob cuts
+  // that to ~135 deg/s — still snappy, no longer "on rails at any speed."
+  steerLowSpeedMult: 0.9,
   steerHighSpeedMult: 0.85,
 
-  maxSteerAngleDeg: 35,
+  maxSteerAngleDeg: 28,
   frontGripStiffness: 17.5,
   rearGripStiffness: 2.5,
   tireSaturationSpeed: 5,
@@ -168,7 +197,20 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftExitSteer: 0.35,
   driftExitSpeed: 4,
   driftExitDuration: 0.3,
-  driftVisualOffsetDeg: 39,
+  // 39 -> 10 (owner playtest 2026-07-07, "nose partially returns after
+  // releasing steer mid-drift"). Root cause: this is a PURE cosmetic offset
+  // added on top of the physical heading (baseCar.rotation.y in kart.ts,
+  // never read by camera.ts, which follows physical yaw only) — it does not
+  // represent an actual slip angle. At the old 39deg it visibly swings back
+  // toward 0 over ~1s as dFast decays on release (driftEngageOutRate=2.5),
+  // which the owner correctly reads as "the nose I was watching un-turns."
+  // 10deg keeps a readable "body angled into the slide" cue without a
+  // swing large enough to register as un-turning. See session diagnostic
+  // (tools/diagnose_drift_release.ts) — this was confirmed to be THE
+  // dominant contributor (visual-only offset decay), not the kinematic
+  // omega blend or a physical counter-yaw from grip recovery, both of
+  // which never reverse in this model.
+  driftVisualOffsetDeg: 10,
   driftEngageInRate: 7,
   driftEngageOutRate: 2.5,
   driftRecoveryRate: 5,

@@ -267,6 +267,78 @@ describe("BicyclePhysics — kinematic/dynamic blend (req 2: nose leads at low s
   });
 });
 
+describe("BicyclePhysics — braking asymmetry fix (owner playtest 2026-07-07)", () => {
+  // Bug: holding S while moving forward fired BOTH reverse-thrust (step I
+  // thrust term) AND brakeForce simultaneously, stacking to a near-instant
+  // stop (~0.18s from a ~10.7 m/s cruise at the old defaults). Fix:
+  // reverseEngageSpeed gates reverse-thrust to 0 until fwdSpeed has braked
+  // down near zero — while still rolling forward, S only brakes.
+  function runToNearStop(velocity: { x: number; y: number; z: number }, ticksToSample: number) {
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    // Spin up to cruise speed first.
+    let v = velocity;
+    for (let i = 0; i < 240; i++) {
+      const state = bike.step(freshInput({ velocity: v, throttle: 1, steerInput: 0 }), DT);
+      v = state.newVelocity;
+    }
+    const cruiseSpeed = Math.hypot(v.x, v.z);
+    // Now hold S (brake + reverse-intent).
+    const speeds: number[] = [];
+    for (let i = 0; i < ticksToSample; i++) {
+      const state = bike.step(freshInput({ velocity: v, throttle: -1, steerInput: 0, brakeHeld: true }), DT);
+      v = state.newVelocity;
+      speeds.push(state.fwdSpeed);
+    }
+    return { cruiseSpeed, speeds };
+  }
+
+  it("braking from a cruise is not near-instant — takes a real, bounded process (>= 0.3s to near-zero)", () => {
+    const { cruiseSpeed, speeds } = runToNearStop({ x: 0, y: 0, z: 0 }, Math.round(2 / DT));
+    expect(cruiseSpeed).toBeGreaterThan(8); // sanity: actually cruising first
+    const firstNearZeroIdx = speeds.findIndex((s) => Math.abs(s) < 0.5);
+    expect(firstNearZeroIdx).toBeGreaterThanOrEqual(0);
+    const timeToNearZero = firstNearZeroIdx * DT;
+    expect(timeToNearZero).toBeGreaterThanOrEqual(0.3);
+    // ...but still a REAL brake, not just coasting forever: within ~1.5s.
+    expect(timeToNearZero).toBeLessThan(1.5);
+  });
+
+  it("reverse-thrust does not add to brake force while still rolling forward at speed", () => {
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const bike = new BicyclePhysics(p, DEFAULT_AXLE_GEOMETRY);
+    // Well above reverseEngageSpeed — reverse-thrust term should be fully gated to 0.
+    const velocity = { x: 0, y: 0, z: -10 };
+    const withReverseIntent = bike.step(freshInput({ velocity, throttle: -1, steerInput: 0, brakeHeld: true }), DT);
+
+    const bikeBrakeOnly = new BicyclePhysics(p, DEFAULT_AXLE_GEOMETRY);
+    // Same brake, but throttle=0 (no reverse-thrust term can ever fire) —
+    // if the gate works, this should decelerate IDENTICALLY to the throttle=-1
+    // case above, since reverse-thrust contributes 0 at this speed either way.
+    const brakeOnly = bikeBrakeOnly.step(freshInput({ velocity, throttle: 0, steerInput: 0, brakeHeld: true }), DT);
+
+    expect(withReverseIntent.fwdSpeed).toBeCloseTo(brakeOnly.fwdSpeed, 5);
+  });
+
+  it("reverse-thrust DOES engage once fwdSpeed has braked down near reverseEngageSpeed", () => {
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const bike = new BicyclePhysics(p, DEFAULT_AXLE_GEOMETRY);
+    // Start already near-stationary (below reverseEngageSpeed).
+    const velocity = { x: 0, y: 0, z: -0.3 };
+    const state = bike.step(freshInput({ velocity, throttle: -1, steerInput: 0, brakeHeld: true }), DT);
+    // fwdSpeed should keep dropping toward/through 0 and into reverse —
+    // brakeHeld's blend is 0 at fwdSpeed<=0, so once past zero only
+    // reverse-thrust is driving it; confirm it doesn't just sit at 0.
+    let v = state.newVelocity;
+    for (let i = 0; i < 60; i++) {
+      const s = bike.step(freshInput({ velocity: v, throttle: -1, steerInput: 0, brakeHeld: true }), DT);
+      v = s.newVelocity;
+    }
+    expect(Math.hypot(v.x, v.z)).toBeGreaterThan(0.5);
+    const finalFwd = bike.step(freshInput({ velocity: v, throttle: -1, steerInput: 0, brakeHeld: true }), DT).fwdSpeed;
+    expect(finalFwd).toBeLessThan(0); // genuinely reversing, not stuck at 0
+  });
+});
+
 describe("BicyclePhysics — reset", () => {
   it("clears omega, driftIntensity, isDrifting", () => {
     const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
