@@ -13,7 +13,7 @@ import { Kart } from "./kart/kart";
 import { KART_TYPES } from "./kart/stats";
 import { InputController } from "./core/input";
 import { FixedStepLoop } from "./core/loop";
-import { updateCamera } from "./core/camera";
+import { ChaseCamera } from "./core/camera";
 import { Telemetry } from "./debug/telemetry";
 import { initParamPanel } from "./debug/paramPanel";
 import { initNet } from "./net";
@@ -63,6 +63,7 @@ const SPAWN = new THREE.Vector3(0, 0, 6.5);
 const stats = KART_TYPES.racer;
 const kart = new Kart(scene, stats, SPAWN);
 
+const chaseCamera = new ChaseCamera();
 const input = new InputController();
 const telemetry = new Telemetry(kart, input);
 initParamPanel(kart); // dev tuner overlay, toggled with P — see src/debug/paramPanel.ts
@@ -128,10 +129,16 @@ function frame(): void {
   requestAnimationFrame(frame);
   physTick(); // keep input latency low when rAF is alive
   kart.syncVisual();
-  updateCamera(camera, kart.position, kart.yaw, 0.05); // dt: camera lerp smoothing only
-  telemetry.updateHud(hud);
   const now = performance.now();
-  combat.update(net.client, input, (now - lastFrameMs) / 1000); // dt: box spin visual only
+  // Real per-frame dt (not physics' fixed substep) — the camera only runs
+  // once per rendered frame, so it needs actual frame time for its
+  // framerate-independent follow filter (see camera.ts). Clamped so a
+  // tab-backgrounding stall doesn't feed the exp-follow a huge dt and snap
+  // the camera across the map on the next visible frame.
+  const frameDt = Math.min((now - lastFrameMs) / 1000, 0.1);
+  chaseCamera.update(camera, kart.position, kart.yaw, kart.velocity, kart.physicsParams, frameDt);
+  telemetry.updateHud(hud);
+  combat.update(net.client, input, frameDt); // dt: box spin visual only
   lastFrameMs = now;
   renderer.render(scene, camera);
 }

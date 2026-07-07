@@ -129,6 +129,13 @@ export interface KartPhysicsParams {
   // Body attitude (pitch/roll) follow — src/kart/kart.ts step 8b/8d.
   attitudeFollowRate: number; // ATTITUDE_FOLLOW_RATE — grounded slope-follow speed
   attitudeAirborneRelaxRate: number; // ATTITUDE_AIRBORNE_RELAX_RATE — how fast the body levels out while airborne
+
+  // Chase camera heading (src/core/camera.ts, 2026-07-07 — camera detached
+  // from physical yaw so drift can be visually deep again without spinning
+  // the whole screen; see camera.ts file header for the full rationale).
+  camYawFollowRate: number; // CAM_YAW_FOLLOW_RATE — how fast the camera turns to catch up to its target heading
+  camVelHeadingBlendLo: number; // CAM_VEL_HEADING_BLEND_LO — below this forward speed, camera target = physical yaw only
+  camVelHeadingBlendHi: number; // CAM_VEL_HEADING_BLEND_HI — at/above this forward speed, camera target = velocity heading only
 }
 
 // Values pulled straight from dev_params.json (repo root) on 2026-07-06.
@@ -217,20 +224,21 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftExitSteer: 0.35,
   driftExitSpeed: 4,
   driftExitDuration: 0.3,
-  // 39 -> 10 (owner playtest 2026-07-07, "nose partially returns after
-  // releasing steer mid-drift"). Root cause: this is a PURE cosmetic offset
-  // added on top of the physical heading (baseCar.rotation.y in kart.ts,
-  // never read by camera.ts, which follows physical yaw only) — it does not
-  // represent an actual slip angle. At the old 39deg it visibly swings back
-  // toward 0 over ~1s as dFast decays on release (driftEngageOutRate=2.5),
-  // which the owner correctly reads as "the nose I was watching un-turns."
-  // 10deg keeps a readable "body angled into the slide" cue without a
-  // swing large enough to register as un-turning. See session diagnostic
-  // (tools/diagnose_drift_release.ts) — this was confirmed to be THE
-  // dominant contributor (visual-only offset decay), not the kinematic
-  // omega blend or a physical counter-yaw from grip recovery, both of
-  // which never reverse in this model.
-  driftVisualOffsetDeg: 10,
+  // 39 -> 10 -> 30 (2026-07-07). The 10deg clamp (owner playtest: "nose
+  // partially returns after releasing steer mid-drift") was a workaround for
+  // a DIFFERENT bug: camera.ts used to follow the kart's PHYSICAL yaw
+  // rigidly, so this purely-cosmetic body offset (added on top of physical
+  // heading, baseCar.rotation.y in kart.ts) visibly swinging back toward 0
+  // as dFast decays on release read as "the whole screen un-turns." Root
+  // cause fixed at the source (camera.ts now follows a velocity/yaw-blended
+  // heading, not physical yaw — see camera.ts file header), so the deep
+  // offset can come back: 30deg gives a proper SmashKarts-style "body kicked
+  // sideways into the slide" read without the screen swinging along with it.
+  // See driftReleaseComposition.test.ts for the regression guard (rewritten
+  // to check for release-derivative smoothness/jerk, not swing amplitude —
+  // a deep offset decaying back toward 0 on release is now DESIGN INTENT,
+  // not a bug).
+  driftVisualOffsetDeg: 30,
   driftEngageInRate: 7,
   driftEngageOutRate: 2.5,
   driftRecoveryRate: 5,
@@ -282,6 +290,17 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // speed in this vertical slice's speed range.
   attitudeFollowRate: 20,
   attitudeAirborneRelaxRate: 3,
+
+  // Chase camera detached from physical yaw (2026-07-07) — see camera.ts
+  // file header. 4 turns the camera to its target heading in ~0.7s (time
+  // constant 1/4=0.25s), fast enough to keep up with a drift's changing
+  // travel direction without visibly lagging. Blend window 0.5..2.5 m/s
+  // covers "basically stopped/reversing" (pure physical yaw) up through a
+  // slow rolling start (pure velocity heading) — arena_slice's cruise speeds
+  // are 10+ m/s, comfortably above the top of the window.
+  camYawFollowRate: 4,
+  camVelHeadingBlendLo: 0.5,
+  camVelHeadingBlendHi: 2.5,
 };
 
 // Axle geometry — separate from KartPhysicsParams because it's measured from
