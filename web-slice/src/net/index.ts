@@ -5,6 +5,18 @@
 import * as THREE from "three";
 import { NetClient, type NetCallbacks, type RemotePose } from "./netClient";
 import { RemoteKartManager } from "./remoteKarts";
+import type { KartObstacle } from "../physics/kartCollision";
+
+// Returned by initNet() — bundles the NetClient (combat wiring, getSelf/
+// getBoxes/sendFire, see main.ts + combat/index.ts) with a way to read the
+// currently-rendered remote kart positions for LOCAL kart-vs-kart collision
+// (physics/kartCollision.ts). Kept as a plain object rather than growing
+// NetClient itself: RemoteKartManager is a rendering concern net/index.ts
+// owns, NetClient doesn't need to know it exists.
+export interface NetHandle {
+  client: NetClient;
+  getObstacles: () => KartObstacle[];
+}
 
 export interface InitNetOptions {
   scene: THREE.Scene;
@@ -16,7 +28,7 @@ export interface InitNetOptions {
   // straight through to NetClient.connect() alongside the movement-relay
   // callbacks above. Optional so net/ still works standalone (e.g. tests)
   // without a combat module attached.
-  combat?: Pick<NetCallbacks, "onRocketSpawn" | "onRocketExplode" | "onKill" | "onRespawn">;
+  combat?: Pick<NetCallbacks, "onRocketSpawn" | "onRocketExplode" | "onKill" | "onRespawn" | "onMatchEnd" | "onMatchRestart">;
 }
 
 // Fire-and-forget: connects in the background, wires remote-kart rendering,
@@ -24,7 +36,7 @@ export interface InitNetOptions {
 // needs to know net/ exists beyond this one call. Returns the NetClient in
 // case the caller wants to disconnect() on teardown (not used yet — no
 // scene teardown exists today).
-export function initNet(opts: InitNetOptions): NetClient {
+export function initNet(opts: InitNetOptions): NetHandle {
   const client = new NetClient();
   const remotes = new RemoteKartManager(opts.scene);
   window.__net = { connected: false, players: 0 };
@@ -54,5 +66,5 @@ export function initNet(opts: InitNetOptions): NetClient {
   }
   requestAnimationFrame(frame);
 
-  return client;
+  return { client, getObstacles: () => remotes.getObstacles() };
 }

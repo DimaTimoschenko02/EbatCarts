@@ -69,6 +69,27 @@ export interface RespawnMsg {
   yaw: number;
 }
 
+// Match flow (server/rooms/MatchRoom.ts endMatch()/restartMatch(),
+// server/schema/MatchState.ts matchEndsAt/phase). Sent as plain broadcast
+// messages rather than read live off room.state — the scoreboard table is a
+// point-in-time snapshot, not a tracked collection, so this keeps the wire
+// contract in the same "server broadcasts an event, client renders it" shape
+// as the rest of combat/ (rocket:spawn, kill, respawn) instead of adding a
+// third way (schema polling) to observe match state.
+export interface ScoreboardRow {
+  id: string;
+  nick: string;
+  kills: number;
+  deaths: number;
+}
+export interface MatchEndMsg {
+  table: ScoreboardRow[];
+  restartAt: number; // unix ms — when restartMatch() is scheduled to run
+}
+export interface MatchRestartMsg {
+  matchEndsAt: number; // unix ms — new match's end time
+}
+
 // Structural mirror of server/schema/MatchState.ts's WeaponBox fields.
 export interface BoxState {
   id: string;
@@ -91,15 +112,22 @@ export interface NetCallbacks {
   // Targeted at this client only (teleport-on-respawn) — see MatchRoom.ts
   // respawnPlayer() for why this can't ride the normal schema pose channel.
   onRespawn?: (msg: RespawnMsg) => void;
+  // Match flow — see MatchRoom.ts endMatch()/restartMatch().
+  onMatchEnd?: (msg: MatchEndMsg) => void;
+  onMatchRestart?: (msg: MatchRestartMsg) => void;
 }
 
-const SEND_INTERVAL_MS = 50; // ~20Hz, matches the room's default patch rate
+// 30Hz: fixed, regular cadence matters more than saving a few bytes here —
+// see startSending() for why we deliberately do NOT skip unchanged poses
+// anymore (that "optimization" created irregular arrival gaps that fed
+// straight into the interpolation buffer as visible judder on remote
+// clients — see network-programmer session notes, 2026-07-07).
+const SEND_INTERVAL_MS = 1000 / 30;
 const DEFAULT_PORT = 8091;
 
 export class NetClient {
   private room: Room<any, any> | null = null;
   private sendTimer: ReturnType<typeof setInterval> | null = null;
-  private lastSent: RemotePose | null = null;
 
   get connected(): boolean {
     return this.room !== null;
@@ -127,6 +155,17 @@ export class NetClient {
   // messages come back.
   sendFire(): void {
     this.room?.send("fire");
+  }
+
+  // Read directly off the schema (server/schema/MatchState.ts) rather than a
+  // dedicated message — these two fields change rarely (once per match) and
+  // are polled once per rendered frame by the HUD countdown, same cadence
+  // and pattern as getBoxes() below.
+  getMatchEndsAt(): number {
+    return this.room ? (this.room.state as { matchEndsAt: number }).matchEndsAt : 0;
+  }
+  getMatchPhase(): string {
+    return this.room ? (this.room.state as { phase: string }).phase : "playing";
   }
 
   // Weapon boxes are few (6-8) and change rarely — polling the whole list
@@ -175,6 +214,8 @@ export class NetClient {
       if (callbacks.onRocketExplode) room.onMessage("rocket:explode", callbacks.onRocketExplode);
       if (callbacks.onKill) room.onMessage("kill", callbacks.onKill);
       if (callbacks.onRespawn) room.onMessage("respawn", callbacks.onRespawn);
+      if (callbacks.onMatchEnd) room.onMessage("match:end", callbacks.onMatchEnd);
+      if (callbacks.onMatchRestart) room.onMessage("match:restart", callbacks.onMatchRestart);
 
       room.onLeave(() => {
         console.warn("[net] disconnected from match server");
@@ -193,17 +234,20 @@ export class NetClient {
   // Starts throttled position reporting. `getLocalState` is polled on a
   // timer (not per-physics-substep) so network send rate is decoupled from
   // the 120Hz physics tick.
+  //
+  // Deliberately ALWAYS sends, even when parked at spawn / pose unchanged.
+  // An earlier version skipped redundant sends as a bandwidth optimization,
+  // but that made send timing irregular from the receiver's point of view
+  // (a "no changes, skip" gap looks identical to a dropped/delayed packet).
+  // Those irregular gaps fed straight into SnapshotBuffer as noisy
+  // timestamps, which read as remote karts stutter-stepping even when their
+  // actual motion was smooth. Regular cadence is worth more than the tiny
+  // bandwidth saved by skipping idle frames.
   startSending(getLocalState: () => RemotePose): void {
     this.stopSending();
     this.sendTimer = setInterval(() => {
       if (!this.room) return;
-      const pose = getLocalState();
-      // Skip redundant sends of an unchanged pose (e.g. parked at spawn) —
-      // cheap bandwidth win, doesn't change interpolation on the far end
-      // since the receiver just holds the last snapshot (see snapshotBuffer).
-      if (this.lastSent && poseEquals(this.lastSent, pose)) return;
-      this.lastSent = pose;
-      this.room.send("state", pose);
+      this.room.send("state", getLocalState());
     }, SEND_INTERVAL_MS);
   }
 
@@ -219,8 +263,4 @@ export class NetClient {
     this.room?.leave();
     this.room = null;
   }
-}
-
-function poseEquals(a: RemotePose, b: RemotePose): boolean {
-  return a.x === b.x && a.y === b.y && a.z === b.z && a.yaw === b.yaw;
 }

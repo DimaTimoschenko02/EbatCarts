@@ -13,8 +13,13 @@ import type { NetCallbacks, NetClient } from "../net/netClient";
 import { RocketManager } from "./rockets";
 import { BoxManager } from "./boxes";
 import { CombatHud } from "./hud";
+import { FinalScoreOverlay } from "./finalScore";
+import { mountPauseMenu } from "../ui/pauseMenu";
 
-export type CombatNetCallbacks = Pick<NetCallbacks, "onRocketSpawn" | "onRocketExplode" | "onKill" | "onRespawn">;
+export type CombatNetCallbacks = Pick<
+  NetCallbacks,
+  "onRocketSpawn" | "onRocketExplode" | "onKill" | "onRespawn" | "onMatchEnd" | "onMatchRestart"
+>;
 
 export interface CombatHandle {
   // Passed into NetClient.connect() (via initNet's InitNetOptions) alongside
@@ -28,6 +33,12 @@ export function createCombat(scene: THREE.Scene, kart: Kart): CombatHandle {
   const rockets = new RocketManager(scene);
   const boxes = new BoxManager(scene);
   const hud = CombatHud.mount();
+  const finalScore = FinalScoreOverlay.mount();
+  // Pause menu has no per-frame update — it's pure event-driven DOM (its own
+  // keydown/click listeners), so mounting it here is a fire-and-forget call,
+  // same shape as CombatHud.mount()/FinalScoreOverlay.mount() but with
+  // nothing to hold onto afterward.
+  mountPauseMenu();
 
   const netCallbacks: CombatNetCallbacks = {
     onRocketSpawn: msg => rockets.spawn(msg),
@@ -37,6 +48,8 @@ export function createCombat(scene: THREE.Scene, kart: Kart): CombatHandle {
     // can't just patch our own schema pose to move us, it has to explicitly
     // tell THIS client to teleport its locally-simulated kart.
     onRespawn: msg => kart.teleport(msg.x, msg.z, msg.yaw),
+    onMatchEnd: msg => finalScore.show(msg.table, msg.restartAt),
+    onMatchRestart: () => finalScore.hide(),
   };
 
   return {
@@ -44,6 +57,7 @@ export function createCombat(scene: THREE.Scene, kart: Kart): CombatHandle {
     update(client, input, dt) {
       const self = client.getSelf();
       hud.updateStats(self);
+      hud.updateTimer(client.getMatchEndsAt());
       // Offline / not-yet-joined: self is null, always render the kart.
       kart.group.visible = self ? self.alive : true;
 

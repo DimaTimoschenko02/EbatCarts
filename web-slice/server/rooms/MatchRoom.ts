@@ -32,6 +32,17 @@ const BOX_HOVER_HEIGHT_M = 0.5; // cosmetic only — how high the box floats abo
 const DEATH_RESPAWN_DELAY_MS = 3_000; // state_manager.gd:13 RESPAWN_DELAY (confirmed)
 const RESPAWN_INVULN_MS = 2_000; // state_manager.gd:14 RESPAWN_INVULN_DURATION (confirmed)
 
+// Match timer (docs/p2-port-notes.md §4). The Express lobby already validates
+// a duration_min whitelist (server/rooms/rooms.constants.js DURATION_MIN_OPTIONS
+// = [5, 10, 20]) and defaults new rooms to 5 — this Colyseus room isn't wired
+// to that lobby yet (no options plumbed through matchMaker), so it always uses
+// that same 5-minute default for now. MATCH_DURATION_MS env override exists
+// only so tools/match_flow_smoke.mjs can run a match end-to-end in seconds
+// instead of minutes; it's not meant to be set in production.
+const DEFAULT_MATCH_DURATION_MS = 5 * 60_000;
+const MATCH_DURATION_MS = Number.parseInt(process.env.MATCH_DURATION_MS ?? "", 10) || DEFAULT_MATCH_DURATION_MS;
+const MATCH_RESTART_DELAY_MS = 15_000;
+
 // UNCONFIRMED vs the Godot muzzle socket offsets (kart_controller.gd sockets
 // carry their own local transform we don't have — our craft_racer model has
 // no launcher meshes at all, see src/weapons/stats.ts volleyCount comment).
@@ -140,6 +151,13 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     this.onMessage("fire", client => this.handleFire(client));
 
     this.setSimulationInterval(dt => this.tick(dt), 1000 / ROCKET_SIM_HZ);
+
+    // TODO: start the clock on first join / lobby "ready" signal instead of
+    // room creation — deferred until the Express lobby actually creates this
+    // room with player-controlled timing. For now (MVP) the timer starts the
+    // instant the room object exists, same as everything else in onCreate().
+    this.state.phase = "playing";
+    this.startMatchTimer();
   }
 
   onJoin(client: Client, options?: { nick?: string; kartType?: string }): void {
@@ -164,8 +182,58 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     console.log(`[match] ${client.sessionId} left (${this.state.players.size}/${this.maxClients})`);
   }
 
+  // ── Match timer / end / restart ──────────────────────────────────────
+  private startMatchTimer(): void {
+    this.state.matchEndsAt = Date.now() + MATCH_DURATION_MS;
+    this.clock.setTimeout(() => this.endMatch(), MATCH_DURATION_MS);
+  }
+
+  // Freezes combat (fire/damage/pickup all check `phase === "playing"`),
+  // snapshots the scoreboard for the client's Final Score overlay, and
+  // schedules the restart. Doesn't touch player position/hp/weapon here —
+  // that reset happens all at once in restartMatch() so a player who died
+  // seconds before the whistle doesn't flicker back to life mid-freeze.
+  private endMatch(): void {
+    this.state.phase = "ended";
+    const table = Array.from(this.state.players.entries()).map(([id, p]) => ({
+      id,
+      nick: p.nick,
+      kills: p.kills,
+      deaths: p.deaths,
+    }));
+    const restartAt = Date.now() + MATCH_RESTART_DELAY_MS;
+    this.broadcast("match:end", { table, restartAt });
+    this.clock.setTimeout(() => this.restartMatch(), MATCH_RESTART_DELAY_MS);
+  }
+
+  // Same room, same connections — just wipes stats/hp/weapons and
+  // re-scatters everyone across the spawn points (round-robin, same as a
+  // fresh join) rather than leaving corpses/mid-match positions lying around.
+  private restartMatch(): void {
+    this.rockets = [];
+    this.invulnerableUntil.clear();
+    this.spawnIndex = 0;
+    for (const player of this.state.players.values()) {
+      const spawn = pickInitialSpawn(SPAWN_POINTS, this.spawnIndex++);
+      player.x = spawn.x;
+      player.y = groundHeightAt(spawn);
+      player.z = spawn.z;
+      player.yaw = faceCenterYaw(spawn);
+      player.hp = 100;
+      player.alive = true;
+      player.weapon = "";
+      player.kills = 0;
+      player.deaths = 0;
+    }
+    for (const box of this.state.boxes.values()) box.active = true;
+    this.state.phase = "playing";
+    this.startMatchTimer();
+    this.broadcast("match:restart", { matchEndsAt: this.state.matchEndsAt });
+  }
+
   // ── Fire ────────────────────────────────────────────────────────────
   private handleFire(client: Client): void {
+    if (this.state.phase !== "playing") return; // fire is disabled during the end-of-match freeze
     const player = this.state.players.get(client.sessionId);
     if (!player) return;
     if (!player.alive || player.weapon !== "rocket") return; // can_fire() guard: alive AND armed
@@ -260,6 +328,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   }
 
   private applyDamage(victimId: string, dmg: number, killerId: string): void {
+    if (this.state.phase !== "playing") return; // no damage during the end-of-match freeze
     const victim = this.state.players.get(victimId);
     if (!victim || !victim.alive) return;
     const invulnUntil = this.invulnerableUntil.get(victimId) ?? 0;
@@ -274,10 +343,13 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     if (!victim) return;
     victim.alive = false;
     victim.deaths += 1;
-    // Weapon is NOT cleared on death — matches the actual reference code
-    // (docs/p2-port-notes.md §1 step 8 flags this as likely an oversight in
-    // the original, not a deliberate design choice, but we port the code as
-    // written, not the GDD's stated intent).
+    // Weapon IS cleared on death. The reference Godot code does NOT do this
+    // (docs/p2-port-notes.md §1 step 8 flags it as a likely oversight in the
+    // original rather than a deliberate design choice) — this is an explicit
+    // game-designer deviation from the ported reference: dying always clears
+    // whatever weapon you were holding, matching the GDD's stated intent
+    // instead of the buggier reference behavior.
+    victim.weapon = "";
     if (killerId !== victimId) {
       const killer = this.state.players.get(killerId);
       if (killer) killer.kills += 1;
@@ -287,6 +359,11 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   }
 
   private respawnPlayer(sessionId: string): void {
+    // Scoreboard-freeze window: the pending 3s respawn timer from a kill just
+    // before the whistle can still fire here. Skip it — restartMatch() will
+    // bring everyone back (full hp, fresh spawn) all at once shortly anyway,
+    // so an early one-off respawn here would just get immediately overwritten.
+    if (this.state.phase !== "playing") return;
     const player = this.state.players.get(sessionId);
     if (!player) return; // left the room while dead
 
@@ -316,6 +393,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
 
   // ── Weapon boxes ─────────────────────────────────────────────────────
   private tickBoxes(): void {
+    if (this.state.phase !== "playing") return; // no pickups during the end-of-match freeze
     for (const [boxId, box] of this.state.boxes.entries()) {
       if (!box.active) continue;
       for (const player of this.state.players.values()) {

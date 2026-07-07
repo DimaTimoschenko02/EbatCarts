@@ -1,7 +1,8 @@
 // Minimal combat HUD: hp/weapon/kills-deaths text, a "RESPAWN IN N…"
-// overlay while dead, and a small kill-feed. Plain DOM divs layered over the
-// canvas — no framework, matches the existing #hud element's style in
-// index.html (see src/debug/telemetry.ts updateHud for the sibling pattern).
+// overlay while dead, a small kill-feed, and the match countdown timer.
+// Plain DOM divs layered over the canvas — no framework, matches the
+// existing #hud element's style in index.html (see src/debug/telemetry.ts
+// updateHud for the sibling pattern).
 import type { KillMsg, RemotePlayerState } from "../net/netClient";
 
 // Mirrors server/rooms/MatchRoom.ts DEATH_RESPAWN_DELAY_MS for the countdown
@@ -22,7 +23,8 @@ export class CombatHud {
   private constructor(
     private readonly statsEl: HTMLElement,
     private readonly respawnEl: HTMLElement,
-    private readonly killFeedEl: HTMLElement
+    private readonly killFeedEl: HTMLElement,
+    private readonly timerEl: HTMLElement
   ) {}
 
   // Creates and appends its own DOM elements — no index.html changes needed
@@ -57,7 +59,19 @@ export class CombatHud {
     } satisfies Partial<CSSStyleDeclaration>);
     document.body.appendChild(killFeedEl);
 
-    return new CombatHud(statsEl, respawnEl, killFeedEl);
+    // Neon Stadium palette (docs/p2-port-notes.md ACCENT_GOLD #FFD633) — the
+    // one HUD element every player glances at repeatedly, so it gets the
+    // "important" accent color instead of plain white.
+    const timerEl = document.createElement("div");
+    timerEl.id = "match-timer";
+    Object.assign(timerEl.style, {
+      position: "fixed", top: "10px", left: "10px", zIndex: "10",
+      font: "bold 18px/1.4 monospace", color: "#FFD633",
+      textShadow: "0 0 6px #000", pointerEvents: "none",
+    } satisfies Partial<CSSStyleDeclaration>);
+    document.body.appendChild(timerEl);
+
+    return new CombatHud(statsEl, respawnEl, killFeedEl, timerEl);
   }
 
   // Call once per rendered frame with the local player's own schema state
@@ -86,6 +100,25 @@ export class CombatHud {
     const remaining = Math.max(0, DEATH_RESPAWN_DELAY_S - (performance.now() - this.deathAt) / 1000);
     this.respawnEl.style.display = "block";
     this.respawnEl.textContent = `RESPAWN IN ${remaining.toFixed(1)}…`;
+  }
+
+  // matchEndsAt is a unix ms timestamp from the SERVER's clock
+  // (server/schema/MatchState.ts) compared against Date.now() on the CLIENT.
+  // No clock-sync handshake exists for this MVP — a few hundred ms of client/
+  // server clock skew just shows up as the countdown being briefly a beat
+  // off, which is an acceptable tradeoff for not building NTP-style sync for
+  // a single cosmetic timer. Hidden entirely offline (matchEndsAt === 0,
+  // NetClient.getMatchEndsAt()'s default when there's no room).
+  updateTimer(matchEndsAt: number): void {
+    if (matchEndsAt <= 0) {
+      this.timerEl.style.display = "none";
+      return;
+    }
+    this.timerEl.style.display = "block";
+    const remainingS = Math.max(0, Math.round((matchEndsAt - Date.now()) / 1000));
+    const mm = Math.floor(remainingS / 60);
+    const ss = remainingS % 60;
+    this.timerEl.textContent = `${mm}:${ss.toString().padStart(2, "0")}`;
   }
 
   pushKillFeed(msg: KillMsg): void {

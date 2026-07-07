@@ -44,4 +44,11 @@ export class WeaponBox extends Schema {
 export class MatchState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
   @type({ map: WeaponBox }) boxes = new MapSchema<WeaponBox>();
+  // Match flow (docs/p2-port-notes.md §4: DURATION_MIN_OPTIONS from the
+  // Express lobby isn't wired to this Colyseus room yet — see MatchRoom.ts
+  // MATCH_DURATION_MS for the current fixed default + env override for
+  // tests). `phase` flips to "ended" for the scoreboard-freeze window between
+  // matches, then back to "playing" once the room resets itself.
+  @type("number") matchEndsAt = 0; // unix ms — when the current phase (playing/ended) is scheduled to end
+  @type("string") phase = "playing"; // "playing" | "ended"
 }

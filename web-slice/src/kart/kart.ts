@@ -18,6 +18,7 @@ import { loadKartModel } from "../map/assetLoader";
 import type { GameMap } from "../map/mapLoader";
 import { buildKartPhysicsParams, type KartStats } from "./stats";
 import type { RawInput } from "../core/input";
+import { resolveKartPush, type KartObstacle } from "../physics/kartCollision";
 
 // Godot: forward = -Z rotated by yaw around +Y.
 export function forwardOf(yaw: number): THREE.Vector3 {
@@ -186,7 +187,10 @@ export class Kart {
 
   // Physics-only step — may run multiple times per rendered frame (fixed
   // substeps). Object3D transform sync happens separately in syncVisual().
-  update(dt: number, raw: RawInput, map: GameMap | null): void {
+  // `obstacles`: other connected players' currently-rendered positions (see
+  // net/remoteKarts.ts getObstacles()), used for local-only kart-vs-kart
+  // collision (step 8c below) — defaults to none for offline play / tests.
+  update(dt: number, raw: RawInput, map: GameMap | null, obstacles: readonly KartObstacle[] = []): void {
     // 1. Input smoothing.
     this.smoothInput(raw, dt);
 
@@ -239,6 +243,37 @@ export class Kart {
       else this.state.pos.z = nz;
     } else {
       this.state.pos.addScaledVector(this.state.vel, dt);
+    }
+
+    // 8c. Kart-kart collision: push the LOCAL kart out of overlap with any
+    // OTHER (alive) connected player. Client-side, symmetric-by-construction
+    // — the other client runs this same resolution against OUR rendered
+    // position independently, no server authority needed for the bump (see
+    // network-programmer brief). Must not shove the kart through a wall: the
+    // pushed position is re-validated against the map per-axis exactly like
+    // step 8 above, and rolled back on whichever axis lands somewhere
+    // unwalkable.
+    if (obstacles.length > 0) {
+      const preX = this.state.pos.x;
+      const preZ = this.state.pos.z;
+      const pushed = resolveKartPush(
+        { x: preX, z: preZ },
+        { x: this.state.vel.x, z: this.state.vel.z },
+        obstacles
+      );
+      let pushedX = pushed.pos.x;
+      let pushedZ = pushed.pos.z;
+      if (map) {
+        const curH = map.sampleHeight(preX, preZ) ?? this.groundY;
+        const hx = map.sampleHeight(pushedX, preZ);
+        if (hx === null || hx - curH > MAX_STEP) pushedX = preX;
+        const hz = map.sampleHeight(pushedX, pushedZ);
+        if (hz === null || hz - curH > MAX_STEP) pushedZ = preZ;
+      }
+      this.state.pos.x = pushedX;
+      this.state.pos.z = pushedZ;
+      this.state.vel.x = pushed.vel.x;
+      this.state.vel.z = pushed.vel.z;
     }
 
     // 8b. Follow the heightfield: smoothed height + slope pitch from a fore/aft

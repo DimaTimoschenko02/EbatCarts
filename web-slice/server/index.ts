@@ -14,7 +14,12 @@
 import { defineRoom, defineServer, listen, WebSocketTransport } from "colyseus";
 import { MatchRoom } from "./rooms/MatchRoom";
 
-const PORT = 8091; // 8080 = master Express, 8090 = Vite dev server — both taken
+// 8080 = master Express, 8090 = Vite dev server — both taken. PORT env
+// override exists only so tools/match_flow_smoke.mjs can spin up a second,
+// disposable instance on a free port without colliding with a real dev
+// server someone already has running on :8091 (see that script for why it
+// doesn't just netstat-kill whatever's listening there).
+const PORT = Number.parseInt(process.env.PORT ?? "", 10) || 8091;
 
 const gameServer = defineServer({
   transport: new WebSocketTransport(),

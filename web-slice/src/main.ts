@@ -74,9 +74,10 @@ const combat = createCombat(scene, kart);
 
 // Multiplayer skeleton: owner-authoritative, strictly optional (see net/).
 // Runs its own connect/send/interpolate lifecycle — nothing else in this
-// file ever touches net/ internals again after this call except to pass the
-// returned client into combat.update() each frame.
-const netClient = initNet({
+// file ever touches net/ internals again after this call except to pass
+// net.client into combat.update() and net.getObstacles() into kart.update()
+// each frame.
+const net = initNet({
   scene,
   getLocalState: () => ({ x: kart.position.x, y: kart.position.y, z: kart.position.z, yaw: kart.yaw }),
   combat: combat.netCallbacks,
@@ -113,7 +114,7 @@ const loop = new FixedStepLoop(PHYS_STEP, MAX_CATCHUP);
 function physTick(): void {
   loop.tick(dt => {
     const raw = input.next(dt * 1000);
-    kart.update(dt, raw, map);
+    kart.update(dt, raw, map, net.getObstacles());
     telemetry.recordSubstep(dt, raw);
   });
 }
@@ -127,7 +128,7 @@ function frame(): void {
   updateCamera(camera, kart.position, kart.yaw, 0.05); // dt: camera lerp smoothing only
   telemetry.updateHud(hud);
   const now = performance.now();
-  combat.update(netClient, input, (now - lastFrameMs) / 1000); // dt: box spin visual only
+  combat.update(net.client, input, (now - lastFrameMs) / 1000); // dt: box spin visual only
   lastFrameMs = now;
   renderer.render(scene, camera);
 }
