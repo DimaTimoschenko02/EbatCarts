@@ -46,8 +46,21 @@ describe("GameMap heightfield", () => {
 
   // NB: cells are pivot-centered — cell (0,0) spans world [-0.5, 0.5); probes
   // sit at ±0.4 because exactly ±0.5 rounds into the (empty) neighbor cell.
-  it("ramp rot=0 ascends +X from its LOW y_level", () => {
+  //
+  // Ramp shares its ascent basis with terrain_side (+Z at rot=0) — verified by
+  // direct GLB vertex inspection (tools/glb-catalog.mjs). An earlier version of
+  // this test pinned a table that was rotated 90° off from the real mesh (ramp
+  // ascended +X here while the rendered mesh actually rose along +Z) — see
+  // docs/space-kit-terrain-catalog.md for the full discrepancy writeup.
+  it("ramp rot=0 ascends +Z from its LOW y_level", () => {
     const map = makeMap([{ asset: "terrain_ramp", x: 0, z: 0, y_level: 0, rot: 0 }]);
+    expect(map.sampleHeight(0, -0.4)).toBeCloseTo(0.05, 5); // near low edge
+    expect(map.sampleHeight(0, 0)).toBeCloseTo(0.25, 5); // mid
+    expect(map.sampleHeight(0, 0.4)).toBeCloseTo(0.45, 5); // near high edge
+  });
+
+  it("ramp rot=90 ascends +X from its LOW y_level", () => {
+    const map = makeMap([{ asset: "terrain_ramp", x: 0, z: 0, y_level: 0, rot: 90 }]);
     expect(map.sampleHeight(-0.4, 0)).toBeCloseTo(0.05, 5); // near low edge
     expect(map.sampleHeight(0, 0)).toBeCloseTo(0.25, 5); // mid
     expect(map.sampleHeight(0.4, 0)).toBeCloseTo(0.45, 5); // near high edge

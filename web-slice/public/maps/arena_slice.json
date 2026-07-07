@@ -50,10 +50,10 @@
     {"asset": "terrain_side", "x": 15, "z": 13, "y_level": 1, "rot": -90},
     {"asset": "terrain_side", "x": 15, "z": 14, "y_level": 1, "rot": -90},
 
-    {"_": "West ramp up (ascends +X), 2 tiles wide", "asset": "terrain_ramp", "x": 8, "z": 11, "y_level": 0, "rot": 0},
-    {"asset": "terrain_ramp", "x": 8, "z": 12, "y_level": 0, "rot": 0},
-    {"_": "East ramp up (ascends -X), 2 tiles wide", "asset": "terrain_ramp", "x": 15, "z": 11, "y_level": 0, "rot": 180},
-    {"asset": "terrain_ramp", "x": 15, "z": 12, "y_level": 0, "rot": 180},
+    {"_": "West ramp up (ascends +X, mesh+physics now agree post RAMP_ASCENT fix), 2 tiles wide", "asset": "terrain_ramp", "x": 8, "z": 11, "y_level": 0, "rot": 90},
+    {"asset": "terrain_ramp", "x": 8, "z": 12, "y_level": 0, "rot": 90},
+    {"_": "East ramp up (ascends -X), 2 tiles wide", "asset": "terrain_ramp", "x": 15, "z": 11, "y_level": 0, "rot": -90},
+    {"asset": "terrain_ramp", "x": 15, "z": 12, "y_level": 0, "rot": -90},
 
     {"_": "Skirt corners. NB: sideCorner rises ABOVE its pivot (ramp-like, y in [0, +0.5]) so y_level = LOW level, unlike plain sides", "asset": "terrain_sideCorner", "x": 8, "z": 8, "y_level": 0, "rot": 90},
     {"asset": "terrain_sideCorner", "x": 15, "z": 8, "y_level": 0, "rot": 0},
