@@ -1,10 +1,12 @@
 ---
 status: active
 date: 2026-04-03
-last-updated: 2026-04-28
+last-updated: 2026-07-07
 ---
 
 # Systems Index — SmashKarts Clone
+
+> **2026-07-07:** дальнейшие фичи (оружие/баффы/машинки/стата/модификаторы) специфицированы в [features-roadmap-2026-07.md](features-roadmap-2026-07.md) для web-slice стека (three.js/Colyseus). Эта таблица описывает замороженную Godot-версию.
 
 ## Summary
 
