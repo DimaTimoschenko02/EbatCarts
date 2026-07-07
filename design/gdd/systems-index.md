@@ -26,7 +26,7 @@ last-updated: 2026-04-28
 | 3 | HTML5 Export Pipeline | Infrastructure | 1 | MVP | Broken |
 | 4 | Health & Damage | Core | 2 | MVP | Designed |
 | 5 | Camera System | Core | 2 | MVP | Designed |
-| 6 | Kart Physics | Core | 2 | MVP | v3.1 Implemented (bicycle + auto-drift state machine). v3.2 Thermal Fade redesign in design phase |
+| 6 | Kart Physics | Core | 2 | MVP | v3.1 Implemented in Godot (frozen reference). Live development in web-slice TS port: Continuous Drift v4.0 + kinematic low-speed blend + vertical dynamics (2026-07-07) — см. docs/plan-js-migration.md P2.5 |
 | 7 | Kart Classes | Feature | 3 | Alpha | Not Started |
 | 8 | Spawn System | Core | 3 | MVP | Designed |
 | 9 | Pickup System | Core | 3 | MVP | Designed |
