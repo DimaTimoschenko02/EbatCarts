@@ -22,10 +22,29 @@ export class InputController {
   private readonly keys: Record<string, boolean> = {};
   private script: ScriptCursor | null = null;
   private _scriptDone = true;
+  // Fire is edge-triggered (press, not hold) so holding the button down
+  // doesn't spam "fire" messages every frame — the server would just ignore
+  // the extras anyway (weapon already consumed after the first shot), but
+  // there's no reason to send them. Latched between consumeFire() polls.
+  private firePressed = false;
 
   constructor() {
-    addEventListener("keydown", e => { this.keys[e.code] = true; });
+    addEventListener("keydown", e => {
+      this.keys[e.code] = true;
+      if (e.code === "Space") this.firePressed = true;
+    });
     addEventListener("keyup", e => { this.keys[e.code] = false; });
+    addEventListener("mousedown", e => {
+      if (e.button === 0) this.firePressed = true; // left click
+    });
+  }
+
+  // True at most once per press (Space or left-click), however long the
+  // button is held. Call once per rendered frame.
+  consumeFire(): boolean {
+    if (!this.firePressed) return false;
+    this.firePressed = false;
+    return true;
   }
 
   get scriptDone(): boolean {

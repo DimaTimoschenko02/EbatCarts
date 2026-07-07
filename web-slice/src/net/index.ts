@@ -3,7 +3,7 @@
 // else (connecting, throttled sending, remote kart interpolation, its own
 // per-frame update loop) lives in this module tree.
 import * as THREE from "three";
-import { NetClient, type RemotePose } from "./netClient";
+import { NetClient, type NetCallbacks, type RemotePose } from "./netClient";
 import { RemoteKartManager } from "./remoteKarts";
 
 export interface InitNetOptions {
@@ -12,6 +12,11 @@ export interface InitNetOptions {
   // own kart pose to report — see NetClient.startSending.
   getLocalState: () => RemotePose;
   nick?: string;
+  // Combat wiring (src/combat/index.ts createCombat().netCallbacks) — passed
+  // straight through to NetClient.connect() alongside the movement-relay
+  // callbacks above. Optional so net/ still works standalone (e.g. tests)
+  // without a combat module attached.
+  combat?: Pick<NetCallbacks, "onRocketSpawn" | "onRocketExplode" | "onKill" | "onRespawn">;
 }
 
 // Fire-and-forget: connects in the background, wires remote-kart rendering,
@@ -30,6 +35,7 @@ export function initNet(opts: InitNetOptions): NetClient {
       onPlayerAdd: (id, player) => remotes.add(id, player),
       onPlayerRemove: id => remotes.remove(id),
       onPlayerChange: (id, player) => remotes.onSnapshot(id, player),
+      ...opts.combat,
     })
     .then(connected => {
       window.__net.connected = connected;

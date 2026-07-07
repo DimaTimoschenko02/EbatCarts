@@ -16,6 +16,7 @@ import { FixedStepLoop } from "./core/loop";
 import { updateCamera } from "./core/camera";
 import { Telemetry } from "./debug/telemetry";
 import { initNet } from "./net";
+import { createCombat } from "./combat";
 
 // Keep in sync with the editor palette (src/editor/main.ts) — a map driven
 // from the editor must not silently drop tiles the game never preloaded.
@@ -65,10 +66,21 @@ const input = new InputController();
 const telemetry = new Telemetry(kart, input);
 const hud = document.getElementById("hud")!;
 
+// Combat wiring (weapons/damage/death/respawn/pickups) — server-authoritative,
+// see src/combat/index.ts and server/rooms/MatchRoom.ts. Strictly optional
+// like net/ itself: with no server, combat.update() just renders "offline"
+// and the fire button is a no-op.
+const combat = createCombat(scene, kart);
+
 // Multiplayer skeleton: owner-authoritative, strictly optional (see net/).
 // Runs its own connect/send/interpolate lifecycle — nothing else in this
-// file ever touches net/ again after this call.
-initNet({ scene, getLocalState: () => ({ x: kart.position.x, y: kart.position.y, z: kart.position.z, yaw: kart.yaw }) });
+// file ever touches net/ internals again after this call except to pass the
+// returned client into combat.update() each frame.
+const netClient = initNet({
+  scene,
+  getLocalState: () => ({ x: kart.position.x, y: kart.position.y, z: kart.position.z, yaw: kart.yaw }),
+  combat: combat.netCallbacks,
+});
 
 // Map + kart model load async: physics runs from frame one on a flat
 // fallback (height 0) and switches to the map heightfield when it arrives.
@@ -107,12 +119,16 @@ function physTick(): void {
 }
 setInterval(physTick, 50);
 
+let lastFrameMs = performance.now();
 function frame(): void {
   requestAnimationFrame(frame);
   physTick(); // keep input latency low when rAF is alive
   kart.syncVisual();
   updateCamera(camera, kart.position, kart.yaw, 0.05); // dt: camera lerp smoothing only
   telemetry.updateHud(hud);
+  const now = performance.now();
+  combat.update(netClient, input, (now - lastFrameMs) / 1000); // dt: box spin visual only
+  lastFrameMs = now;
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);

@@ -38,6 +38,7 @@ export class RemoteKartManager {
     );
     placeholder.position.y = 0.45;
     group.add(placeholder);
+    group.visible = player.alive;
     this.scene.add(group);
 
     const entry: RemoteKart = { group, buffer: new SnapshotBuffer(), modelReady: false };
@@ -62,16 +63,21 @@ export class RemoteKartManager {
     this.karts.delete(sessionId);
   }
 
-  // Called on every schema change for this player — just feeds the buffer,
-  // rendering happens in update() on its own cadence.
+  // Called on every schema change for this player — feeds the interpolation
+  // buffer and toggles visibility on death/respawn (instant, not
+  // interpolated: a dead kart should vanish immediately rather than fade out
+  // along the render-delay curve).
   onSnapshot(sessionId: string, player: RemotePlayerState): void {
-    this.karts.get(sessionId)?.buffer.push({
+    const kart = this.karts.get(sessionId);
+    if (!kart) return;
+    kart.buffer.push({
       t: performance.now(),
       x: player.x,
       y: player.y,
       z: player.z,
       yaw: player.yaw,
     });
+    kart.group.visible = player.alive;
   }
 
   // Call once per rendered frame.

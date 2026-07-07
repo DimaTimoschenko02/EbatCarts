@@ -142,6 +142,26 @@ export class Kart {
     this.skids.clear();
   }
 
+  // Server-driven respawn teleport (P3 combat slice, server/rooms/MatchRoom.ts
+  // respawnPlayer() → "respawn" message). Deliberately separate from reset():
+  // that one always returns to the fixed offline-mode spawn point, this one
+  // goes wherever the server picked. Clears the same transient physics state
+  // reset() does (input smoothing, drift, skid trail) so the kart doesn't
+  // arrive mid-drift from wherever it died.
+  teleport(x: number, z: number, yaw: number): void {
+    this.state.pos.set(x, this.groundY, z);
+    this.state.vel.set(0, 0, 0);
+    this.state.yaw = yaw;
+    this.throttleSm = 0;
+    this.steerSm = 0;
+    this.visualDriftAngle = 0;
+    this.driftVisualYaw = 0;
+    this.pitchSm = 0;
+    this.bicycle.reset();
+    this.driftSM.reset();
+    this.skids.clear();
+  }
+
   get position(): THREE.Vector3 {
     return this.state.pos;
   }

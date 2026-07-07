@@ -33,6 +33,49 @@ export interface RemotePlayerState {
   nick: string;
   kartType: string;
   hp: number;
+  alive: boolean;
+  weapon: string; // "" | "rocket"
+  kills: number;
+  deaths: number;
+}
+
+// Wire payloads for the combat broadcast/targeted messages (server/rooms/
+// MatchRoom.ts) — projectiles are NOT schema-tracked (see that file's header
+// for why), so these are the only source of truth for rendering them.
+export interface RocketSpawnMsg {
+  id: string;
+  ownerId: string;
+  x: number;
+  y: number;
+  z: number;
+  dx: number;
+  dz: number;
+  speed: number;
+  lifetime: number;
+}
+export interface RocketExplodeMsg {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+}
+export interface KillMsg {
+  victimId: string;
+  killerId: string;
+}
+export interface RespawnMsg {
+  x: number;
+  z: number;
+  yaw: number;
+}
+
+// Structural mirror of server/schema/MatchState.ts's WeaponBox fields.
+export interface BoxState {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  active: boolean;
 }
 
 export interface NetCallbacks {
@@ -41,6 +84,13 @@ export interface NetCallbacks {
   // Fired whenever any tracked field on a remote player's schema changes —
   // used to push a fresh snapshot into that kart's interpolation buffer.
   onPlayerChange: (sessionId: string, player: RemotePlayerState) => void;
+  // Combat events — see server/rooms/MatchRoom.ts for the authoritative side.
+  onRocketSpawn?: (msg: RocketSpawnMsg) => void;
+  onRocketExplode?: (msg: RocketExplodeMsg) => void;
+  onKill?: (msg: KillMsg) => void;
+  // Targeted at this client only (teleport-on-respawn) — see MatchRoom.ts
+  // respawnPlayer() for why this can't ride the normal schema pose channel.
+  onRespawn?: (msg: RespawnMsg) => void;
 }
 
 const SEND_INTERVAL_MS = 50; // ~20Hz, matches the room's default patch rate
@@ -61,6 +111,36 @@ export class NetClient {
 
   get playerCount(): number {
     return this.room ? this.room.state.players.size : 0;
+  }
+
+  // Polled (not push-based) by the combat HUD each frame — simpler than
+  // wiring a dedicated onChange callback for "myself" when onAdd/onChange
+  // already deliberately skip the local sessionId (see connect()).
+  getSelf(): RemotePlayerState | null {
+    if (!this.room) return null;
+    return (this.room.state.players.get(this.room.sessionId) as unknown as RemotePlayerState) ?? null;
+  }
+
+  // Fire-and-forget: server validates alive+armed and silently no-ops
+  // otherwise (see MatchRoom.handleFire) — the client doesn't need a
+  // request/response round trip, it just renders whatever "rocket:spawn"
+  // messages come back.
+  sendFire(): void {
+    this.room?.send("fire");
+  }
+
+  // Weapon boxes are few (6-8) and change rarely — polling the whole list
+  // once per rendered frame is simpler than wiring per-box onAdd/onChange
+  // callbacks like RemoteKartManager does for the (much larger, much more
+  // frequently updated) player list.
+  getBoxes(): BoxState[] {
+    if (!this.room) return [];
+    const out: BoxState[] = [];
+    const boxes = this.room.state.boxes as Map<string, { x: number; y: number; z: number; active: boolean }>;
+    for (const [id, box] of boxes.entries()) {
+      out.push({ id, x: box.x, y: box.y, z: box.z, active: box.active });
+    }
+    return out;
   }
 
   // Resolves once connected+joined, or immediately (offline mode) if the
@@ -88,6 +168,11 @@ export class NetClient {
         if (id === room.sessionId) return;
         callbacks.onPlayerRemove(id);
       });
+
+      if (callbacks.onRocketSpawn) room.onMessage("rocket:spawn", callbacks.onRocketSpawn);
+      if (callbacks.onRocketExplode) room.onMessage("rocket:explode", callbacks.onRocketExplode);
+      if (callbacks.onKill) room.onMessage("kill", callbacks.onKill);
+      if (callbacks.onRespawn) room.onMessage("respawn", callbacks.onRespawn);
 
       room.onLeave(() => {
         console.warn("[net] disconnected from match server");
