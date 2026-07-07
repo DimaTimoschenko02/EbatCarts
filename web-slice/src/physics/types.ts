@@ -28,6 +28,15 @@ export interface KartPhysicsParams {
   reverseRatio: number; // REVERSE_RATIO
   reverseEngageSpeed: number; // REVERSE_ENGAGE_SPEED — fwdSpeed below which reverse-gear thrust fully engages (see bicyclePhysics.ts step I); above it, holding S only brakes, mirroring a real car braking to a stop before reverse engages.
 
+  // Slope gravity assist (owner playtest 2026-07-07: "kart climbs a ramp at
+  // full inertia like it's flat ground" — see bicyclePhysics.ts step I). A
+  // purely longitudinal term: -slopeGravityAccel*sin(groundSlopeRad) added
+  // alongside thrust/drag/rolling/brake, so it acts identically whether the
+  // kart is coasting or under throttle. Deliberately an ARCADE tuning knob,
+  // not literal g*sin(theta) off verticalGravity (22) — see dev_params
+  // comment at the default for why.
+  slopeGravityAccel: number; // SLOPE_GRAVITY_ACCEL
+
   // Input smoothing (applied by caller before building PhysicsInput — see
   // kart_controller.gd _smooth_input; kept here so the web port has the same
   // single source of tunable numbers as the GDScript resource).
@@ -146,6 +155,17 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // braking hard from speed never feels thrust fighting the brake, but
   // reverse still kicks in essentially the instant the kart is stationary.
   reverseEngageSpeed: 1.2,
+
+  // 10 m/s² (owner playtest 2026-07-07, "kart drives up a ramp at full
+  // inertia like flat ground"). arena_slice's ramps are ~0.5m rise over
+  // ~1.5m run (~18-20deg) — at 10, full-throttle uphill terminal speed on
+  // that grade settles ~9.4 m/s vs ~10.8 m/s flat (~13% down), and the same
+  // grade downhill settles ~12.0 m/s (~11% up): clearly felt on a ramp
+  // crossing, nowhere near strong enough to stall a full-throttle climb or
+  // to rocket the kart downhill uncontrollably. Deliberately NOT tied to
+  // verticalGravity (22, tuned purely for jump/trampoline arc feel) — this
+  // is a separate arcade "grade resistance" knob for ground-following.
+  slopeGravityAccel: 10,
 
   // steerSlewRateIn 3 -> 2.2 (owner playtest: "steering has no weight" —
   // slower ramp-up to full lock gives the wheel a touch of heft without
@@ -291,6 +311,14 @@ export interface PhysicsInput {
   brakeHeld: boolean;
   onFloor: boolean;
   rearGripMultiplier: number; // set by DriftStateMachine (<1 during active drift)
+
+  // Signed longitudinal grade under/ahead of the kart along its current
+  // heading, radians. Positive = climbing (uphill), negative = descending.
+  // 0 on flat ground or when no heightfield sample is available (e.g. off
+  // the edge of the map). Callers only need to populate this while grounded
+  // — bicycle.step() is never called while airborne (see kart.ts), so an
+  // airborne caller's value here is simply unused.
+  groundSlopeRad: number;
 }
 
 // ─── PhysicsState (physics_state.gd) ────────────────────────────────────────

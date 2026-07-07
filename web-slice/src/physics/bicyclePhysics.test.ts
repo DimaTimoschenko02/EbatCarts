@@ -16,6 +16,7 @@ function freshInput(overrides: Partial<PhysicsInput> = {}): PhysicsInput {
     brakeHeld: false,
     onFloor: true,
     rearGripMultiplier: 1,
+    groundSlopeRad: 0,
     ...overrides,
   };
 }
@@ -336,6 +337,116 @@ describe("BicyclePhysics — braking asymmetry fix (owner playtest 2026-07-07)",
     expect(Math.hypot(v.x, v.z)).toBeGreaterThan(0.5);
     const finalFwd = bike.step(freshInput({ velocity: v, throttle: -1, steerInput: 0, brakeHeld: true }), DT).fwdSpeed;
     expect(finalFwd).toBeLessThan(0); // genuinely reversing, not stuck at 0
+  });
+});
+
+describe("BicyclePhysics — slope gravity assist (owner playtest 2026-07-07)", () => {
+  // Analytic force-equilibrium terminal speed with full throttle, dead
+  // straight, on a constant grade `slopeRad` (same quadratic as the existing
+  // flat-ground equilibrium test above, with the slope term folded into the
+  // constant forcing term since it doesn't depend on v).
+  function terminalSpeedOnGrade(slopeRad: number): number {
+    const { accelForce, kDrag, kRolling, slopeGravityAccel } = DEFAULT_KART_PHYSICS_PARAMS;
+    const forcing = accelForce - slopeGravityAccel * Math.sin(slopeRad);
+    const disc = kRolling * kRolling + 4 * kDrag * forcing;
+    return (-kRolling + Math.sqrt(disc)) / (2 * kDrag);
+  }
+
+  function runToTerminal(slopeRad: number, throttle = 1): number {
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    let velocity = { x: 0, y: 0, z: 0 };
+    let fwdSpeed = 0;
+    const steps = Math.round(30 / DT);
+    for (let i = 0; i < steps; i++) {
+      const state = bike.step(freshInput({ velocity, throttle, steerInput: 0, groundSlopeRad: slopeRad }), DT);
+      velocity = state.newVelocity;
+      fwdSpeed = state.fwdSpeed;
+    }
+    return fwdSpeed;
+  }
+
+  it("uphill (positive groundSlopeRad) settles at a LOWER terminal speed than flat ground under full throttle", () => {
+    const slopeRad = (20 * Math.PI) / 180; // ~20deg, in the ballpark of arena_slice's ramps
+    const flat = runToTerminal(0);
+    const uphill = runToTerminal(slopeRad);
+    expect(uphill).toBeLessThan(flat);
+    expect(uphill).toBeCloseTo(terminalSpeedOnGrade(slopeRad), 1);
+    expect(flat).toBeCloseTo(terminalSpeedOnGrade(0), 1);
+  });
+
+  it("downhill (negative groundSlopeRad) settles at a HIGHER terminal speed than flat ground under full throttle", () => {
+    const slopeRad = -(20 * Math.PI) / 180;
+    const flat = runToTerminal(0);
+    const downhill = runToTerminal(slopeRad);
+    expect(downhill).toBeGreaterThan(flat);
+    expect(downhill).toBeCloseTo(terminalSpeedOnGrade(slopeRad), 1);
+  });
+
+  it("uphill decelerates faster than flat ground on pure inertia (no throttle)", () => {
+    const slopeRad = (20 * Math.PI) / 180;
+    const startVelocity = { x: 0, y: 0, z: -10 }; // 10 m/s cruise, coasting
+    const flatBike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    const uphillBike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    let flatV = startVelocity;
+    let uphillV = startVelocity;
+    let flatSpeed = 10;
+    let uphillSpeed = 10;
+    const steps = Math.round(1 / DT); // 1 sim-second
+    for (let i = 0; i < steps; i++) {
+      const flatState = flatBike.step(freshInput({ velocity: flatV, throttle: 0, groundSlopeRad: 0 }), DT);
+      flatV = flatState.newVelocity;
+      flatSpeed = flatState.fwdSpeed;
+      const upState = uphillBike.step(freshInput({ velocity: uphillV, throttle: 0, groundSlopeRad: slopeRad }), DT);
+      uphillV = upState.newVelocity;
+      uphillSpeed = upState.fwdSpeed;
+    }
+    expect(uphillSpeed).toBeLessThan(flatSpeed);
+  });
+
+  it("downhill accelerates from rest on pure inertia (no throttle) while flat ground stays at rest", () => {
+    const slopeRad = -(20 * Math.PI) / 180;
+    const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
+    let velocity = { x: 0, y: 0, z: 0 };
+    let fwdSpeed = 0;
+    const steps = Math.round(1 / DT);
+    for (let i = 0; i < steps; i++) {
+      const state = bike.step(freshInput({ velocity, throttle: 0, groundSlopeRad: slopeRad }), DT);
+      velocity = state.newVelocity;
+      fwdSpeed = state.fwdSpeed;
+    }
+    // A negative groundSlopeRad (downhill ahead, per the +uphill sign
+    // convention) should roll the kart forward from a dead stop, pure
+    // inertia, no throttle — fwdSpeed goes positive (forward along its own
+    // heading), not just nonzero.
+    expect(fwdSpeed).toBeGreaterThan(0.5);
+  });
+
+  it("flat ground (groundSlopeRad=0) is bit-for-bit unaffected by slopeGravityAccel — matches the pre-existing equilibrium test", () => {
+    const { accelForce, kDrag, kRolling } = DEFAULT_KART_PHYSICS_PARAMS;
+    const disc = kRolling * kRolling + 4 * kDrag * accelForce;
+    const expectedTerminal = (-kRolling + Math.sqrt(disc)) / (2 * kDrag);
+    expect(runToTerminal(0)).toBeCloseTo(expectedTerminal, 1);
+  });
+
+  it("slopeGravityAccel=0 makes any groundSlopeRad a no-op", () => {
+    const zeroParams = { ...DEFAULT_KART_PHYSICS_PARAMS, slopeGravityAccel: 0 };
+    const slopeRad = (25 * Math.PI) / 180;
+    const bike = new BicyclePhysics(zeroParams, DEFAULT_AXLE_GEOMETRY);
+    const flatBike = new BicyclePhysics(zeroParams, DEFAULT_AXLE_GEOMETRY);
+    let v = { x: 0, y: 0, z: 0 };
+    let flatV = { x: 0, y: 0, z: 0 };
+    let speed = 0;
+    let flatSpeed = 0;
+    const steps = Math.round(5 / DT);
+    for (let i = 0; i < steps; i++) {
+      const s = bike.step(freshInput({ velocity: v, throttle: 1, groundSlopeRad: slopeRad }), DT);
+      v = s.newVelocity;
+      speed = s.fwdSpeed;
+      const fs = flatBike.step(freshInput({ velocity: flatV, throttle: 1, groundSlopeRad: 0 }), DT);
+      flatV = fs.newVelocity;
+      flatSpeed = fs.fwdSpeed;
+    }
+    expect(speed).toBeCloseTo(flatSpeed, 6);
   });
 });
 

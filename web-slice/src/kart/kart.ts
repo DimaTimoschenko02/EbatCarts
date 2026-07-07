@@ -33,6 +33,18 @@ export function rightOf(yaw: number): THREE.Vector3 {
 // Max climbable rise per move — a full tile step is 0.5, ramps rise gradually.
 const MAX_STEP = 0.3;
 
+// Ground-slope sampling for the slope gravity assist (bicyclePhysics.ts
+// PhysicsInput.groundSlopeRad) — owner playtest 2026-07-07: "kart climbs a
+// ramp at full inertia like flat ground". Probes a fixed distance AHEAD along
+// the current heading rather than differencing over a full tile so the raw
+// reading tracks the actual ramp face under/just ahead of the nose, not some
+// blend with flat ground beyond the ramp's far edge.
+const SLOPE_PROBE_DIST = 0.75; // meters ahead of the kart's own position
+// Exp-filter rate for the raw slope reading — smooths the step-function jump
+// at heightfield tile seams (see .claude/rules/smooth-values.md) without
+// meaningfully lagging behind a ramp the kart is actively crossing at speed.
+const SLOPE_FILTER_RATE = 18; // 1/s
+
 export interface KartTelemetry {
   fwdSpeed: number;
   sideSpeed: number;
@@ -84,6 +96,11 @@ export class Kart {
   // heightfield-probe math and sign convention.
   private pitchSm = 0;
   private rollSm = 0;
+  // Smoothed longitudinal ground slope (radians, +uphill) fed to
+  // BicyclePhysics.step as PhysicsInput.groundSlopeRad — see SLOPE_PROBE_DIST/
+  // SLOPE_FILTER_RATE above and step 4 below. Frozen (not updated) while
+  // airborne, same as the rest of steps 4-7 — see the airborne branch comment.
+  private slopeSm = 0;
   // Accumulated sim time (sum of fixed physics dt), fed to skid-mark fade —
   // deliberately NOT performance.now() so this stays deterministic/testable.
   private simTime = 0;
@@ -151,6 +168,7 @@ export class Kart {
     this.vertical = createVerticalState(this.spawn.y);
     this.pitchSm = 0;
     this.rollSm = 0;
+    this.slopeSm = 0;
     this.bicycle.reset();
     this.driftSM.reset();
     this.skids.clear();
@@ -173,6 +191,7 @@ export class Kart {
     this.vertical = createVerticalState(this.vertical.y);
     this.pitchSm = 0;
     this.rollSm = 0;
+    this.slopeSm = 0;
     this.bicycle.reset();
     this.driftSM.reset();
     this.skids.clear();
@@ -242,7 +261,27 @@ export class Kart {
     this.driftVisualYaw = drift.visualYawOffsetRad;
 
     if (!airborne) {
-      // 4. Build PhysicsInput.
+      // 4a. Ground slope sample — probe current position vs. SLOPE_PROBE_DIST
+      // ahead along heading, exp-filtered to smooth heightfield tile seams
+      // (see SLOPE_PROBE_DIST/SLOPE_FILTER_RATE above and .claude/rules/
+      // smooth-values.md). Falls back to 0 (flat) whenever either sample is
+      // off the map — same "no data, assume level" convention attitude.ts
+      // uses for pitch/roll.
+      let slopeRaw = 0;
+      if (map) {
+        const hHere = map.sampleHeight(this.state.pos.x, this.state.pos.z);
+        const hAhead = map.sampleHeight(
+          this.state.pos.x + fwdDir.x * SLOPE_PROBE_DIST,
+          this.state.pos.z + fwdDir.z * SLOPE_PROBE_DIST
+        );
+        if (hHere !== null && hAhead !== null) {
+          slopeRaw = Math.atan2(hAhead - hHere, SLOPE_PROBE_DIST);
+        }
+      }
+      const slopeAlpha = 1 - Math.exp(-SLOPE_FILTER_RATE * dt);
+      this.slopeSm += (slopeRaw - this.slopeSm) * slopeAlpha;
+
+      // 4b. Build PhysicsInput.
       const inp: PhysicsInput = {
         velocity: { x: this.state.vel.x, y: this.state.vel.y, z: this.state.vel.z },
         forward: { x: fwdDir.x, y: 0, z: fwdDir.z },
@@ -252,6 +291,7 @@ export class Kart {
         brakeHeld: raw.throttle < 0,
         onFloor: true,
         rearGripMultiplier: drift.rearGripMultiplier,
+        groundSlopeRad: this.slopeSm,
       };
 
       // 5. Bicycle physics step.

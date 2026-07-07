@@ -57,6 +57,7 @@ function runDriftReleaseScenario(params: KartPhysicsParams, driftHoldTicks: numb
       brakeHeld: rawThrottle < 0,
       onFloor: true,
       rearGripMultiplier: out.rearGripMultiplier,
+      groundSlopeRad: 0,
     };
     const st = bicycle.step(inp, DT);
     yaw += st.yawDelta + out.yawBonusRadPerSec * DT;

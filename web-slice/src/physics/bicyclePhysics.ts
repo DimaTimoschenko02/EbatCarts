@@ -219,8 +219,20 @@ export class BicyclePhysics {
       brake = -p.brakeForce * brakeBlend;
     }
 
-    fwdSpeed += (thrust + drag + rolling + corneringDrag + brake) * delta;
-    if (Math.abs(thrust) < 0.01 && Math.abs(fwdSpeed) < 0.1) {
+    // Slope gravity assist (owner playtest 2026-07-07): purely longitudinal,
+    // adds/removes the same way whether under throttle or coasting — climbing
+    // (groundSlopeRad > 0) subtracts, descending adds. See kart.ts for how
+    // groundSlopeRad is sampled from the heightfield and smoothed.
+    const slopeForce = -p.slopeGravityAccel * Math.sin(inp.groundSlopeRad);
+
+    fwdSpeed += (thrust + drag + rolling + corneringDrag + brake + slopeForce) * delta;
+    // Snap-to-zero only applies with NO active driving force at all — thrust
+    // AND slope both near-zero. Without the slopeForce check here, a kart at
+    // rest on a downhill grade (thrust=0) would get its slope-driven
+    // acceleration clobbered back to 0 every single tick (each tick's delta-v
+    // starts under the 0.1 speed gate), silently defeating req: "works on
+    // pure inertia, not just under throttle."
+    if (Math.abs(thrust) < 0.01 && Math.abs(slopeForce) < 0.01 && Math.abs(fwdSpeed) < 0.1) {
       fwdSpeed = 0;
     }
 
