@@ -30,6 +30,7 @@ interface SimState {
   vel: { x: number; y: number; z: number };
   throttleSm: number;
   steerSm: number;
+  driftPenaltySlow: number;
 }
 
 function makeSim(): SimState {
@@ -42,6 +43,7 @@ function makeSim(): SimState {
     vel: { x: 0, y: 0, z: 0 },
     throttleSm: 0,
     steerSm: 0,
+    driftPenaltySlow: 0,
   };
 }
 
@@ -72,6 +74,11 @@ function tick(sim: SimState, t: number, rawSteer: number, rawThrottle: number): 
 
   const drift = sim.drift.update(speed, sim.steerSm, true, sim.throttleSm, DT);
 
+  // Slow low-pass of the bicycle's own driftIntensity (see kart.ts step 4a2 /
+  // types.ts PhysicsInput.driftPenaltyFactor doc comment) — one-tick lag.
+  const penaltyAlpha = 1 - Math.exp(-(1 / Math.max(p.driftPenaltyTau, 0.05)) * DT);
+  sim.driftPenaltySlow += (sim.bicycle.getDriftIntensity() - sim.driftPenaltySlow) * penaltyAlpha;
+
   const inp: PhysicsInput = {
     velocity: { ...sim.vel },
     forward: { x: fwdDir.x, y: 0, z: fwdDir.z },
@@ -81,6 +88,7 @@ function tick(sim: SimState, t: number, rawSteer: number, rawThrottle: number): 
     brakeHeld: rawThrottle < 0,
     onFloor: true,
     rearGripMultiplier: drift.rearGripMultiplier,
+    driftPenaltyFactor: sim.driftPenaltySlow,
     groundSlopeRad: 0,
   };
   const st = sim.bicycle.step(inp, DT);

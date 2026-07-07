@@ -164,6 +164,7 @@ export class ContinuousDrift {
       exitBoostForce: exitBoost,
       power: this.energy,
       engageFactor: absD,
+      heat: this.heat,
     };
   }
 }

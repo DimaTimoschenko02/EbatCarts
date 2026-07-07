@@ -101,6 +101,11 @@ export class Kart {
   // SLOPE_FILTER_RATE above and step 4 below. Frozen (not updated) while
   // airborne, same as the rest of steps 4-7 — see the airborne branch comment.
   private slopeSm = 0;
+  // Slow low-pass of BicyclePhysics's own driftIntensity, fed to
+  // PhysicsInput.driftPenaltyFactor (see types.ts doc comment for why this
+  // filters driftIntensity itself rather than using ContinuousDrift's heat).
+  // Rate: params.driftPenaltyTau.
+  private driftPenaltySlow = 0;
   // Accumulated sim time (sum of fixed physics dt), fed to skid-mark fade —
   // deliberately NOT performance.now() so this stays deterministic/testable.
   private simTime = 0;
@@ -169,6 +174,7 @@ export class Kart {
     this.pitchSm = 0;
     this.rollSm = 0;
     this.slopeSm = 0;
+    this.driftPenaltySlow = 0;
     this.bicycle.reset();
     this.driftSM.reset();
     this.skids.clear();
@@ -192,6 +198,7 @@ export class Kart {
     this.pitchSm = 0;
     this.rollSm = 0;
     this.slopeSm = 0;
+    this.driftPenaltySlow = 0;
     this.bicycle.reset();
     this.driftSM.reset();
     this.skids.clear();
@@ -281,6 +288,14 @@ export class Kart {
       const slopeAlpha = 1 - Math.exp(-SLOPE_FILTER_RATE * dt);
       this.slopeSm += (slopeRaw - this.slopeSm) * slopeAlpha;
 
+      // 4a2. Slow low-pass of the bicycle's own (last tick's) driftIntensity
+      // — see PhysicsInput.driftPenaltyFactor doc comment in types.ts for why
+      // this filters driftIntensity itself (not ContinuousDrift's heat).
+      // One-tick lag (reads the value from BEFORE this tick's step() call,
+      // same established pattern as rearGripMultiplier above).
+      const penaltyAlpha = 1 - Math.exp(-(1 / Math.max(this.params.driftPenaltyTau, 0.05)) * dt);
+      this.driftPenaltySlow += (this.bicycle.getDriftIntensity() - this.driftPenaltySlow) * penaltyAlpha;
+
       // 4b. Build PhysicsInput.
       const inp: PhysicsInput = {
         velocity: { x: this.state.vel.x, y: this.state.vel.y, z: this.state.vel.z },
@@ -291,6 +306,7 @@ export class Kart {
         brakeHeld: raw.throttle < 0,
         onFloor: true,
         rearGripMultiplier: drift.rearGripMultiplier,
+        driftPenaltyFactor: this.driftPenaltySlow,
         groundSlopeRad: this.slopeSm,
       };
 

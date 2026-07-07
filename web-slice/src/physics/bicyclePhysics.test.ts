@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BicyclePhysics, computeAxleLateralVelocities, computeSlipRatio } from "./bicyclePhysics";
-import { DEFAULT_AXLE_GEOMETRY, DEFAULT_KART_PHYSICS_PARAMS, type PhysicsInput } from "./types";
+import { ContinuousDrift } from "./driftContinuous";
+import { DEFAULT_AXLE_GEOMETRY, DEFAULT_KART_PHYSICS_PARAMS, type KartPhysicsParams, type PhysicsInput } from "./types";
 
 // Godot convention (see types.ts header): forward = -Z, right = +X at yaw=0.
 const FORWARD = { x: 0, y: 0, z: -1 };
@@ -16,6 +17,11 @@ function freshInput(overrides: Partial<PhysicsInput> = {}): PhysicsInput {
     brakeHeld: false,
     onFloor: true,
     rearGripMultiplier: 1,
+    // Default 0: most tests here aren't exercising the drift-penalty terms
+    // (dragMult/rollingMult/cdDriftScale in step I) — see the dedicated
+    // "longitudinal drift penalty" describe block below for tests that pass
+    // a nonzero override explicitly.
+    driftPenaltyFactor: 0,
     groundSlopeRad: 0,
     ...overrides,
   };
@@ -147,7 +153,17 @@ describe("BicyclePhysics — drift intensity signal shaping", () => {
 });
 
 describe("BicyclePhysics — reverse driving gate", () => {
-  it("gates drift target intensity to 0 while driving backward, but omega still responds to steer torque", () => {
+  // UPDATED 2026-07-07 (Fix 3, consistency gate): step J's targetIntensity
+  // gate was changed from a hard `fwdSpeed >= driftMinSpeed` (ANY negative
+  // fwdSpeed gated the drift signal to 0, even a fast, hard-steering reverse)
+  // to `Math.abs(fwdSpeed) >= driftMinSpeed` — matching ContinuousDrift's own
+  // abs-gating (driftContinuous.ts speedGate uses Math.abs(speed)), so the
+  // two drift signals no longer disagree about whether a fast reverse counts
+  // as "moving fast enough to drift." This test used to assert the OLD hard
+  // gate (drift forced to 0 while reversing); it now asserts the NEW,
+  // intentional behavior: reversing fast + steering hard produces real,
+  // nonzero drift intensity, same as it would going forward at that speed.
+  it("no longer hard-gates drift target intensity to 0 while reversing — engages like forward drift once |fwdSpeed| clears driftMinSpeed", () => {
     const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
     let velocity = { x: 0, y: 0, z: 0 };
 
@@ -160,22 +176,25 @@ describe("BicyclePhysics — reverse driving gate", () => {
     const reverseState0 = bike.getOmega();
     expect(reverseState0).toBeCloseTo(0, 6);
 
-    // Now steer hard while still reversing.
-    let lastState = bike.step(freshInput({ velocity, throttle: -1, steerInput: 1 }), DT);
+    // Now steer hard while still reversing (with a low rearGripMultiplier,
+    // same as a real drift-engaged reverse — ContinuousDrift would supply
+    // this too once its own abs-gated speedGate opens).
+    let lastState = bike.step(freshInput({ velocity, throttle: -1, steerInput: 1, rearGripMultiplier: 0.25 }), DT);
     velocity = lastState.newVelocity;
     expect(lastState.fwdSpeed).toBeLessThan(0); // confirm we're actually in reverse
 
-    // Drift intensity target should be gated to 0 (fwd_speed < drift_min_speed
-    // in gd — note the gate is a hard `>=` on signed fwd_speed, so ANY
-    // negative fwd_speed gates it out, matching bicycle_physics.gd step J).
-    for (let i = 0; i < 30; i++) {
-      lastState = bike.step(freshInput({ velocity, throttle: -1, steerInput: 1 }), DT);
+    for (let i = 0; i < 60; i++) {
+      lastState = bike.step(freshInput({ velocity, throttle: -1, steerInput: 1, rearGripMultiplier: 0.25 }), DT);
       velocity = lastState.newVelocity;
     }
-    expect(lastState.driftIntensity).toBeCloseTo(0, 3);
+    // |fwdSpeed| is well above driftMinSpeed (2.5) at this point (reverse
+    // terminal speed ~8.3 m/s) — driftIntensity should be genuinely engaged,
+    // not gated to 0.
+    expect(Math.abs(lastState.fwdSpeed)).toBeGreaterThan(DEFAULT_KART_PHYSICS_PARAMS.driftMinSpeed);
+    expect(lastState.driftIntensity).toBeGreaterThan(0.1);
 
-    // But yaw torque (omega) is still emergent from tire forces regardless of
-    // direction — reverse steering should still produce nonzero omega.
+    // Yaw torque (omega) is still emergent from tire forces regardless of
+    // direction — reverse steering still produces nonzero omega.
     expect(Math.abs(bike.getOmega())).toBeGreaterThan(0.01);
   });
 });
@@ -447,6 +466,166 @@ describe("BicyclePhysics — slope gravity assist (owner playtest 2026-07-07)", 
       flatSpeed = fs.fwdSpeed;
     }
     expect(speed).toBeCloseTo(flatSpeed, 6);
+  });
+});
+
+// ─── Fix 1/2 regression coverage (numerical diagnosis 2026-07-07,
+// tools/diagnose_drift_circle.ts / tools/diagnose_reverse.ts) ──────────────
+// Mirrors kart.ts's exact per-tick wiring (smoothInput -> ContinuousDrift.update
+// -> slow driftPenaltyFactor low-pass -> BicyclePhysics.step -> yaw/vel
+// composition) — see kart.ts step 3/4a2/4b/5-7 and the diagnose_* tools for
+// the full-detail versions this is a condensed regression-test copy of.
+function forwardOf(yaw: number) {
+  return { x: -Math.sin(yaw), z: -Math.cos(yaw) };
+}
+function rightOf(yaw: number) {
+  return { x: Math.cos(yaw), z: -Math.sin(yaw) };
+}
+
+interface KartLikeSim {
+  params: KartPhysicsParams;
+  bicycle: BicyclePhysics;
+  drift: ContinuousDrift;
+  yaw: number;
+  vel: { x: number; y: number; z: number };
+  throttleSm: number;
+  steerSm: number;
+  driftPenaltySlow: number;
+}
+
+function makeKartLikeSim(params: KartPhysicsParams = DEFAULT_KART_PHYSICS_PARAMS): KartLikeSim {
+  return {
+    params,
+    bicycle: new BicyclePhysics(params, DEFAULT_AXLE_GEOMETRY),
+    drift: new ContinuousDrift(params),
+    yaw: 0,
+    vel: { x: 0, y: 0, z: 0 },
+    throttleSm: 0,
+    steerSm: 0,
+    driftPenaltySlow: 0,
+  };
+}
+
+function kartLikeTick(sim: KartLikeSim, dt: number, rawSteer: number, rawThrottle: number) {
+  const p = sim.params;
+  const slew = Math.abs(rawSteer) > Math.abs(sim.steerSm) ? p.steerSlewRateIn : p.steerSlewRateOut;
+  sim.steerSm += (rawSteer - sim.steerSm) * (1 - Math.exp(-slew * dt));
+  sim.throttleSm += (rawThrottle - sim.throttleSm) * (1 - Math.exp(-p.throttleSlewRate * dt));
+
+  const fwdDir = forwardOf(sim.yaw);
+  const rightDir = rightOf(sim.yaw);
+  const speed = Math.hypot(sim.vel.x, sim.vel.z);
+  const fwdSigned = sim.vel.x * fwdDir.x + sim.vel.z * fwdDir.z;
+
+  const drift = sim.drift.update(speed, sim.steerSm, true, sim.throttleSm, dt);
+
+  const penaltyAlpha = 1 - Math.exp(-(1 / Math.max(p.driftPenaltyTau, 0.05)) * dt);
+  sim.driftPenaltySlow += (sim.bicycle.getDriftIntensity() - sim.driftPenaltySlow) * penaltyAlpha;
+
+  const inp: PhysicsInput = {
+    velocity: { ...sim.vel },
+    forward: { x: fwdDir.x, y: 0, z: fwdDir.z },
+    right: { x: rightDir.x, y: 0, z: rightDir.z },
+    throttle: sim.throttleSm,
+    steerInput: sim.steerSm,
+    brakeHeld: rawThrottle < 0,
+    onFloor: true,
+    rearGripMultiplier: drift.rearGripMultiplier,
+    driftPenaltyFactor: sim.driftPenaltySlow,
+    groundSlopeRad: 0,
+  };
+  const st = sim.bicycle.step(inp, dt);
+  sim.yaw += st.yawDelta + drift.yawBonusRadPerSec * dt;
+  sim.vel.x = st.newVelocity.x;
+  sim.vel.z = st.newVelocity.z;
+
+  const assist = drift.forwardAssistForce + drift.exitBoostForce;
+  if (Math.abs(assist) > 0 && fwdSigned >= 0) {
+    const fwdAfter = forwardOf(sim.yaw);
+    sim.vel.x += fwdAfter.x * assist * dt;
+    sim.vel.z += fwdAfter.z * assist * dt;
+  }
+  return st;
+}
+
+describe("BicyclePhysics + ContinuousDrift — Fix 1 regression: drift entry no longer punches a speed dip", () => {
+  // Bound is 70%, not the original 80% goal: swept driftPenaltyTau 0.6/1.2/2.0
+  // (tools/diagnose_drift_circle.ts) and found diminishing returns above ~2.0
+  // — a real physical floor remains because corneringDrag's BASE term
+  // (corneringDragCoeff, active in ANY sharp turn) still scales with the
+  // ACTUAL |sideSpeed|, which genuinely spikes at drift entry as a real
+  // physical transient (see types.ts driftPenaltyTau default's comment for
+  // the full sweep numbers). At the tuned default (tau=2.0) the dip measures
+  // ~78.7% of steady mean (up from ~67.5% pre-fix) — 70% gives headroom
+  // below that measured value without being so loose it'd miss a real
+  // regression back toward the old ~67.5%.
+  it("fwdSpeed never dips below 70% of the eventual steady-state mean during drift entry", () => {
+    const sim = makeKartLikeSim();
+    const dt = 1 / 120;
+    // Phase 1: accelerate to cruise (3.5s).
+    for (let i = 0; i < Math.round(3.5 / dt); i++) kartLikeTick(sim, dt, 0, 1);
+    // Phase 2: full steer + full throttle, several drift circles (12s).
+    const driftSpeeds: number[] = [];
+    for (let i = 0; i < Math.round(12 / dt); i++) {
+      const st = kartLikeTick(sim, dt, 1, 1);
+      driftSpeeds.push(st.fwdSpeed);
+    }
+    const steadyWindow = driftSpeeds.slice(Math.round(8 / dt)); // last 4s of the 12s hold
+    const steadyMean = steadyWindow.reduce((a, b) => a + b, 0) / steadyWindow.length;
+    const minSpeed = Math.min(...driftSpeeds);
+    expect(minSpeed).toBeGreaterThanOrEqual(steadyMean * 0.7);
+    // Steady-state mean itself must stay close to the pre-fix value (~5.67
+    // m/s) — this is the "don't wreck the circle to fix the entry" guard.
+    expect(steadyMean).toBeGreaterThan(5.0);
+    expect(steadyMean).toBeLessThan(6.3);
+  });
+});
+
+describe("BicyclePhysics + ContinuousDrift — Fix 2 regression: reverse maneuverability improved, with no oscillation", () => {
+  // NOT full forward/reverse parity: numerically swept reverseSteerGain
+  // 1.5..5.0 (tools/diagnose_reverse.ts) and found a genuine physical
+  // feedback-loop ceiling — see types.ts reverseSteerGain default's doc
+  // comment for the full root-cause writeup (larger steerAngle -> more
+  // corneringDrag -> less fwdSpeed -> smaller kinematic omega term, which
+  // cancels out the steer-angle increase). At the tuned default
+  // (reverseSteerGain=2.2) reverse reaches ~101 deg/s vs forward's ~171
+  // deg/s (ratio ~0.59) — a real, substantial improvement over the pre-fix
+  // ~85 deg/s (ratio ~0.5), but short of the aspirational "reverse >=
+  // forward" target. This test guards the MEASURED improvement, not the
+  // unreached aspirational target.
+  it("reverse yaw rate at terminal speed is a much better fraction of forward's than the pre-fix ~0.5, and doesn't oscillate", () => {
+    const dt = 1 / 120;
+
+    function terminalManeuverOmega(throttleSign: 1 | -1): { meanOmega: number; omegas: number[] } {
+      const sim = makeKartLikeSim();
+      for (let i = 0; i < Math.round(6 / dt); i++) kartLikeTick(sim, dt, 0, throttleSign); // reach cruise
+      const omegas: number[] = [];
+      for (let i = 0; i < Math.round(5 / dt); i++) {
+        const st = kartLikeTick(sim, dt, 1, throttleSign); // full steer, same throttle held
+        omegas.push(st.omega);
+      }
+      const steady = omegas.slice(Math.round(4 / dt)); // last 1s
+      const meanOmega = steady.reduce((a, b) => a + b, 0) / steady.length;
+      return { meanOmega, omegas: steady };
+    }
+
+    const fwd = terminalManeuverOmega(1);
+    const rev = terminalManeuverOmega(-1);
+
+    // Pre-fix ratio was ~0.5 (85 vs 169 deg/s). Post-fix measured ratio is
+    // ~0.59 (101 vs 171 deg/s) — require clearly above the old ratio, with
+    // margin below the measured value so normal tuning noise doesn't flake.
+    const ratio = Math.abs(rev.meanOmega) / Math.abs(fwd.meanOmega);
+    expect(ratio).toBeGreaterThan(0.55);
+    // Absolute floor: pre-fix reverse omega was ~1.483 rad/s (85 deg/s).
+    expect(Math.abs(rev.meanOmega)).toBeGreaterThan(1.6);
+
+    // No runaway/divergent oscillation on the reverse steady window: the
+    // spread (max-min) should stay a small fraction of the mean magnitude,
+    // not grow tick-over-tick.
+    const revMax = Math.max(...rev.omegas.map(Math.abs));
+    const revMin = Math.min(...rev.omegas.map(Math.abs));
+    expect(revMax - revMin).toBeLessThan(Math.abs(rev.meanOmega) * 0.25);
   });
 });
 

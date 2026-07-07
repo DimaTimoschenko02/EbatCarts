@@ -48,6 +48,16 @@ export interface KartPhysicsParams {
   steerLowSpeedMult: number; // STEER_LOW_MULT
   steerHighSpeedMult: number; // STEER_HIGH_MULT
 
+  // Reverse maneuverability fix (numerical diagnosis 2026-07-07, see
+  // tools/diagnose_reverse.ts FACT 2): vWheelLatFront's fwdSpeed*sin(steerAngle)
+  // term flips sign in reverse, which halves yaw rate at matched |speed|
+  // (169 deg/s forward vs 85 deg/s reverse) — the opposite of the design
+  // intent ("reverse should feel MORE maneuverable, like a real kart backing
+  // up"). Fix: continuously scale up the effective steerAngle as fwdSpeed
+  // goes negative (bicyclePhysics.ts step B) — no discrete forward/reverse
+  // branch, a smoothstep blend so cruising forward is bit-for-bit unaffected.
+  reverseSteerGain: number; // REVERSE_STEER_GAIN — steerAngle multiplier fully applied once reversing
+
   // Bicycle v3.0 (two-axle)
   maxSteerAngleDeg: number; // MAX_STEER_ANGLE_DEG
   frontGripStiffness: number; // FRONT_GRIP
@@ -72,6 +82,14 @@ export interface KartPhysicsParams {
   driftRollingMultiplier: number; // DRIFT_ROLLING_MULTIPLIER
   corneringDragCoeff: number; // CORNERING_DRAG_COEFF
   corneringDragDriftMult: number; // CORNERING_DRAG_DRIFT_MULT — extra multiplier while actively drifting
+
+  // Slow low-pass time constant (seconds) for PhysicsInput.driftPenaltyFactor
+  // — see that field's doc comment above and kart.ts. Filters BicyclePhysics's
+  // own driftIntensity (NOT ContinuousDrift's heat — see doc comment for why)
+  // before it drives the longitudinal drag/rolling/cornering-drag penalties,
+  // so a fast entry-transient spike in the measured signal doesn't punch a
+  // hole in mid-drift speed.
+  driftPenaltyTau: number; // DRIFT_PENALTY_TAU
 
   // Collision / mass — not exposed in dev_params.json (tuner doesn't surface
   // it yet); keep the kart_physics_resource.gd default.
@@ -193,6 +211,33 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   steerLowSpeedMult: 0.9,
   steerHighSpeedMult: 0.85,
 
+  // 2.2 (numerical tuning, tools/diagnose_reverse.ts 2026-07-07, swept
+  // 1.5/1.9/2.0/2.2/2.4/2.6/2.8/3.0/5.0). Brings reverse-terminal omega up
+  // from 85 -> 100.7 deg/s (vs forward's 170.7 deg/s) and time-to-180deg down
+  // from 2.83s -> 1.83s (vs forward's 0.90s) — a real, measured improvement,
+  // but NOT full parity with forward (see PhysicsInput.driftPenaltyFactor-
+  // style honesty note: the aspirational target from the design brief was
+  // reverse omega >= forward's 170 deg/s and time-to-180 <= ~1s).
+  // ROOT CAUSE the sweep exposed: pushing reverseSteerGain higher runs into a
+  // genuine physical feedback loop, not a tuning-resolution problem — a
+  // larger effective steerAngle increases |sideSpeed|, which increases
+  // corneringDrag (step I), which bleeds off fwdSpeed, which directly shrinks
+  // the KINEMATIC omega term (kinematicOmega = fwdSpeed/wheelbase*tan(steerAngle)
+  // — step G) that dominates reverse's already-low speed range. Concretely:
+  // at gain=5.0, omega reaches 140 deg/s but only because |fwdSpeed| has
+  // collapsed to 0.39 m/s (turn radius 0.16m — the kart is nearly
+  // pirouetting in place rather than genuinely turning faster), and
+  // time-to-180 stops improving past ~gain=2.8 (plateaus ~1.76-1.88s) because
+  // the shrinking fwdSpeed cancels out the larger steer angle. 2.2 is picked
+  // as a genuine, stable improvement (no omega oscillation over a sustained
+  // 5s hold) before the speed-collapse trade-off gets severe. Reaching the
+  // full aspirational target would need a mechanism that doesn't route
+  // through steerAngle/corneringDrag (e.g. a direct reverse omega bonus,
+  // config-driven so it doesn't reintroduce this feedback loop) — flagging
+  // for game-designer/systems-designer if the deeper target still matters
+  // after playtesting this measured improvement.
+  reverseSteerGain: 2.2,
+
   maxSteerAngleDeg: 28,
   frontGripStiffness: 17.5,
   rearGripStiffness: 2.5,
@@ -213,6 +258,22 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftRollingMultiplier: 5,
   corneringDragCoeff: 5,
   corneringDragDriftMult: 4,
+
+  // 2.0 (numerical tuning, tools/diagnose_drift_circle.ts 2026-07-07): swept
+  // 0.6 / 1.2 / 2.0 — the entry dip's low-point rises with tau (67.5% ->
+  // 72.8% -> 76.7% -> 78.7% of steady mean as tau goes 0(old) -> 0.6 -> 1.2 ->
+  // 2.0) but with diminishing returns: a real floor remains because
+  // corneringDrag's BASE term (corneringDragCoeff, always active in any
+  // sharp turn — see step I) still scales with the ACTUAL |sideSpeed|, which
+  // genuinely spikes right at drift entry as a real physical transient (the
+  // rear tires really do slip harder for a moment before the yaw rate
+  // settles) — that portion isn't reachable by filtering driftPenaltyFactor
+  // at all, only the cdDriftScale/dragMult/rollingMult MULTIPLIERS are. 2.0
+  // is picked as the point where steady mean fwdSpeed is still bit-for-bit
+  // unaffected (converges well within a single ~2s drift circle) and further
+  // increases stopped meaningfully improving the dip (diminishing returns
+  // past here start trading away entry responsiveness for no real gain).
+  driftPenaltyTau: 2.0,
 
   mass: 1.0,
 
@@ -331,6 +392,36 @@ export interface PhysicsInput {
   onFloor: boolean;
   rearGripMultiplier: number; // set by DriftStateMachine (<1 during active drift)
 
+  // Longitudinal drift-penalty signal [0..1] driving dragMult/rollingMult/
+  // cdDriftScale in bicyclePhysics.ts step I (numerical diagnosis 2026-07-07,
+  // see tools/diagnose_drift_circle.ts FACT 1). Deliberately NOT read directly
+  // from the bicycle model's own internal driftIntensity
+  // (BicyclePhysics.getDriftIntensity()): that signal is derived from the
+  // FAST, measured rear-slip magnitude (slipSmoothing tau~0.2s), which itself
+  // spikes hard right at drift entry (omega overshoots toward its steady
+  // value before settling) — feeding that spike straight into the
+  // longitudinal drag/rolling/cornering-drag multipliers was what caused a
+  // real speed dip 90-180deg into every drift (10.75 -> 3.83 m/s at old
+  // defaults).
+  //
+  // Callers should pass a SLOW-FILTERED version of THE SAME driftIntensity
+  // signal (see kart.ts: an exp low-pass over bicycle.getDriftIntensity(),
+  // rate KartPhysicsParams.driftPenaltyTau — one-tick lag, same established
+  // pattern as rearGripMultiplier reading last tick's drift output).
+  // Deliberately NOT ContinuousDrift's `heat` output: heat chases the STEER/
+  // THROTTLE INTENT signal dFast, which saturates to 1.0 at full lock,
+  // whereas the physically-measured driftIntensity only reaches ~0.3 in
+  // steady state at these tuned params (rear slip is bounded by the tire
+  // model's saturation, not by how hard the player is steering) — using heat
+  // here was tried and measured to over-penalize the steady-state circle by
+  // ~55% (5.67 -> 2.49 m/s mean), failing the "steady mean ±10%" requirement.
+  // A low-pass of driftIntensity ITSELF preserves the correct steady-state
+  // magnitude by construction (filtering a converged constant converges to
+  // that same constant) while still smoothing away the fast entry transient.
+  // driftIntensity itself is left untouched everywhere else (telemetry/VFX/
+  // lean) — this field only replaces its use in the three longitudinal terms.
+  driftPenaltyFactor: number;
+
   // Signed longitudinal grade under/ahead of the kart along its current
   // heading, radians. Positive = climbing (uphill), negative = descending.
   // 0 on flat ground or when no heightfield sample is available (e.g. off
@@ -379,4 +470,10 @@ export interface DriftOutput {
   exitBoostForce: number;
   power: number; // 0..1 accumulated power
   engageFactor: number; // 0..1
+  // Slow "tire warm-up" filter [0..1] chasing |dFast| at driftHeatTau (see
+  // driftContinuous.ts). Exposed for PhysicsInput.driftPenaltyFactor — see
+  // that field's doc comment in this file for why the longitudinal drift
+  // penalties need this slow signal instead of the bicycle model's fast,
+  // measured-slip-derived internal driftIntensity.
+  heat: number;
 }

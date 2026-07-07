@@ -33,6 +33,8 @@ function simulate(
         brakeHeld: ph.brakeHeld,
         onFloor: true,
         rearGripMultiplier: 1,
+        driftPenaltyFactor: 0,
+        groundSlopeRad: 0,
       };
       const st = bike.step(inp, DT);
       velocity = st.newVelocity;

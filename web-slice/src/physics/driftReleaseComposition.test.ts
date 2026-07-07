@@ -45,6 +45,9 @@ function runDriftReleaseScenario(params: KartPhysicsParams, driftHoldTicks: numb
   let throttleSm = 0;
   let steerSm = 0;
   let visualDriftAngle = 0;
+  // Slow low-pass of bicycle.getDriftIntensity() — mirrors kart.ts's
+  // driftPenaltySlow (see types.ts PhysicsInput.driftPenaltyFactor doc comment).
+  let driftPenaltySlow = 0;
 
   function tick(rawSteer: number, rawThrottle: number) {
     const slew = Math.abs(rawSteer) > Math.abs(steerSm) ? params.steerSlewRateIn : params.steerSlewRateOut;
@@ -56,6 +59,9 @@ function runDriftReleaseScenario(params: KartPhysicsParams, driftHoldTicks: numb
     const speed = Math.hypot(vel.x, vel.z);
     const out = drift.update(speed, steerSm, true, throttleSm, DT);
 
+    const penaltyAlpha = 1 - Math.exp(-(1 / Math.max(params.driftPenaltyTau, 0.05)) * DT);
+    driftPenaltySlow += (bicycle.getDriftIntensity() - driftPenaltySlow) * penaltyAlpha;
+
     const inp: PhysicsInput = {
       velocity: { ...vel },
       forward: { x: fwdDir.x, y: 0, z: fwdDir.z },
@@ -65,6 +71,7 @@ function runDriftReleaseScenario(params: KartPhysicsParams, driftHoldTicks: numb
       brakeHeld: rawThrottle < 0,
       onFloor: true,
       rearGripMultiplier: out.rearGripMultiplier,
+      driftPenaltyFactor: driftPenaltySlow,
       groundSlopeRad: 0,
     };
     const st = bicycle.step(inp, DT);

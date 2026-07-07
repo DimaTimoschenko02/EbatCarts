@@ -107,7 +107,16 @@ export class BicyclePhysics {
     const maxAngleRad = degToRad(p.maxSteerAngleDeg);
     const spdRatio = clamp(Math.abs(fwdSpeed) / Math.max(p.maxSpeed, 0.01), 0, 1);
     const steerMult = lerp(p.steerLowSpeedMult, p.steerHighSpeedMult, spdRatio);
-    const steerAngle = inp.steerInput * maxAngleRad * steerMult;
+    // Reverse maneuverability fix (see types.ts reverseSteerGain doc comment
+    // and tools/diagnose_reverse.ts FACT 2): continuously scale up the
+    // effective steer angle as fwdSpeed goes negative. `reverseGate` is 1
+    // (no change) at/above +0.5 m/s and 0 (full reverseSteerGain applied) at
+    // /below -1.0 m/s — a narrow window straddling standstill so a normal
+    // forward cruise is completely unaffected, and there's no discrete
+    // forward/reverse branch (smooth-values rule).
+    const reverseGate = smoothstep(-1.0, 0.5, fwdSpeed);
+    const reverseSteerMult = lerp(p.reverseSteerGain, 1, reverseGate);
+    const steerAngle = inp.steerInput * maxAngleRad * steerMult * reverseSteerMult;
 
     // C. Per-axle lateral velocities. Bicycle model: v_at_point = v_body + ω × r_point.
     // Godot conventions: forward = -Z, right = +X, up = +Y. See bicycle_physics.gd
@@ -194,8 +203,20 @@ export class BicyclePhysics {
       thrust = inp.throttle * p.accelForce * p.reverseRatio * reverseEngageGate;
     }
 
-    const dragMult = lerp(1, p.driftDragMultiplier, this.driftIntensity);
-    const rollingMult = lerp(1, p.driftRollingMultiplier, this.driftIntensity);
+    // Drift-penalty source (numerical diagnosis 2026-07-07, see
+    // tools/diagnose_drift_circle.ts FACT 1 and PhysicsInput.driftPenaltyFactor's
+    // doc comment in types.ts): dragMult/rollingMult/cdDriftScale used to read
+    // this.driftIntensity — the bicycle model's OWN fast, measured-slip signal
+    // — which spikes hard right at drift entry (before the yaw rate settles),
+    // causing a real speed dip mid-drift-circle. They now read the caller-
+    // supplied inp.driftPenaltyFactor (kart.ts passes a slow low-pass of this
+    // same driftIntensity — NOT ContinuousDrift's heat, which saturates toward
+    // 1.0 and would crush steady-state circle speed; see types.ts doc comment).
+    // this.driftIntensity itself is untouched — still computed in step J below
+    // exactly as before, still driving VFX/telemetry.
+    const penalty = clamp(inp.driftPenaltyFactor, 0, 1);
+    const dragMult = lerp(1, p.driftDragMultiplier, penalty);
+    const rollingMult = lerp(1, p.driftRollingMultiplier, penalty);
     const drag = -Math.sign(fwdSpeed) * p.kDrag * dragMult * fwdSpeed * fwdSpeed;
     const rolling = -p.kRolling * rollingMult * fwdSpeed;
     // Continuous force blends (smooth-values rule): no discrete jumps on
@@ -203,13 +224,12 @@ export class BicyclePhysics {
     // corneringDragCoeff alone is the ORDINARY-turn braking (kept gentle so
     // coasting through a turn doesn't nearly stop the kart); it's scaled up
     // by corneringDragDriftMult while an actual drift is active so THAT loses
-    // noticeably more speed than a plain turn. Reads last tick's
-    // driftIntensity — same one-tick-lag pattern as dragMult/rollingMult
-    // just above, already an established convention in this step.
+    // noticeably more speed than a plain turn. Reads the same slow
+    // driftPenaltyFactor as dragMult/rollingMult just above (see comment there).
     let corneringDrag = 0;
     if (p.corneringDragCoeff > 0) {
       const cdBlend = smoothstep(0, 0.2, Math.abs(fwdSpeed));
-      const cdDriftScale = lerp(1, p.corneringDragDriftMult, this.driftIntensity);
+      const cdDriftScale = lerp(1, p.corneringDragDriftMult, penalty);
       corneringDrag = -Math.sign(fwdSpeed) * p.corneringDragCoeff * cdDriftScale * Math.abs(sideSpeed) * 0.5 * cdBlend;
     }
     // brake force blends in across [0..0.6] m/s.
@@ -240,8 +260,13 @@ export class BicyclePhysics {
     const rearSlipMag = Math.max(Math.abs(vLatRearL), Math.abs(vLatRearR));
     const slipRatio = computeSlipRatio(rearSlipMag, p.driftMaxSlipSpeed);
 
+    // Consistency fix (2026-07-07): gate by |fwdSpeed| instead of raw signed
+    // fwdSpeed — matches ContinuousDrift's own abs-gating (driftContinuous.ts
+    // speedGate uses Math.abs(speed)), so the two drift signals agree on
+    // whether reversing at speed counts as "fast enough to drift" instead of
+    // this one hard-zeroing out on ANY negative fwdSpeed.
     let targetIntensity = 0;
-    if (fwdSpeed >= p.driftMinSpeed) {
+    if (Math.abs(fwdSpeed) >= p.driftMinSpeed) {
       targetIntensity = slipRatio;
     }
     const alpha = 1 - Math.exp(-p.slipSmoothing * delta);

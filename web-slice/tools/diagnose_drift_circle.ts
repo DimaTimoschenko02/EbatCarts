@@ -81,7 +81,9 @@ function instrumentedStep(
   const maxAngleRad = degToRad(p.maxSteerAngleDeg);
   const spdRatio = clamp(Math.abs(fwdSpeed) / Math.max(p.maxSpeed, 0.01), 0, 1);
   const steerMult = lerp(p.steerLowSpeedMult, p.steerHighSpeedMult, spdRatio);
-  const steerAngle = inp.steerInput * maxAngleRad * steerMult;
+  const reverseGate = smoothstep(-1.0, 0.5, fwdSpeed);
+  const reverseSteerMult = lerp(p.reverseSteerGain, 1, reverseGate);
+  const steerAngle = inp.steerInput * maxAngleRad * steerMult * reverseSteerMult;
 
   const halfWb = wheelbase * 0.5;
   const { front: vLatFront, rear: vLatRear } = computeAxleLateralVelocities(sideSpeed, st.omega, halfWb);
@@ -116,15 +118,19 @@ function instrumentedStep(
     thrust = inp.throttle * p.accelForce * p.reverseRatio * reverseEngageGate;
   }
 
-  const dragMult = lerp(1, p.driftDragMultiplier, st.driftIntensity);
-  const rollingMult = lerp(1, p.driftRollingMultiplier, st.driftIntensity);
+  // Fix 1 sync (see bicyclePhysics.ts step I comment): these three terms now
+  // read inp.driftPenaltyFactor (the caller's slow "heat" signal) instead of
+  // st.driftIntensity (fast, measured-slip-derived).
+  const penalty = clamp(inp.driftPenaltyFactor, 0, 1);
+  const dragMult = lerp(1, p.driftDragMultiplier, penalty);
+  const rollingMult = lerp(1, p.driftRollingMultiplier, penalty);
   const drag = -Math.sign(fwdSpeed) * p.kDrag * dragMult * fwdSpeed * fwdSpeed;
   const rolling = -p.kRolling * rollingMult * fwdSpeed;
 
   let corneringDrag = 0;
   if (p.corneringDragCoeff > 0) {
     const cdBlend = smoothstep(0, 0.2, Math.abs(fwdSpeed));
-    const cdDriftScale = lerp(1, p.corneringDragDriftMult, st.driftIntensity);
+    const cdDriftScale = lerp(1, p.corneringDragDriftMult, penalty);
     corneringDrag = -Math.sign(fwdSpeed) * p.corneringDragCoeff * cdDriftScale * Math.abs(sideSpeed) * 0.5 * cdBlend;
   }
 
@@ -145,7 +151,7 @@ function instrumentedStep(
   const slipRatio = computeSlipRatio(rearSlipMag, p.driftMaxSlipSpeed);
 
   let targetIntensity = 0;
-  if (fwdSpeed >= p.driftMinSpeed) targetIntensity = slipRatio;
+  if (Math.abs(fwdSpeed) >= p.driftMinSpeed) targetIntensity = slipRatio;
   const alpha = 1 - Math.exp(-p.slipSmoothing * delta);
   st.driftIntensity = clamp(lerp(st.driftIntensity, targetIntensity, alpha), 0, 1);
 
@@ -198,6 +204,8 @@ let yaw = 0;
 const vel = { x: 0, y: 0, z: 0 };
 let throttleSm = 0;
 let steerSm = 0;
+// Slow low-pass of bikeState.driftIntensity, mirrors kart.ts's driftPenaltySlow.
+let driftPenaltySlow = 0;
 
 function forwardOf(y: number) {
   return { x: -Math.sin(y), z: -Math.cos(y) };
@@ -247,6 +255,12 @@ function tick(t: number, phase: string, rawSteer: number, rawThrottle: number) {
 
   const out = drift.update(speed, steerSm, true, throttleSm, DT);
 
+  // Slow low-pass of driftIntensity itself (see kart.ts step 4a2 / types.ts
+  // PhysicsInput.driftPenaltyFactor doc comment) — one-tick lag, reads
+  // bikeState.driftIntensity BEFORE this tick's instrumentedStep() call.
+  const penaltyAlpha = 1 - Math.exp(-(1 / Math.max(params.driftPenaltyTau, 0.05)) * DT);
+  driftPenaltySlow += (bikeState.driftIntensity - driftPenaltySlow) * penaltyAlpha;
+
   const inp: PhysicsInput = {
     velocity: { ...vel },
     forward: { x: fwdDir.x, y: 0, z: fwdDir.z },
@@ -256,6 +270,7 @@ function tick(t: number, phase: string, rawSteer: number, rawThrottle: number) {
     brakeHeld: rawThrottle < 0,
     onFloor: true,
     rearGripMultiplier: out.rearGripMultiplier,
+    driftPenaltyFactor: driftPenaltySlow,
     groundSlopeRad: 0,
   };
   const st = instrumentedStep(bikeState, params, wheelbase, inp, DT);

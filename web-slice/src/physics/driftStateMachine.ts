@@ -184,6 +184,11 @@ export class DriftStateMachine {
       exitBoostForce: exitBoost,
       power: this.power,
       engageFactor: this.engageFactor,
+      // This legacy v3.1 state machine (unused by kart.ts, kept for rollback —
+      // see paramPanel.ts's "not used in v4.0" tags) predates ContinuousDrift's
+      // slow thermal-fade `heat` filter. engageFactor is the closest available
+      // analog (no separate fast/slow signal split exists here).
+      heat: this.engageFactor,
     };
   }
 
@@ -197,6 +202,7 @@ export class DriftStateMachine {
       forwardAssistForce: 0,
       exitBoostForce: 0,
       power: 0,
+      heat: 0,
       engageFactor: this.engageFactor,
     };
   }

@@ -35,6 +35,7 @@ const vel = { x: 0, y: 0, z: 0 };
 let throttleSm = 0;
 let steerSm = 0;
 let visualDriftAngle = 0;
+let driftPenaltySlow = 0;
 
 function forwardOf(y: number) {
   return { x: -Math.sin(y), z: -Math.cos(y) };
@@ -71,6 +72,9 @@ function tick(t: number, phase: string, rawSteer: number, rawThrottle: number) {
   const out = drift.update(speed, steerSm, true, throttleSm, dt);
   const driftVisualYaw = out.visualYawOffsetRad;
 
+  const penaltyAlpha = 1 - Math.exp(-(1 / Math.max(params.driftPenaltyTau, 0.05)) * dt);
+  driftPenaltySlow += (bicycle.getDriftIntensity() - driftPenaltySlow) * penaltyAlpha;
+
   const inp: PhysicsInput = {
     velocity: { ...vel },
     forward: { x: fwdDir.x, y: 0, z: fwdDir.z },
@@ -80,6 +84,8 @@ function tick(t: number, phase: string, rawSteer: number, rawThrottle: number) {
     brakeHeld: rawThrottle < 0,
     onFloor: true,
     rearGripMultiplier: out.rearGripMultiplier,
+    driftPenaltyFactor: driftPenaltySlow,
+    groundSlopeRad: 0,
   };
   const st = bicycle.step(inp, dt);
   yaw += st.yawDelta + out.yawBonusRadPerSec * dt;
