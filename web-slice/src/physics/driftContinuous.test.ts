@@ -258,6 +258,77 @@ describe("ContinuousDrift v4.0 — req 3: yaw effects die out with CURRENT speed
   });
 });
 
+describe("ContinuousDrift v4.1 — driftReversalRate (mid-drift direction flip)", () => {
+  // Regression guard for the owner playtest bug (2026-07-07, see
+  // tools/diagnose_drift_swap.ts): the visual dFast signal used to cross zero
+  // and re-saturate the OPPOSITE way within ~0.6s of a raw steer flip, well
+  // before the physical yaw omega had finished its own reversal — read by the
+  // player as "no inertia". driftReversalRate (+ its internal reversalMemory
+  // helper filter) slows dFast's approach specifically during a mid-drift
+  // sign flip. The bound below (0.35s) is derived from
+  // DEFAULT_KART_PHYSICS_PARAMS.driftReversalRate itself so it doesn't go
+  // stale on retuning, and is well above the ~0.6s-fast crossing the bug
+  // report measured with the OLD (pre-fix) always-driftEngageOutRate=2.5
+  // behavior at this same test setup — see the disabled-reversal control
+  // case below for the direct A/B comparison.
+  it("dFast does not cross zero faster than driftReversalRate allows on a mid-drift flip", () => {
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const drift = makeDrift();
+    run(drift, 240, { speed: 15, steer: 1, throttle: 1 }); // saturate dFast at +1
+    expect(drift.getDFast()).toBeGreaterThan(0.99);
+
+    // A single-rate exp filter at driftReversalRate crosses from +1 toward 0
+    // (37% of the way, i.e. e^-1) after 1/driftReversalRate seconds. Zero
+    // crossing should not happen meaningfully faster than that lower bound —
+    // if it did, the reversal slow-down isn't engaging at all.
+    const minCrossingTime = 1 / p.driftReversalRate;
+    let crossedAt: number | null = null;
+    const ticks = Math.round(2.0 / DT);
+    for (let i = 0; i < ticks; i++) {
+      drift.update(15, -1, true, 1, DT);
+      if (crossedAt === null && drift.getDFast() <= 0) {
+        crossedAt = (i + 1) * DT;
+        break;
+      }
+    }
+    expect(crossedAt).not.toBeNull();
+    expect(crossedAt as number).toBeGreaterThan(minCrossingTime * 0.5);
+  });
+
+  it("control: with driftReversalRate raised to match driftEngageInRate (i.e. the reversal slow-down effectively disabled), dFast crosses zero much sooner", () => {
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const fast = new ContinuousDrift({ ...p, driftReversalRate: p.driftEngageInRate });
+    run(fast, 240, { speed: 15, steer: 1, throttle: 1 });
+
+    const slow = makeDrift(); // uses the tuned (slow) default driftReversalRate
+
+    function timeToCross(d: ContinuousDrift): number {
+      const ticks = Math.round(2.0 / DT);
+      for (let i = 0; i < ticks; i++) {
+        d.update(15, -1, true, 1, DT);
+        if (d.getDFast() <= 0) return (i + 1) * DT;
+      }
+      return Infinity;
+    }
+    const tFast = timeToCross(fast);
+    run(slow, 240, { speed: 15, steer: 1, throttle: 1 });
+    const tSlow = timeToCross(slow);
+    expect(tSlow).toBeGreaterThan(tFast);
+  });
+
+  it("fresh entry from zero (no prior drift) is NOT slowed by driftReversalRate — reaches full engagement at driftEngageInRate timing", () => {
+    const p = DEFAULT_KART_PHYSICS_PARAMS;
+    const drift = makeDrift();
+    // Independent of steer sign, dFast starts at 0 so reversalTrigger's
+    // product (-signedIntent * dFast) is exactly 0 the entire ramp-up —
+    // reversalMemory never rises above 0, so the effective rate is always
+    // driftEngageInRate, unaffected by driftReversalRate.
+    const expected = 1 - Math.exp(-p.driftEngageInRate * 2);
+    const outs = run(drift, 240, { speed: 15, steer: 1, throttle: 1 }); // 2s
+    expect(outs[outs.length - 1].engageFactor).toBeGreaterThan(expected - 0.05);
+  });
+});
+
 describe("ContinuousDrift v4.0 — req 4: low-speed drift pickup (no ~1s wait)", () => {
   it("full steer+throttle at a low, drift-gate-open speed (~2.5 m/s) engages substantially within a few tenths of a second", () => {
     const drift = makeDrift();

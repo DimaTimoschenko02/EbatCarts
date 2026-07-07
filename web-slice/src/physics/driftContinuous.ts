@@ -57,12 +57,29 @@ function degToRad(deg: number): number {
   return (deg * Math.PI) / 180;
 }
 
+// Internal fixed rates for the reversalMemory filter (step 3, ContinuousDrift.update).
+// Not exposed as tunable params — they only shape the WIDTH of the window
+// around the dFast zero-crossing where driftReversalRate applies, which is a
+// secondary concern vs. driftReversalRate itself. Rise is near-instant (the
+// slow-down should kick in the moment intent flips); decay is tuned so the
+// slow rate persists for roughly the time the physics-side yaw/speed
+// transient needs to relax post-crossing (~0.5-0.8s at default params) —
+// picked via tools/_sweep3.ts / _sweep4.ts exploratory sweeps (see
+// diagnose_drift_swap.ts owner-facing report for the full table): decay
+// values below ~1 push the visual overshoot metric under 10deg but at the
+// cost of the whole reversal never settling within a 3s window, so 1 is the
+// fastest decay that still meaningfully closes the "gate closes exactly at
+// the crossing" hole without introducing a new never-settles regression.
+const REVERSAL_MEMORY_RISE_RATE = 40;
+const REVERSAL_MEMORY_DECAY_RATE = 1;
+
 export class ContinuousDrift {
   private params: KartPhysicsParams;
 
   private dFast = 0; // signed intent filter [-1..1] — the master signal
   private heat = 0; // slow tire-warm-up filter [0..1], chases |dFast|
   private energy = 0; // stored drift power [0..1], chases |dFast| slowly
+  private reversalMemory = 0; // [0..1], see step 3 — persists the reversal slow-down through the dFast zero-crossing
   private engaged = false; // VFX/audio hysteresis flag ONLY
 
   constructor(params: KartPhysicsParams) {
@@ -73,6 +90,7 @@ export class ContinuousDrift {
     this.dFast = 0;
     this.heat = 0;
     this.energy = 0;
+    this.reversalMemory = 0;
     this.engaged = false;
   }
 
@@ -108,8 +126,31 @@ export class ContinuousDrift {
     const intentMag = steerGate * speedGate * throttleGate * floorGate;
     const signedIntent = Math.sign(steerInput) * intentMag;
 
-    // 3. D_fast — asymmetric exp filter (fast in, configurable out).
-    const rate = Math.abs(signedIntent) > Math.abs(this.dFast) ? p.driftEngageInRate : p.driftEngageOutRate;
+    // 3. D_fast — asymmetric exp filter (fast in, configurable out), with a
+    // continuous REVERSAL slow-down layered on top for the "steer flipped
+    // mid-drift" case (owner playtest 2026-07-07: visual signal was crossing
+    // zero and settling ~1s BEFORE the physical yaw omega finished its own
+    // reversal, so the body looked like it had no inertia — see
+    // tools/diagnose_drift_swap.ts).
+    //
+    // reversalTrigger is 1 exactly while signedIntent opposes the CURRENT
+    // dFast sign (before the crossing) and 0 once they agree (including the
+    // dFast===0 fresh-entry case, where the product is exactly 0 regardless
+    // of intent sign — so entry speed off driftEngageInRate is untouched).
+    // Read directly it would collapse back to 0 the instant dFast crosses
+    // zero into agreement with signedIntent — exactly where the physical yaw
+    // is usually still mid-reversal — snapping the rate straight back up to
+    // driftEngageInRate and recreating the "visual outruns physics" overshoot
+    // this mechanism exists to remove (see tools/diagnose_drift_swap.ts sweep
+    // notes). Instead it drives a fast-rise/slow-decay memory filter (same
+    // idiom as dFast/heat/energy below), so the slow rate persists for a
+    // short window PAST the crossing too, giving the physical yaw/speed
+    // transient time to relax before dFast snaps to its new steady value.
+    const baseRate = Math.abs(signedIntent) > Math.abs(this.dFast) ? p.driftEngageInRate : p.driftEngageOutRate;
+    const reversalTrigger = smoothstep(0, 0.05, -signedIntent * this.dFast);
+    const reversalMemRate = reversalTrigger > this.reversalMemory ? REVERSAL_MEMORY_RISE_RATE : REVERSAL_MEMORY_DECAY_RATE;
+    this.reversalMemory = lerp(this.reversalMemory, reversalTrigger, 1 - Math.exp(-reversalMemRate * delta));
+    const rate = lerp(baseRate, p.driftReversalRate, this.reversalMemory);
     const alpha = 1 - Math.exp(-rate * delta);
     this.dFast = lerp(this.dFast, signedIntent, alpha);
 

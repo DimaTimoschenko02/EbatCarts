@@ -107,6 +107,14 @@ export interface KartPhysicsParams {
   driftVisualOffsetDeg: number; // DRIFT_VISUAL_OFFSET_DEG
   driftEngageInRate: number; // DRIFT_ENGAGE_IN_RATE
   driftEngageOutRate: number; // DRIFT_ENGAGE_OUT_RATE
+  // Filter rate applied ONLY while the raw steer intent has flipped against
+  // the currently-live dFast signal (mid-drift reversal, e.g. right-drift ->
+  // left-drift with throttle held). Overrides driftEngageInRate/OutRate for
+  // that case via a continuous blend (see driftContinuous.ts) — a fresh
+  // entry from zero is untouched, only an active-drift direction flip is
+  // slowed down so the visual signal doesn't outrun the physical yaw
+  // reversal (see tools/diagnose_drift_swap.ts).
+  driftReversalRate: number; // DRIFT_REVERSAL_RATE
   driftRecoveryRate: number; // DRIFT_RECOVERY_RATE
   driftExitGripMult: number; // DRIFT_EXIT_GRIP_MULT
   driftRearGripMult: number; // DRIFT_REAR_GRIP_MULT
@@ -302,6 +310,7 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftVisualOffsetDeg: 30,
   driftEngageInRate: 7,
   driftEngageOutRate: 2.5,
+  driftReversalRate: 0.8,
   driftRecoveryRate: 5,
   driftExitGripMult: 2.2,
   driftRearGripMult: 0.25,
