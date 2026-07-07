@@ -199,9 +199,17 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // gravity 22 m/s² is arcade-light (real gravity 9.8 feels floaty/slow for
   // a kart game); groundFollowRate 20 matches the pre-existing hardcoded
   // exp-follow rate kart.ts used before this was parameterized.
+  //
+  // verticalAirborneDropThreshold raised 2.5 -> 4.0 (m/s) when the launch
+  // detector was rewritten to also fire on a flattening ramp-top (not just
+  // cliffs): at arena_slice's 26.6deg ramp slope, a slow crawl (3-5 m/s kart
+  // speed) implies a ~1.3-2.2 m/s climb rate, a cruise (15-22 m/s) implies
+  // ~6.7-9.8 m/s. 4.0 sits in the gap between those two bands so slow
+  // approaches stay glued to the flattening ramp-top while a real cruise
+  // gets an unmistakable trampoline launch. See vertical.test.ts.
   verticalGravity: 22,
   verticalGroundFollowRate: 20,
-  verticalAirborneDropThreshold: 2.5,
+  verticalAirborneDropThreshold: 4.0,
   verticalLandingMargin: 0.04,
 
   // 20 (up from the old hardcoded pitch-only rate of 10) — a plain 10 let a

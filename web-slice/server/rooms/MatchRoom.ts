@@ -111,8 +111,19 @@ interface ActiveRocket {
   flightHeight: number; // constant — gravityScale=0, rocket flies dead level
 }
 
+// Colyseus defaults patchRate to 50ms (20Hz, see @colyseus/core Room.ts
+// DEFAULT_PATCH_RATE) — slower than the 30Hz (~33ms) cadence clients already
+// send "state" at (netClient.ts SEND_INTERVAL_MS), so schema mutations from
+// handleState() below could sit queued for up to 50ms before the next patch
+// broadcast even though they were applied to the schema instantly. Matching
+// the two rates removes that dead time from the movement-relay latency
+// budget without changing anything about WHAT gets sent, only how often the
+// server flushes it — a simulation/transport setting, not game logic.
+const PATCH_RATE_MS = 1000 / 30;
+
 export class MatchRoom extends Room<{ state: MatchState }> {
   maxClients = 8;
+  patchRate = PATCH_RATE_MS;
 
   private rockets: ActiveRocket[] = [];
   private nextRocketId = 0;

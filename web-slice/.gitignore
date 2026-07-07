@@ -1,2 +1,7 @@
 node_modules/
 dist/
+
+# Dev param tuner persistence (src/debug/paramPanel.ts) — personal live-tuning
+# scratch state, not a build artifact. Final values go into
+# DEFAULT_KART_PHYSICS_PARAMS via the panel's "Copy JSON" button instead.
+dev-params.local.json

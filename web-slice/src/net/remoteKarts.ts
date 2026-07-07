@@ -167,16 +167,18 @@ export class RemoteKartManager {
   // remote karts — surfaced through window.__net (net/index.ts) so jitter/
   // catch-up behavior can be sanity-checked during a live playtest without
   // needing devtools breakpoints.
-  getNetStats(): { delayMs: number; jitterMs: number; underruns: number } {
+  getNetStats(): { delayMs: number; jitterMs: number; underruns: number; visualLagMs: number } {
     let delayMs = 0;
     let jitterMs = 0;
     let underruns = 0;
+    let visualLagMs = 0;
     for (const kart of this.karts.values()) {
       const s = kart.interp.stats;
       delayMs = Math.max(delayMs, s.delayMs);
       jitterMs = Math.max(jitterMs, s.jitterMs);
       underruns += s.underruns;
+      visualLagMs = Math.max(visualLagMs, s.visualLagMs);
     }
-    return { delayMs, jitterMs, underruns };
+    return { delayMs, jitterMs, underruns, visualLagMs };
   }
 }

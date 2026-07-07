@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RemoteInterpolator, SnapshotBuffer, lerpAngle } from "./snapshotBuffer";
+import { BASE_RENDER_DELAY_MS, RemoteInterpolator, SnapshotBuffer, lerpAngle } from "./snapshotBuffer";
 
 describe("SnapshotBuffer", () => {
   it("returns null before anything is pushed", () => {
@@ -287,5 +287,50 @@ describe("RemoteInterpolator smoothness under realistic network distortions", ()
     });
     expect(maxRatio).toBeLessThan(1.5);
     expect(minRatio).toBeGreaterThan(0.5);
+  });
+});
+
+// --- Adaptive delay recovery after a one-off gap ----------------------------
+// Regression test for the 2026-07-07 latency pass: GAP_PEAK_DECAY_RATE used
+// to be slow enough (~6.7s time constant) that a SINGLE one-off large gap —
+// e.g. a backgrounded/occluded browser window coalescing its timers for a
+// stretch during a same-machine two-window playtest, not a real recurring
+// network burst — left appliedDelayMs (and therefore the total visual
+// latency) pinned near MAX_RENDER_DELAY_MS for upwards of 10+ seconds after
+// the gap itself was long over. This asserts the delay both DOES widen in
+// response to a genuine gap (confirms the mechanism is still doing its job)
+// and reliably comes back down near the base floor within 5 real seconds of
+// the network going quiet again.
+describe("RemoteInterpolator adaptive delay recovery after a one-off gap", () => {
+  it("widens on a single large gap, then decays back near the base floor within 5s", () => {
+    const interp = new RemoteInterpolator({ x: 0, y: 0, z: 0, yaw: 0 });
+    const dt = 1000 / 60;
+    const sendInterval = 1000 / 30;
+    let clock = 0;
+    let nextSend = 0;
+
+    const runUntil = (target: number): void => {
+      for (; clock < target; clock += dt) {
+        if (clock >= nextSend) {
+          interp.push(clock, { x: 0, y: 0, z: 0, yaw: 0 });
+          nextSend += sendInterval;
+        }
+        interp.update(clock, dt / 1000);
+      }
+    };
+
+    // Warm up on a perfectly regular 30Hz cadence so appliedDelayMs settles
+    // at the base floor before the gap hits.
+    runUntil(1000);
+    expect(interp.stats.delayMs).toBeLessThan(BASE_RENDER_DELAY_MS + 15);
+
+    // A single 500ms gap — one delayed/coalesced send, then cadence resumes.
+    nextSend = clock + 500;
+    runUntil(clock + 700);
+    expect(interp.stats.delayMs).toBeGreaterThan(BASE_RENDER_DELAY_MS + 50);
+
+    // 5 real seconds of calm, regular cadence after the gap.
+    runUntil(clock + 5000);
+    expect(interp.stats.delayMs).toBeLessThan(BASE_RENDER_DELAY_MS + 20);
   });
 });

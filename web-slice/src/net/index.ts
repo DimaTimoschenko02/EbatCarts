@@ -45,7 +45,7 @@ export interface InitNetOptions {
 export function initNet(opts: InitNetOptions): NetHandle {
   const client = new NetClient();
   const remotes = new RemoteKartManager(opts.scene);
-  window.__net = { connected: false, players: 0, delayMs: 0, jitterMs: 0, underruns: 0 };
+  window.__net = { connected: false, players: 0, delayMs: 0, jitterMs: 0, underruns: 0, visualLagMs: 0 };
 
   // Lobby hand-off contract (src/lobby/main.ts): nick in
   // localStorage["sk-nick"], room code in the ?room= query param.
@@ -73,6 +73,7 @@ export function initNet(opts: InitNetOptions): NetHandle {
     window.__net.delayMs = Math.round(stats.delayMs);
     window.__net.jitterMs = Math.round(stats.jitterMs);
     window.__net.underruns = stats.underruns;
+    window.__net.visualLagMs = Math.round(stats.visualLagMs);
   }
   requestAnimationFrame(frame);
 

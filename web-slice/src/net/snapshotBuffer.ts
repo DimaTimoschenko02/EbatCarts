@@ -104,6 +104,25 @@ export class SnapshotBuffer {
     return this.buf.length ? this.buf[this.buf.length - 1] : null;
   }
 
+  // Arrival timestamp of whichever buffered snapshot is currently the
+  // freshest real data INFORMING `renderTime` — the newer bracket edge when
+  // interpolating, or the newest snapshot when renderTime has run past it
+  // (clamped-to-newest or extrapolating). Used only for the visualLagMs
+  // telemetry (RemoteInterpolator.stats) — "how stale is what's on screen
+  // relative to when its underlying network data actually arrived" — not by
+  // sample() itself, so it's a separate read-only query rather than
+  // threading an extra return value through the hot sampling path.
+  informingArrival(renderTime: number): number | null {
+    const n = this.buf.length;
+    if (n === 0) return null;
+    if (renderTime <= this.buf[0].t) return this.buf[0].t;
+    if (renderTime >= this.buf[n - 1].t) return this.buf[n - 1].t;
+    for (let i = 0; i < n - 1; i++) {
+      if (renderTime >= this.buf[i].t && renderTime <= this.buf[i + 1].t) return this.buf[i + 1].t;
+    }
+    return this.buf[n - 1].t; // unreachable given the bounds checks above
+  }
+
   // Interpolated pose at `renderTime` (same clock as the `t` passed to
   // push()). Returns null if nothing has ever been pushed. Clamps to the
   // oldest/newest snapshot when renderTime falls outside the buffered range
@@ -142,10 +161,21 @@ export interface RenderPose {
 }
 
 // How far behind wall-clock time we render a remote kart when the network is
-// calm. Kept at the same 100ms previously tuned in remoteKarts.ts (shooter
-// game, player explicitly asked for minimal added latency) — this is the
-// FLOOR of the adaptive delay below, not a fixed value anymore.
-const BASE_RENDER_DELAY_MS = 100;
+// calm. This is the FLOOR of the adaptive delay below, not a fixed value.
+// Lowered from the original 100ms (2026-07-07, shooter-feel latency pass):
+// with the server's patchRate now matched to the client send rate (30Hz,
+// see server/rooms/MatchRoom.ts) a calm LAN/loopback connection's real
+// inter-arrival gaps sit close to ~33ms, so an 80ms floor still comfortably
+// clears DELAY_MARGIN headroom over that without carrying the full 50ms of
+// pure unused-safety-margin latency the old floor did, for every remote
+// kart, every frame, always. Kept at 80 rather than pushed lower still: the
+// regression suite's plain-jitter scenario (+/-30ms, snapshotBuffer.test.ts)
+// is the floor on how low this can go before the render pointer starts
+// grazing the buffer edge often enough to show up as real judder — verified
+// empirically against that test, not derived analytically. Exported so the
+// "delay returns to base after a burst" regression test doesn't hardcode
+// this tuning value twice.
+export const BASE_RENDER_DELAY_MS = 80;
 // Ceiling on how far the adaptive delay is allowed to grow even under a
 // nasty burst — beyond this a stall is a real disconnect/loss event, not
 // something worth hiding behind ever-more latency.
@@ -154,13 +184,24 @@ const MAX_RENDER_DELAY_MS = 400;
 // (a burst's silent gap, not the average) so the buffer stays a step ahead
 // of the render pointer even right after a burst. Continuous multiplicative
 // decay (not a reset) per smooth-values.md — the peak relaxes back down once
-// the network calms down instead of snapping. Deliberately slow (~6.7s time
-// constant): a recurring burst pattern (e.g. a Wi-Fi power-save cycle firing
-// every ~1-1.5s) needs the held peak to persist across SEVERAL cycles, not
-// decay away between one burst and the next — a faster decay here chases its
-// own tail forever (delay relaxes back down right before the next burst
-// hits, gets caught underprepared again every single cycle).
-const GAP_PEAK_DECAY_RATE = 0.15; // 1/s
+// the network calms down instead of snapping.
+//
+// Retuned 2026-07-07 (was 0.15, ~6.7s time constant): that original value
+// meant a SINGLE one-off gap (e.g. a laptop's Wi-Fi adapter waking up once,
+// or — as diagnosed live during a same-machine two-window playtest — a
+// backgrounded/occluded browser window coalescing its render or delivery
+// timers for a stretch) left the held peak elevated, and therefore
+// appliedDelayMs and the burst-smoothing rate both stuck near their worst-
+// case values, for upwards of 10+ seconds after the network had already
+// gone back to being perfectly calm — read by the player as a persistent
+// ~1s input-to-visual lag that never seemed to recover on its own. 0.5
+// (~2s time constant) still comfortably survives a recurring burst cycle
+// as short as ~1.2s (peak only decays to ~55% of its value between two
+// consecutive bursts of a 1.2s-period pattern, so the SECOND burst still
+// lands on an already-elevated delay/smoothing budget) while returning to
+// baseline within ~3-4s of the network actually going quiet — see the
+// "delay decays back to base after a one-off burst" test below.
+const GAP_PEAK_DECAY_RATE = 0.5; // 1/s
 // Headroom multiplier over the held peak gap — the delay needs to exceed
 // the worst gap, not just match it, or the render pointer still grazes the
 // buffer edge right at the worst moment.
@@ -181,7 +222,17 @@ const DELAY_CHASE_RATE = 3; // 1/s
 // calm value and a burst value based on the SAME held-peak-gap signal that
 // drives the adaptive delay above — smoothstep, not a threshold flip, so
 // there's no discrete rate jump either.
-const RENDER_SMOOTH_RATE_CALM = 12; // normal jitter, snappy
+// Retuned 2026-07-07 alongside GAP_PEAK_DECAY_RATE above (was 12, ~83ms
+// settle lag): a shooter needs the calm-network case to add as little of
+// its own lag as the smoothing pass can get away with. 15 (~67ms settle lag
+// against a constant-velocity target) still visibly cleans up snapshot-to-
+// snapshot stair-stepping — see the still-green jitter/drift smoothness
+// tests below, which is also what capped how much further this could be
+// pushed (20, ~50ms lag, tipped the plain-jitter scenario's worst-case
+// ratio just over budget — empirical ceiling, not analytically derived) —
+// while keeping the filter's own contribution to the total input-to-visual
+// latency budget close to one send tick.
+const RENDER_SMOOTH_RATE_CALM = 15; // normal jitter, snappy
 const RENDER_SMOOTH_RATE_BURST = 4; // mid-burst-recovery, spreads the catch-up over many frames
 const RENDER_SMOOTH_RATE_LO_GAP_MS = 50; // peak gap below this: fully calm rate
 const RENDER_SMOOTH_RATE_HI_GAP_MS = 140; // peak gap above this: fully burst rate
@@ -210,6 +261,12 @@ const MAX_EXTRAPOLATION_MS = 300;
 // or near-zero underestimates) that then poison the smoothed estimate used
 // to bridge the NEXT gap.
 const NOMINAL_TICK_MS = 1000 / 30;
+// How smoothly the visualLagMs TELEMETRY READOUT reacts to each frame's raw
+// measurement (see stats getter / SnapshotBuffer.informingArrival above).
+// This only steadies the on-screen number for a human reading window.__net
+// during a live playtest — it does not feed back into rendering at all, so
+// it's tuned purely for readability, not latency budget.
+const VISUAL_LAG_EMA_RATE = 5; // 1/s
 
 // Per-remote-kart interpolation state: buffers raw arrival timestamps (see
 // the JitterResampler history note above for why NOT a synthetic clock),
@@ -228,6 +285,7 @@ export class RemoteInterpolator {
   private readonly velocity = { x: 0, y: 0, z: 0 };
   private wasStalled = false;
   private underrunEvents = 0;
+  private visualLagSmoothMs = 0;
 
   constructor(initial: RenderPose) {
     this.smoothPos = { x: initial.x, y: initial.y, z: initial.z };
@@ -300,12 +358,31 @@ export class RemoteInterpolator {
       this.smoothPos.z += (s.z - this.smoothPos.z) * alpha;
       this.smoothYaw = lerpAngle(this.smoothYaw, s.yaw, alpha);
     }
+
+    // visualLagMs telemetry: "how old is the network data currently on
+    // screen", i.e. wall-clock now minus the arrival time of whichever real
+    // packet is informing the CURRENT renderTime (see
+    // SnapshotBuffer.informingArrival) — the full end-to-end number a
+    // player-perceived-lag report should be checked against, as opposed to
+    // appliedDelayMs alone (which omits the post-interpolation smoothing
+    // pass's own contribution). Falls back to appliedDelayMs itself before
+    // anything has ever been pushed (informingArrival returns null).
+    const informingT = this.buffer.informingArrival(renderTime);
+    const rawVisualLag = informingT !== null ? nowMs - informingT : this.appliedDelayMs;
+    this.visualLagSmoothMs += (rawVisualLag - this.visualLagSmoothMs) * (1 - Math.exp(-VISUAL_LAG_EMA_RATE * dtSec));
+
     return { x: this.smoothPos.x, y: this.smoothPos.y, z: this.smoothPos.z, yaw: this.smoothYaw };
   }
 
-  // Diagnostics surfaced through window.__net (see net/index.ts) so jitter
-  // and catch-up behavior can be eyeballed during a live playtest.
-  get stats(): { delayMs: number; jitterMs: number; underruns: number } {
-    return { delayMs: this.appliedDelayMs, jitterMs: this.peakGapMs, underruns: this.underrunEvents };
+  // Diagnostics surfaced through window.__net (see net/index.ts) so jitter,
+  // catch-up behavior, and true perceived latency can be eyeballed during a
+  // live playtest.
+  get stats(): { delayMs: number; jitterMs: number; underruns: number; visualLagMs: number } {
+    return {
+      delayMs: this.appliedDelayMs,
+      jitterMs: this.peakGapMs,
+      underruns: this.underrunEvents,
+      visualLagMs: this.visualLagSmoothMs,
+    };
   }
 }

@@ -21,15 +21,27 @@ declare global {
     // completes; stays false forever in offline mode (server unreachable is
     // NOT an error, see net/netClient.ts). `players` is the count of OTHER
     // connected players currently rendered (excludes the local kart).
-    // `delayMs`/`jitterMs`/`underruns` are worst-case remote-kart
-    // interpolation diagnostics (see net/remoteKarts.ts getNetStats() /
+    // `delayMs`/`jitterMs`/`underruns`/`visualLagMs` are worst-case remote-
+    // kart interpolation diagnostics (see net/remoteKarts.ts getNetStats() /
     // net/snapshotBuffer.ts RemoteInterpolator) — glance at these live during
-    // a playtest to sanity-check smoothness fixes: delayMs is the current
-    // adaptive render delay (grows above the 100ms floor when arrivals get
-    // bursty/jittery), jitterMs is the worst recently observed inter-arrival
-    // gap driving that delay, underruns counts render-pointer-outran-buffer
-    // events since connecting (should stay near 0 on a healthy connection).
-    __net: { connected: boolean; players: number; delayMs: number; jitterMs: number; underruns: number };
+    // a playtest to sanity-check smoothness/latency fixes: delayMs is the
+    // current adaptive render delay (grows above the 70ms floor when
+    // arrivals get bursty/jittery), jitterMs is the worst recently observed
+    // inter-arrival gap driving that delay, underruns counts render-pointer-
+    // outran-buffer events since connecting (should stay near 0 on a healthy
+    // connection), visualLagMs is the smoothed end-to-end "how stale is what
+    // I'm currently looking at" number — now minus the arrival time of the
+    // network packet actually informing the current frame, i.e. delayMs PLUS
+    // the post-interpolation smoothing pass's own lag — the one to compare
+    // directly against a player's "it feels delayed by about X" report.
+    __net: {
+      connected: boolean;
+      players: number;
+      delayMs: number;
+      jitterMs: number;
+      underruns: number;
+      visualLagMs: number;
+    };
   }
 }
 

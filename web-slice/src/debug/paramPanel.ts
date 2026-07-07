@@ -18,7 +18,12 @@ import { DEFAULT_KART_PHYSICS_PARAMS, type KartPhysicsParams } from "../physics/
 import type { Kart } from "../kart/kart";
 
 const STORAGE_KEY = "sk-dev-params";
-type ParamKey = keyof KartPhysicsParams;
+// Dev-server-only route registered by the devParamsFilePlugin in
+// vite.config.ts. Doesn't exist under `vite build` (prod) — every fetch
+// against it there 404s/network-errors, which the panel treats as "no file
+// backing available, stay on localStorage".
+const DEV_PARAMS_ENDPOINT = "/__dev-params";
+export type ParamKey = keyof KartPhysicsParams;
 
 interface ParamDescriptor {
   key: ParamKey;
@@ -256,6 +261,136 @@ export function parseStoredOverrides(raw: string | null): Partial<KartPhysicsPar
   return out as Partial<KartPhysicsParams>;
 }
 
+// ─── History / revert (pure) ────────────────────────────────────────────
+// One entry per slider commit. `key: "__reset__"` is the special "Reset all"
+// snapshot: oldValue is the full overrides diff that was active right before
+// the reset (so it can be replayed back), newValue is always `{}` (meaning
+// "defaults"). Every other entry is a single-field change with old/new as
+// plain number|boolean.
+export interface HistoryEntry {
+  ts: number;
+  key: ParamKey | "__reset__";
+  oldValue: number | boolean | Partial<KartPhysicsParams>;
+  newValue: number | boolean | Partial<KartPhysicsParams>;
+}
+
+export const HISTORY_MAX_LEN = 200;
+
+// Ring buffer: append then drop from the front once over maxLen. Returns a
+// new array (caller reassigns its `history` binding) rather than mutating,
+// matching the rest of this module's pure-function style.
+export function pushHistoryEntry(
+  history: HistoryEntry[],
+  entry: HistoryEntry,
+  maxLen: number = HISTORY_MAX_LEN
+): HistoryEntry[] {
+  const next = [...history, entry];
+  if (next.length > maxLen) next.splice(0, next.length - maxLen);
+  return next;
+}
+
+// Replays history[0..index) and folds it into an overrides diff — i.e. "the
+// overrides state as it was right before history[index] was applied". This
+// is how revert/undo compute their target state: no separate snapshot
+// storage needed, just fold the log up to a cut point. A `__reset__` entry
+// hard-resets the running overrides to its recorded newValue (always `{}`)
+// before folding continues; every other entry sets/deletes a single key
+// (deletes when the new value happens to equal the default, keeping the
+// invariant that `overrides` only ever holds fields that differ from
+// defaults — same invariant diffFromDefaults produces).
+export function computeOverridesAtIndex(
+  history: HistoryEntry[],
+  index: number,
+  defaults: KartPhysicsParams = DEFAULT_KART_PHYSICS_PARAMS
+): Partial<KartPhysicsParams> {
+  const clamped = Math.max(0, Math.min(index, history.length));
+  let overrides: Partial<KartPhysicsParams> = {};
+  for (let i = 0; i < clamped; i++) {
+    const entry = history[i];
+    if (entry.key === "__reset__") {
+      overrides = { ...(entry.newValue as Partial<KartPhysicsParams>) };
+      continue;
+    }
+    const key = entry.key;
+    const next: Partial<Record<ParamKey, number | boolean>> = { ...overrides };
+    if (entry.newValue === defaults[key]) {
+      delete next[key];
+    } else {
+      next[key] = entry.newValue as number | boolean;
+    }
+    overrides = next as Partial<KartPhysicsParams>;
+  }
+  return overrides;
+}
+
+// "Revert to this point in time": undo every entry from `index` onward
+// (inclusive), i.e. land on the state as it was immediately before
+// history[index] happened. Truncates the log itself (the undone entries are
+// gone, not just their effects) — a subsequent revert-to-an-earlier-point
+// still works correctly since it only ever needs entries before it.
+export function revertToIndex(
+  history: HistoryEntry[],
+  index: number
+): { overrides: Partial<KartPhysicsParams>; history: HistoryEntry[] } {
+  const clamped = Math.max(0, Math.min(index, history.length));
+  return { overrides: computeOverridesAtIndex(history, clamped), history: history.slice(0, clamped) };
+}
+
+// "Undo" = revert to the point right before the most recent entry. Returns
+// null when there's nothing to undo (empty history) so callers can show a
+// "nothing to undo" status instead of silently no-op'ing.
+export function undoLast(
+  history: HistoryEntry[]
+): { overrides: Partial<KartPhysicsParams>; history: HistoryEntry[] } | null {
+  if (history.length === 0) return null;
+  return revertToIndex(history, history.length - 1);
+}
+
+// ─── Dev-params file parsing (pure) ─────────────────────────────────────
+// Same defensive philosophy as parseStoredOverrides: the file on disk is
+// user/hand-editable and can outlive renamed/removed fields, so every entry
+// is individually validated and unknown junk is silently dropped rather than
+// blowing up the panel.
+export function parseHistoryEntries(raw: unknown): HistoryEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const knownKeys = new Set<string>(PARAM_DESCRIPTORS.map(d => d.key));
+  const out: HistoryEntry[] = [];
+  for (const item of raw as unknown[]) {
+    if (typeof item !== "object" || item === null) continue;
+    const e = item as Record<string, unknown>;
+    if (typeof e.ts !== "number") continue;
+    if (e.key === "__reset__") {
+      const oldValue = typeof e.oldValue === "object" && e.oldValue !== null ? (e.oldValue as Partial<KartPhysicsParams>) : {};
+      const newValue = typeof e.newValue === "object" && e.newValue !== null ? (e.newValue as Partial<KartPhysicsParams>) : {};
+      out.push({ ts: e.ts, key: "__reset__", oldValue, newValue });
+      continue;
+    }
+    if (
+      typeof e.key === "string" &&
+      knownKeys.has(e.key) &&
+      (typeof e.oldValue === "number" || typeof e.oldValue === "boolean") &&
+      (typeof e.newValue === "number" || typeof e.newValue === "boolean")
+    ) {
+      out.push({ ts: e.ts, key: e.key as ParamKey, oldValue: e.oldValue, newValue: e.newValue });
+    }
+  }
+  return out;
+}
+
+export interface DevParamsFile {
+  overrides: Partial<KartPhysicsParams>;
+  history: HistoryEntry[];
+}
+
+export function parseDevParamsFile(data: unknown): DevParamsFile {
+  if (typeof data !== "object" || data === null) return { overrides: {}, history: [] };
+  const obj = data as Record<string, unknown>;
+  return {
+    overrides: parseStoredOverrides(JSON.stringify(obj.overrides ?? {})),
+    history: parseHistoryEntries(obj.history),
+  };
+}
+
 // Mutates `target` in place with every field present in `overrides` — this
 // is the live-apply step: `target` is the exact object BicyclePhysics /
 // ContinuousDrift hold by reference, so this is the whole mechanism.
@@ -284,16 +419,51 @@ function saveOverrides(overrides: Partial<KartPhysicsParams>): void {
   }
 }
 
+// GET at startup: if the dev-server route answers, the file is the source of
+// truth (survives a browser localStorage wipe / a different browser). If the
+// route doesn't exist (prod build, offline) fetch throws or the request
+// never lands — either way we return null and the caller just keeps
+// whatever localStorage already applied.
+async function fetchDevParamsFile(): Promise<DevParamsFile | null> {
+  try {
+    const res = await fetch(DEV_PARAMS_ENDPOINT);
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    return parseDevParamsFile(data);
+  } catch {
+    return null;
+  }
+}
+
+// Fire-and-forget POST; failures (prod build / offline) are silently
+// swallowed — localStorage already has the up-to-date state regardless, this
+// is purely the "also survive outside the browser" path.
+async function postDevParamsFile(payload: DevParamsFile): Promise<void> {
+  try {
+    await fetch(DEV_PARAMS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // route unavailable — nothing to do, see comment above.
+  }
+}
+
 // ─── DOM ────────────────────────────────────────────────────────────────
 
 const PANEL_ID = "sk-param-panel";
 
-export function initParamPanel(kart: Kart): void {
+export async function initParamPanel(kart: Kart): Promise<void> {
   if (document.getElementById(PANEL_ID)) return; // idempotent — no double-mount
   const params = kart.physicsParams;
 
   // Apply whatever was persisted from a previous session before building the
-  // UI, so sliders start at the already-tuned values.
+  // UI, so sliders start at the already-tuned values. This is the
+  // localStorage-only bootstrap (synchronous, always available); the
+  // file-backed GET below runs after the panel is built and, if it answers,
+  // overwrites this with the on-disk state (file wins — see task write-up).
+  let history: HistoryEntry[] = [];
   applyOverrides(params, parseStoredOverrides(localStorage.getItem(STORAGE_KEY)));
 
   const panel = document.createElement("div");
@@ -319,7 +489,60 @@ export function initParamPanel(kart: Kart): void {
   Object.assign(status.style, { color: "#888", alignSelf: "center", fontSize: "11px" });
   toolbar.appendChild(makeButton("Copy JSON", () => copyDiffToClipboard()));
   toolbar.appendChild(makeButton("Reset all", () => resetAll()));
+  toolbar.appendChild(makeButton("Undo", () => undo()));
+  toolbar.appendChild(makeButton("История", () => toggleHistoryPanel()));
   toolbar.appendChild(status);
+
+  // Collapsed by default (dev tool — history is a "break glass" tool, not
+  // something glanced at every slider tweak). Rebuilt from scratch on every
+  // change rather than diffed/patched — this list tops out at
+  // HISTORY_MAX_LEN (200) rows, a full innerHTML rebuild of that is cheap
+  // and far simpler than incremental DOM patching for a dev-only panel.
+  const historyPanel = document.createElement("div");
+  Object.assign(historyPanel.style, {
+    display: "none", marginBottom: "12px", padding: "6px 8px",
+    background: "rgba(255,255,255,.04)", border: "1px solid #333",
+    borderRadius: "6px", maxHeight: "260px", overflowY: "auto",
+  });
+  panel.appendChild(historyPanel);
+
+  let historyVisible = false;
+  function toggleHistoryPanel(): void {
+    historyVisible = !historyVisible;
+    historyPanel.style.display = historyVisible ? "block" : "none";
+    if (historyVisible) renderHistoryList();
+  }
+
+  function renderHistoryList(): void {
+    historyPanel.innerHTML = "";
+    if (history.length === 0) {
+      const empty = document.createElement("div");
+      empty.textContent = "История пуста";
+      Object.assign(empty.style, { color: "#666", fontSize: "11px" });
+      historyPanel.appendChild(empty);
+      return;
+    }
+    // Newest first — most useful entry (what did I just do / what do I most
+    // likely want to roll back to) at the top, no scrolling needed for the
+    // common case.
+    for (let i = history.length - 1; i >= 0; i--) {
+      const entry = history[i];
+      const row = document.createElement("div");
+      Object.assign(row.style, {
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        gap: "6px", padding: "3px 0", borderBottom: "1px solid #222", fontSize: "10px",
+      });
+      const label = document.createElement("span");
+      label.textContent = `${formatTime(entry.ts)}  ${formatHistoryEntry(entry)}`;
+      Object.assign(label.style, { color: "#aaa", flex: "1" });
+      row.appendChild(label);
+      const revertBtn = makeButton("↩", () => revertTo(i));
+      Object.assign(revertBtn.style, { padding: "1px 6px", fontSize: "10px" });
+      revertBtn.title = "Откатить до состояния перед этим изменением";
+      row.appendChild(revertBtn);
+      historyPanel.appendChild(row);
+    }
+  }
 
   const rowsByKey = new Map<ParamKey, { numberInput: HTMLInputElement; rangeInput: HTMLInputElement | null }>();
 
@@ -338,7 +561,7 @@ export function initParamPanel(kart: Kart): void {
     groupEl.appendChild(groupTitle);
 
     for (const d of groupDescriptors) {
-      groupEl.appendChild(buildParamRow(d, params, rowsByKey, () => onAnyChange()));
+      groupEl.appendChild(buildParamRow(d, params, rowsByKey, (key, oldValue, newValue) => onParamChange(key, oldValue, newValue)));
     }
     panel.appendChild(groupEl);
   }
@@ -348,6 +571,42 @@ export function initParamPanel(kart: Kart): void {
     saveOverrides(diff);
     status.textContent = "saved";
     setTimeout(() => { if (status.textContent === "saved") status.textContent = ""; }, 800);
+  }
+
+  // Debounced disk write (~500ms after the last slider move) — file I/O per
+  // tick of a dragged range input would be wasteful and can race itself;
+  // localStorage (onAnyChange, above) stays instant since it's synchronous
+  // and local.
+  let persistTimer: ReturnType<typeof setTimeout> | null = null;
+  function schedulePersist(): void {
+    if (persistTimer !== null) clearTimeout(persistTimer);
+    persistTimer = setTimeout(() => {
+      persistTimer = null;
+      void postDevParamsFile({ overrides: diffFromDefaults(params), history });
+    }, 500);
+  }
+
+  function onParamChange(key: ParamKey, oldValue: number | boolean, newValue: number | boolean): void {
+    if (oldValue === newValue) return; // range "input" can fire without an actual value change
+    history = pushHistoryEntry(history, { ts: Date.now(), key, oldValue, newValue });
+    onAnyChange();
+    schedulePersist();
+    if (historyVisible) renderHistoryList();
+  }
+
+  function syncRowsFromParams(): void {
+    for (const d of PARAM_DESCRIPTORS) {
+      const row = rowsByKey.get(d.key);
+      if (!row) continue;
+      const val = getParamValue(params, d.key);
+      if (d.bool) {
+        row.numberInput.checked = Boolean(val);
+        row.numberInput.value = val ? "1" : "0";
+      } else {
+        row.numberInput.value = String(val);
+        if (row.rangeInput) row.rangeInput.value = String(val);
+      }
+    }
   }
 
   function copyDiffToClipboard(): void {
@@ -363,17 +622,48 @@ export function initParamPanel(kart: Kart): void {
   }
 
   function resetAll(): void {
+    // Snapshot what's about to be thrown away *before* touching params, so
+    // the history entry (and therefore "revert to here") can bring it all
+    // back.
+    const prevOverrides = diffFromDefaults(params);
+    history = pushHistoryEntry(history, { ts: Date.now(), key: "__reset__", oldValue: prevOverrides, newValue: {} });
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
     applyOverrides(params, DEFAULT_KART_PHYSICS_PARAMS);
-    for (const d of PARAM_DESCRIPTORS) {
-      const row = rowsByKey.get(d.key);
-      if (!row) continue;
-      const val = getParamValue(params, d.key);
-      row.numberInput.value = String(val);
-      if (row.rangeInput) row.rangeInput.value = String(val);
-    }
+    syncRowsFromParams();
     status.textContent = "reset to defaults";
     setTimeout(() => { status.textContent = ""; }, 1200);
+    schedulePersist();
+    if (historyVisible) renderHistoryList();
+  }
+
+  function undo(): void {
+    const result = undoLast(history);
+    if (result === null) {
+      status.textContent = "нечего откатывать";
+      setTimeout(() => { status.textContent = ""; }, 1200);
+      return;
+    }
+    applyResult(result, "undo");
+  }
+
+  function revertTo(index: number): void {
+    applyResult(revertToIndex(history, index), "откат выполнен");
+  }
+
+  // Shared tail end of undo()/revertTo(): both compute a target
+  // {overrides, history} pair the same way (revertToIndex under the hood) —
+  // this just applies it live and refreshes every surface that shows state
+  // (sliders, localStorage, disk, history list, status text).
+  function applyResult(result: { overrides: Partial<KartPhysicsParams>; history: HistoryEntry[] }, statusText: string): void {
+    history = result.history;
+    applyOverrides(params, DEFAULT_KART_PHYSICS_PARAMS);
+    applyOverrides(params, result.overrides);
+    syncRowsFromParams();
+    saveOverrides(result.overrides);
+    schedulePersist();
+    status.textContent = statusText;
+    setTimeout(() => { status.textContent = ""; }, 1200);
+    if (historyVisible) renderHistoryList();
   }
 
   // Block WASD/Space/etc. from reaching the game's InputController (which
@@ -399,13 +689,48 @@ export function initParamPanel(kart: Kart): void {
     if (e.code !== "KeyP" || e.repeat) return;
     setVisible(!visible);
   }, { capture: true });
+
+  // File is the source of truth when reachable (dev server only — see
+  // devParamsFilePlugin in vite.config.ts). Runs after the panel is already
+  // built and interactive on the localStorage-only state so there's no
+  // blank/loading flash; if the fetch answers, it overwrites that state
+  // (and mirrors it back into localStorage) a moment later.
+  const fileState = await fetchDevParamsFile();
+  if (fileState !== null) {
+    history = fileState.history;
+    applyOverrides(params, DEFAULT_KART_PHYSICS_PARAMS);
+    applyOverrides(params, fileState.overrides);
+    syncRowsFromParams();
+    saveOverrides(fileState.overrides);
+    if (historyVisible) renderHistoryList();
+  }
+}
+
+function formatTime(ts: number): string {
+  const d = new Date(ts);
+  const pad = (n: number): string => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function formatValue(v: number | boolean | Partial<KartPhysicsParams>): string {
+  if (typeof v === "boolean") return v ? "true" : "false";
+  if (typeof v === "number") return String(v);
+  return "{...}";
+}
+
+function formatHistoryEntry(entry: HistoryEntry): string {
+  if (entry.key === "__reset__") {
+    const n = Object.keys(entry.oldValue as Partial<KartPhysicsParams>).length;
+    return `RESET ALL (${n} парам. → дефолт)`;
+  }
+  return `${entry.key}: ${formatValue(entry.oldValue)} → ${formatValue(entry.newValue)}`;
 }
 
 function buildParamRow(
   d: ParamDescriptor,
   params: KartPhysicsParams,
   rowsByKey: Map<ParamKey, { numberInput: HTMLInputElement; rangeInput: HTMLInputElement | null }>,
-  onChange: () => void
+  onChange: (key: ParamKey, oldValue: number | boolean, newValue: number | boolean) => void
 ): HTMLElement {
   const row = document.createElement("div");
   Object.assign(row.style, { marginBottom: "8px" });
@@ -429,9 +754,11 @@ function buildParamRow(
     numberInput.checked = Boolean(current);
     numberInput.value = current ? "1" : "0";
     numberInput.addEventListener("change", () => {
-      setParamValue(params, d.key, numberInput.checked);
-      numberInput.value = numberInput.checked ? "1" : "0";
-      onChange();
+      const oldValue = getParamValue(params, d.key);
+      const newValue = numberInput.checked;
+      setParamValue(params, d.key, newValue);
+      numberInput.value = newValue ? "1" : "0";
+      onChange(d.key, oldValue, newValue);
     });
     nameLine.appendChild(numberInput);
   } else {
@@ -459,17 +786,19 @@ function buildParamRow(
 
     const range = rangeInput; // narrow for closures below (non-null)
     range.addEventListener("input", () => {
-      const value = Number(range.value);
-      setParamValue(params, d.key, value);
+      const oldValue = getParamValue(params, d.key);
+      const newValue = Number(range.value);
+      setParamValue(params, d.key, newValue);
       numberInput.value = range.value;
-      onChange();
+      onChange(d.key, oldValue, newValue);
     });
     numberInput.addEventListener("change", () => {
-      const value = Number(numberInput.value);
-      if (!Number.isFinite(value)) return;
-      setParamValue(params, d.key, value);
-      range.value = String(value);
-      onChange();
+      const oldValue = getParamValue(params, d.key);
+      const newValue = Number(numberInput.value);
+      if (!Number.isFinite(newValue)) return;
+      setParamValue(params, d.key, newValue);
+      range.value = String(newValue);
+      onChange(d.key, oldValue, newValue);
     });
 
     controlLine.appendChild(rangeInput);
