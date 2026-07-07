@@ -1,5 +1,5 @@
 // Browser map editor for the Kenney Space Kit tile format consumed by
-// GameMap (src/game/mapLoader.ts). Standalone page — no game physics, no
+// GameMap (src/map/mapLoader.ts). Standalone page — no game physics, no
 // network — just a click-to-place grid tool that exports the same MapJson
 // the runtime loader reads (see .claude/rules/map-building.md for the
 // asset/rotation conventions this UI surfaces as on-screen hints).
@@ -11,9 +11,9 @@
 // renders identically once loaded through GameMap.fromJson in the game.
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { loadAssetLibrary } from "../game/assetLoader";
-import type { AssetLibrary } from "../game/assetLoader";
-import type { MapJson } from "../game/mapLoader";
+import { loadAssetLibrary } from "../map/assetLoader";
+import type { AssetLibrary } from "../map/assetLoader";
+import type { MapJson } from "../map/mapLoader";
 
 const GRID_SIZE = 32; // cells per side
 const TILE_SIZE = 1;
