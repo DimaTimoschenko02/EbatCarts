@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smash Karts — Lobby</title>
+<style>
+  :root {
+    /* Neon Stadium palette — exact values from scripts/ui/ui_palette.gd,
+       see docs/p2-port-notes.md section "Палитра Neon Stadium". Keep this
+       block in sync if the Godot-era palette ever changes. */
+    --bg-deep: #0C0F1F;
+    --bg-panel: #1D213E;
+    --bg-panel-light: #2A3257;
+    --bg-input: #0D1221;
+    --bg-button: #293666;
+    --bg-button-hover: #3D579E;
+    --bg-button-pressed: #1A2445;
+    --bg-button-disabled: #161A2E;
+    --bg-destructive: #6B2133;
+
+    --accent-gold: #FFD633;
+    --accent-cyan: #4CEBFF;
+    --accent-magenta: #F44CC7;
+    --accent-red: #FF4C5C;
+
+    --text-primary: #F5FAFF;
+    --text-secondary: #B3C7EB;
+    --text-dim: #7A8FB8;
+
+    --status-ok: #66FF80;
+    --status-error: #FF6B85;
+
+    --border-normal: rgba(76, 219, 255, 0.55);
+    --border-hover: #4CEBFF;
+    --border-focus: #FFD633;
+
+    --radius-card: 18px;
+    --radius-button: 10px;
+    --radius-input: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  /* Radial "stadium light" blobs — cyan / magenta / gold, blurred, fixed
+     behind everything. Purely decorative, no interaction. */
+  #bg-blobs {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(600px circle at 15% 20%, rgba(76, 235, 255, 0.16), transparent 60%),
+      radial-gradient(700px circle at 85% 15%, rgba(244, 76, 199, 0.14), transparent 60%),
+      radial-gradient(800px circle at 50% 100%, rgba(255, 214, 51, 0.10), transparent 60%);
+  }
+
+  #app {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    height: 100vh; width: 100vw;
+    padding: 16px;
+  }
+
+  .screen {
+    display: none;
+    width: min(92vw, 440px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+    text-align: center;
+  }
+  .screen.active { display: flex; }
+
+  /* Respect user motion preferences — no forced animation beyond a quick
+     fade, and none at all if reduced motion is requested. */
+  .screen { animation: fade-in 0.25s ease-out; }
+  @media (prefers-reduced-motion: reduce) {
+    .screen { animation: none; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-card);
+    padding: 36px 28px;
+    box-shadow: 0 0 40px rgba(76, 219, 255, 0.08);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .logo {
+    font-size: clamp(40px, 11vw, 64px);
+    font-weight: 800;
+    letter-spacing: 4px;
+    line-height: 1.05;
+    margin: 0;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    text-shadow:
+      0 0 14px rgba(76, 235, 255, 0.65),
+      0 0 34px rgba(244, 76, 199, 0.35);
+  }
+  .logo .accent-word { color: var(--accent-gold); text-shadow: 0 0 14px rgba(255, 214, 51, 0.6); }
+
+  .tagline {
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    font-size: 13px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+
+  input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-input);
+    color: var(--text-primary);
+    font-size: 22px;
+    font-family: inherit;
+    padding: 12px 14px;
+    text-align: center;
+    letter-spacing: 1px;
+    outline: none;
+  }
+  input::placeholder { color: var(--text-dim); }
+  input:focus { border-color: var(--border-focus); }
+
+  #join-code-input { text-transform: uppercase; }
+
+  .btn {
+    background: var(--bg-button);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-button);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 18px 28px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg-button-hover); border-color: var(--border-hover); color: var(--accent-gold); }
+  .btn:active:not(:disabled) { background: var(--bg-button-pressed); }
+  .btn:disabled { background: var(--bg-button-disabled); color: var(--text-dim); cursor: not-allowed; border-color: transparent; }
+  .btn:focus-visible { border-color: var(--border-focus); box-shadow: 0 0 0 2px rgba(255, 214, 51, 0.35); }
+
+  .btn-secondary { background: var(--bg-panel-light); }
+  .btn-secondary:hover:not(:disabled) { background: var(--bg-button-hover); }
+
+  .btn-link {
+    background: none; border: none; color: var(--accent-cyan);
+    font-family: inherit; font-size: 13px; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer; padding: 4px;
+  }
+  .btn-link:hover { color: var(--accent-gold); }
+
+  .field-error {
+    min-height: 18px;
+    color: var(--status-error);
+    font-size: 13px;
+  }
+
+  .welcome-row {
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--text-secondary); font-size: 14px; letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .accent { color: var(--accent-gold); font-weight: 700; }
+
+  .divider {
+    color: var(--text-dim); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; text-align: center;
+  }
+
+  .join-row { display: flex; gap: 8px; }
+  .join-row input { flex: 1; min-width: 0; }
+  .join-row .btn { flex: 0 0 auto; }
+
+  .room-code-display {
+    font-size: 42px; font-weight: 800; letter-spacing: 8px;
+    color: var(--accent-gold);
+    text-shadow: 0 0 18px rgba(255, 214, 51, 0.5);
+    background: var(--bg-input);
+    border: 1px solid var(--border-focus);
+    border-radius: var(--radius-input);
+    padding: 14px 10px;
+  }
+
+  .copy-feedback {
+    min-height: 18px;
+    color: var(--status-ok);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div id="bg-blobs"></div>
+<div id="app">
+
+  <section id="screen-splash" class="screen active">
+    <h1 class="logo">SMASH<br><span class="accent-word">KARTS</span></h1>
+    <div class="tagline" id="splash-hint">Tap to continue</div>
+  </section>
+
+  <section id="screen-nick" class="screen">
+    <div class="panel">
+      <h2>Enter your name</h2>
+      <input id="nick-input" maxlength="16" placeholder="NICKNAME" autocomplete="off" spellcheck="false">
+      <div class="field-error" id="nick-error"></div>
+      <button id="btn-play" class="btn">Play</button>
+    </div>
+  </section>
+
+  <section id="screen-home" class="screen">
+    <div class="panel">
+      <div class="welcome-row">
+        <span>Welcome, <span id="home-nick" class="accent"></span></span>
+        <button id="btn-change-nick" class="btn-link">Change</button>
+      </div>
+      <button id="btn-create-room" class="btn">Create Room</button>
+      <div class="divider">or</div>
+      <div class="join-row">
+        <input id="join-code-input" maxlength="6" placeholder="ROOM CODE" autocomplete="off" spellcheck="false">
+        <button id="btn-join-room" class="btn btn-secondary">Join</button>
+      </div>
+      <div class="field-error" id="join-error"></div>
+    </div>
+  </section>
+
+  <section id="screen-room" class="screen">
+    <div class="panel">
+      <h2 id="room-title">Room Ready</h2>
+      <div class="room-code-display" id="room-code-display">------</div>
+      <button id="btn-copy-link" class="btn btn-secondary">Copy Invite Link</button>
+      <div class="copy-feedback" id="copy-feedback"></div>
+      <button id="btn-go" class="btn">Go</button>
+      <button id="btn-back-home" class="btn-link">Back</button>
+    </div>
+  </section>
+
+</div>
+<script type="module" src="/src/lobby/main.ts"></script>
+</body>
+</html>
