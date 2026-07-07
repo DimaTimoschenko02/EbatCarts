@@ -16,6 +16,12 @@ declare global {
     __ready: boolean;
     __camMode: "chase" | "top";
     __topHeight: number;
+    // Multiplayer skeleton status — set by src/net/index.ts (initNet).
+    // `connected` flips to true once the Colyseus match server handshake
+    // completes; stays false forever in offline mode (server unreachable is
+    // NOT an error, see net/netClient.ts). `players` is the count of OTHER
+    // connected players currently rendered (excludes the local kart).
+    __net: { connected: boolean; players: number };
   }
 }
 

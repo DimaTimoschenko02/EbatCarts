@@ -15,6 +15,7 @@ import { InputController } from "./core/input";
 import { FixedStepLoop } from "./core/loop";
 import { updateCamera } from "./core/camera";
 import { Telemetry } from "./debug/telemetry";
+import { initNet } from "./net";
 
 // Keep in sync with the editor palette (src/editor/main.ts) — a map driven
 // from the editor must not silently drop tiles the game never preloaded.
@@ -63,6 +64,11 @@ const kart = new Kart(scene, stats, SPAWN);
 const input = new InputController();
 const telemetry = new Telemetry(kart, input);
 const hud = document.getElementById("hud")!;
+
+// Multiplayer skeleton: owner-authoritative, strictly optional (see net/).
+// Runs its own connect/send/interpolate lifecycle — nothing else in this
+// file ever touches net/ again after this call.
+initNet({ scene, getLocalState: () => ({ x: kart.position.x, y: kart.position.y, z: kart.position.z, yaw: kart.yaw }) });
 
 // Map + kart model load async: physics runs from frame one on a flat
 // fallback (height 0) and switches to the map heightfield when it arrives.
