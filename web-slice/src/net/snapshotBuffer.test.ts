@@ -334,3 +334,108 @@ describe("RemoteInterpolator adaptive delay recovery after a one-off gap", () =>
     expect(interp.stats.delayMs).toBeLessThan(BASE_RENDER_DELAY_MS + 20);
   });
 });
+
+// --- Teleport (respawn / long-distance server snap) handling ---------------
+// Reproduction for the 2026-07-07 live playtest report: a remote kart
+// "jerks forward-backward" right after spawning (and after being hit by a
+// rocket while stationary). Respawn moves a kart across the map in a single
+// server tick — from the interpolator's point of view that's ONE snapshot
+// landing tens of meters from the previous one. push()'s velocity EMA
+// (see NOMINAL_TICK_MS / VELOCITY_EMA_ALPHA above) has no notion of
+// "this delta wasn't real motion" — it blends 25% of the instantaneous
+// (delta / one-tick) velocity, which for a 30m jump over one ~33ms tick is
+// on the order of 900 m/s, straight into the smoothed estimate used for
+// short-horizon extrapolation. The very next time renderTime runs even
+// slightly past the newest snapshot (a completely ordinary occurrence — see
+// file header), that poisoned velocity flings the rendered kart far past
+// its true (stationary) spawn position; the following real snapshot then
+// yanks it back — the reported "качели".
+describe("RemoteInterpolator teleport handling", () => {
+  it("does not overshoot past a respawn position even when a packet is lost right after the teleport", () => {
+    const interp = new RemoteInterpolator({ x: 0, y: 0, z: 0, yaw: 0 });
+    const dt = 1000 / 60;
+    const sendInterval = 1000 / 30;
+    let clock = 0;
+    let nextSend = 0;
+
+    // Warm up: stationary at x=0 (e.g. sitting in the middle of the map)
+    // long enough for delay/velocity state to settle.
+    for (; clock < 1000; clock += dt) {
+      if (clock >= nextSend) {
+        interp.push(clock, { x: 0, y: 0, z: 0, yaw: 0 });
+        nextSend += sendInterval;
+      }
+      interp.update(clock, dt / 1000);
+    }
+
+    // Respawn: single snapshot jumps 30m — a spawn point clear across the
+    // map, matching the report ("spawn points are at the map edges"). Model
+    // one ordinary dropped/delayed packet right after the teleport (a single
+    // missed send tick is completely routine over UDP-like jitter, not a
+    // special "burst" event) so the interpolator's render pointer briefly
+    // runs past the teleport snapshot — this is exactly the condition that,
+    // BEFORE the teleport-detection fix in push(), let the poisoned velocity
+    // EMA (an instant 30m / one ~33ms tick ~= 900 m/s spike) get exercised by
+    // the extrapolation path in update(). Confirmed pre-fix with this exact
+    // scenario: maxX ~38.4 (8.4m overshoot past the 30m target) followed by
+    // a dip back down to ~30.3 — the reported "качели" — vs. no overshoot at
+    // all once push() detects the >5m jump and snaps state instead of
+    // blending it into the velocity/extrapolation pipeline.
+    interp.push(clock, { x: 30, y: 0, z: 0, yaw: 0 });
+    nextSend = clock + 200; // one held/delayed packet, ~6 ticks' worth
+
+    // Continue stationary at the NEW (spawn) position for 1s, same as a
+    // kart just sitting still after respawning.
+    let maxX = -Infinity;
+    for (const target = clock + 1000; clock < target; clock += dt) {
+      if (clock >= nextSend) {
+        interp.push(clock, { x: 30, y: 0, z: 0, yaw: 0 });
+        nextSend += sendInterval;
+      }
+      const pose = interp.update(clock, dt / 1000);
+      maxX = Math.max(maxX, pose.x);
+    }
+
+    // A stationary target should never be overshot by any meaningful margin.
+    expect(maxX).toBeLessThan(30.2);
+  });
+
+  it("renders the new position immediately (no multi-frame slide across the map) on teleport", () => {
+    const interp = new RemoteInterpolator({ x: 0, y: 0, z: 0, yaw: 0 });
+    interp.push(0, { x: 0, y: 0, z: 0, yaw: 0 });
+    interp.update(80, 1 / 60); // warm the render pointer up to "now" with no delay pending
+
+    // Teleport far away, then immediately sample the very next frame — with
+    // the buffer/velocity snap in place there should be nothing left to
+    // interpolate through, so the render pose reflects the new pose right
+    // away rather than easing toward it over the post-interpolation smoothing
+    // window (which would visibly drag the kart across the map).
+    interp.push(100, { x: 50, y: 0, z: 50, yaw: 0 });
+    const pose = interp.update(100 + 1000 / 60, 1 / 60);
+    expect(Math.hypot(pose.x - 50, pose.z - 50)).toBeLessThan(0.01);
+  });
+
+  it("a small in-bounds position correction (not a teleport) still interpolates smoothly", () => {
+    const interp = new RemoteInterpolator({ x: 0, y: 0, z: 0, yaw: 0 });
+    const dt = 1000 / 60;
+    const sendInterval = 1000 / 30;
+    let clock = 0;
+    let nextSend = 0;
+    for (; clock < 500; clock += dt) {
+      if (clock >= nextSend) {
+        interp.push(clock, { x: 0, y: 0, z: 0, yaw: 0 });
+        nextSend += sendInterval;
+      }
+      interp.update(clock, dt / 1000);
+    }
+    // A 2m nudge (e.g. server-side collision correction) is well under the
+    // teleport threshold and should interpolate normally, not snap. Sample
+    // ~150ms later (past the ~80-100ms render delay) so this new snapshot
+    // has actually started informing renderTime.
+    interp.push(clock, { x: 2, y: 0, z: 0, yaw: 0 });
+    let pose = { x: 0, y: 0, z: 0, yaw: 0 };
+    for (const target = clock + 150; clock < target; clock += dt) pose = interp.update(clock, dt / 1000);
+    expect(pose.x).toBeLessThan(2);
+    expect(pose.x).toBeGreaterThan(0);
+  });
+});

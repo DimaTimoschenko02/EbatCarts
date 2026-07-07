@@ -8,7 +8,7 @@ import type { RemotePlayerState } from "./netClient";
 import type { KartObstacle } from "../physics/kartCollision";
 import type { GameMap } from "../map/mapLoader";
 import { forwardOf, rightOf } from "../kart/kart";
-import { computeAttitudeTarget } from "../kart/attitude";
+import { computeAirborneFactor, computeAttitudeTarget, LEVEL as LEVEL_ATTITUDE } from "../kart/attitude";
 import { DEFAULT_AXLE_GEOMETRY, DEFAULT_KART_PHYSICS_PARAMS } from "../physics/types";
 
 // Adaptive render delay, jitter buffering, and post-interpolation smoothing
@@ -26,6 +26,24 @@ const KART_LENGTH = 2.2;
 // inferred purely from height vs. the same map the local kart drives on, per
 // the design brief's "> ~0.3m" heuristic.
 const REMOTE_AIRBORNE_HEIGHT = 0.3;
+// Soft band the airborne height check eases across instead of flipping at an
+// exact 0.3m line (see computeAirborneFactor in kart/attitude.ts) — 0.3m
+// itself stays the CENTER of the transition.
+const REMOTE_AIRBORNE_BAND = 0.1;
+// How fast the airborne FACTOR itself reacts to a new frame's raw reading.
+// 2026-07-07 live playtest bug: karts standing right at the map edge (every
+// spawn point, and anywhere pushed there by a rocket) have no heightfield
+// cell under their own XZ, so groundHere flips straight to null — before
+// this fix that flipped the OLD boolean `airborne` gate (and therefore the
+// pitch/roll TARGET itself) instantly every frame the network's few
+// millimeters of residual smoothing jitter happened to straddle the map
+// boundary, reading as the reported "jerks forward-backward". Smoothing the
+// factor (instead of the raw target — see .claude/rules/smooth-values.md
+// rule #5) turns that into a continuous fade that a resting kart's tiny
+// position noise can no longer visibly re-trigger every frame, while still
+// reacting fast enough (~150ms to settle) to look responsive when a kart
+// actually drives off a ledge.
+const AIRBORNE_FACTOR_RATE = 10; // 1/s
 
 interface RemoteKart {
   group: THREE.Group;
@@ -34,6 +52,7 @@ interface RemoteKart {
   alive: boolean;
   pitchSm: number;
   rollSm: number;
+  airborneSm: number;
 }
 
 export class RemoteKartManager {
@@ -71,6 +90,7 @@ export class RemoteKartManager {
       alive: player.alive,
       pitchSm: 0,
       rollSm: 0,
+      airborneSm: 0,
     };
     entry.interp.push(performance.now(), { x: player.x, y: player.y, z: player.z, yaw: player.yaw });
     this.karts.set(sessionId, entry);
@@ -121,22 +141,38 @@ export class RemoteKartManager {
       // Body attitude — same heightfield-probe helper the local kart uses
       // (kart/attitude.ts), computed here purely from the map + the
       // network-synced pose, no server-side tilt data needed.
+      //
+      // The raw "grounded" target and the airborne/grounded BLEND are kept
+      // deliberately separate (see AIRBORNE_FACTOR_RATE above and
+      // .claude/rules/smooth-values.md rule #5): computeAttitudeTarget's own
+      // output can still jump the instant groundHere flips to/from null
+      // right at the map edge, but that raw jump is never applied directly
+      // — only through airborneSm, which is exp-filtered frame to frame, so
+      // a resting kart's few millimeters of position noise at a map
+      // boundary can no longer re-trigger a visible pitch/roll snap on
+      // every single frame the way the old binary `airborne` gate did.
       const groundHere = this.map?.sampleHeight(pose.x, pose.z) ?? null;
-      const airborne = groundHere === null || pose.y - groundHere > REMOTE_AIRBORNE_HEIGHT;
-      const target = airborne
-        ? { pitch: 0, roll: 0 }
-        : computeAttitudeTarget(
-            this.map,
-            pose.x,
-            pose.z,
-            forwardOf(pose.yaw),
-            rightOf(pose.yaw),
-            DEFAULT_AXLE_GEOMETRY.wheelbase * 0.5,
-            DEFAULT_AXLE_GEOMETRY.trackWidth * 0.5
-          );
-      const rate = airborne
-        ? DEFAULT_KART_PHYSICS_PARAMS.attitudeAirborneRelaxRate
-        : DEFAULT_KART_PHYSICS_PARAMS.attitudeFollowRate;
+      const airborneRaw = computeAirborneFactor(groundHere, pose.y, REMOTE_AIRBORNE_HEIGHT, REMOTE_AIRBORNE_BAND);
+      kart.airborneSm += (airborneRaw - kart.airborneSm) * (1 - Math.exp(-AIRBORNE_FACTOR_RATE * dt));
+
+      const grounded =
+        groundHere === null
+          ? LEVEL_ATTITUDE
+          : computeAttitudeTarget(
+              this.map,
+              pose.x,
+              pose.z,
+              forwardOf(pose.yaw),
+              rightOf(pose.yaw),
+              DEFAULT_AXLE_GEOMETRY.wheelbase * 0.5,
+              DEFAULT_AXLE_GEOMETRY.trackWidth * 0.5
+            );
+      const groundedFactor = 1 - kart.airborneSm;
+      const target = { pitch: grounded.pitch * groundedFactor, roll: grounded.roll * groundedFactor };
+      const rate =
+        DEFAULT_KART_PHYSICS_PARAMS.attitudeAirborneRelaxRate +
+        (DEFAULT_KART_PHYSICS_PARAMS.attitudeFollowRate - DEFAULT_KART_PHYSICS_PARAMS.attitudeAirborneRelaxRate) *
+          groundedFactor;
       const alpha = 1 - Math.exp(-rate * dt);
       kart.pitchSm += (target.pitch - kart.pitchSm) * alpha;
       kart.rollSm += (target.roll - kart.rollSm) * alpha;

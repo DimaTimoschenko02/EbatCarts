@@ -8,6 +8,14 @@
 import * as THREE from "three";
 import type { RocketExplodeMsg, RocketSpawnMsg } from "../net/netClient";
 
+// The server now fires pitched (not just flat) rockets and broadcasts a `dy`
+// component alongside dx/dz (server/rooms/MatchRoom.ts handleFire) so the
+// client can extrapolate the same tilted straight line. This is an additive
+// extension of the wire payload — kept as a local type rather than editing
+// RocketSpawnMsg in net/netClient.ts (owned by another agent this session).
+// `dy` is optional so old/flat spawns (missing the field) still work.
+type RocketSpawnMsg3D = RocketSpawnMsg & { dy?: number };
+
 const ROCKET_COLOR = 0xff6a1a;
 const EXPLOSION_COLOR = 0xffaa33;
 const EXPLOSION_DURATION_MS = 300;
@@ -33,7 +41,7 @@ export class RocketManager {
 
   constructor(private readonly scene: THREE.Scene) {}
 
-  spawn(msg: RocketSpawnMsg): void {
+  spawn(msg: RocketSpawnMsg3D): void {
     const geo = new THREE.CylinderGeometry(0.08, 0.1, 0.6, 8);
     geo.rotateX(Math.PI / 2); // cylinder's local +Y axis -> mesh +Z (forward)
     const mat = new THREE.MeshStandardMaterial({
@@ -43,7 +51,9 @@ export class RocketManager {
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(msg.x, msg.y, msg.z);
-    const dir = new THREE.Vector3(msg.dx, 0, msg.dz).normalize();
+    // dy defaults to 0 for a flat launch (also covers any stale server build
+    // that hasn't picked up the new field yet).
+    const dir = new THREE.Vector3(msg.dx, msg.dy ?? 0, msg.dz).normalize();
     mesh.lookAt(mesh.position.clone().add(dir));
     this.scene.add(mesh);
 

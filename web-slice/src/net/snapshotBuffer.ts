@@ -90,6 +90,16 @@ export class SnapshotBuffer {
     return this.buf.length;
   }
 
+  // Drops all buffered history. Used by RemoteInterpolator.push() when it
+  // detects a teleport (see TELEPORT_DISTANCE_M below) — the pre-teleport
+  // history spans a gap that was never real motion, so leaving it in the
+  // buffer would let sample() linearly interpolate (or the extrapolation
+  // path in RemoteInterpolator.update() extrapolate) straight across a
+  // fictitious multi-meter-per-millisecond "move".
+  clear(): void {
+    this.buf.length = 0;
+  }
+
   // Timestamp of the most recent buffered snapshot, or null if empty. Used
   // by RemoteInterpolator to detect buffer underrun (render pointer about to
   // outrun the newest data) for the catch-up telemetry counter.
@@ -261,6 +271,17 @@ const MAX_EXTRAPOLATION_MS = 300;
 // or near-zero underestimates) that then poison the smoothed estimate used
 // to bridge the NEXT gap.
 const NOMINAL_TICK_MS = 1000 / 30;
+// Any single frame-to-frame position delta larger than this is treated as a
+// server-side teleport (respawn, or an out-of-bounds recovery snap) rather
+// than real continuous motion. Karts are speed-capped well under 40 m/s (see
+// physics/types.ts), so even a fully dropped send tick (~33ms) only ever
+// covers a bit over 1m of genuine motion, and the adaptive delay above
+// already tolerates gaps up to MAX_RENDER_DELAY_MS (400ms, ~5m at top speed)
+// without this kicking in. 5m clears that with comfortable margin while
+// still catching every respawn — spawn points sit at the map edges, tens of
+// meters from wherever the kart died (see .claude/rules/map-building.md) —
+// without ever misfiring on ordinary jittery/bursty delivery of real motion.
+const TELEPORT_DISTANCE_M = 5;
 // How smoothly the visualLagMs TELEMETRY READOUT reacts to each frame's raw
 // measurement (see stats getter / SnapshotBuffer.informingArrival above).
 // This only steadies the on-screen number for a human reading window.__net
@@ -302,16 +323,34 @@ export class RemoteInterpolator {
       if (gap > this.peakGapMs) this.peakGapMs = gap;
     }
     if (this.lastPushedPose !== null) {
-      // Fixed nominal dt, NOT the arrival gap — see NOMINAL_TICK_MS above.
-      const dt = NOMINAL_TICK_MS / 1000;
-      const instVel = {
-        x: (pose.x - this.lastPushedPose.x) / dt,
-        y: (pose.y - this.lastPushedPose.y) / dt,
-        z: (pose.z - this.lastPushedPose.z) / dt,
-      };
-      this.velocity.x += (instVel.x - this.velocity.x) * VELOCITY_EMA_ALPHA;
-      this.velocity.y += (instVel.y - this.velocity.y) * VELOCITY_EMA_ALPHA;
-      this.velocity.z += (instVel.z - this.velocity.z) * VELOCITY_EMA_ALPHA;
+      const dx = pose.x - this.lastPushedPose.x;
+      const dy = pose.y - this.lastPushedPose.y;
+      const dz = pose.z - this.lastPushedPose.z;
+      if (Math.hypot(dx, dy, dz) > TELEPORT_DISTANCE_M) {
+        // Teleport: discard everything the interpolator thinks it knows
+        // instead of feeding the jump into the velocity EMA / buffer, which
+        // is what produced the reported "flings forward, then yanks back"
+        // judder at every spawn point (see TELEPORT_DISTANCE_M comment and
+        // the "teleport handling" regression tests in snapshotBuffer.test.ts
+        // for the concrete before/after numbers). No interpolation target,
+        // no extrapolation velocity, no stale bracket — just teleport the
+        // render state there too.
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+        this.velocity.z = 0;
+        this.buffer.clear();
+        this.smoothPos.x = pose.x;
+        this.smoothPos.y = pose.y;
+        this.smoothPos.z = pose.z;
+        this.smoothYaw = pose.yaw;
+      } else {
+        // Fixed nominal dt, NOT the arrival gap — see NOMINAL_TICK_MS above.
+        const dt = NOMINAL_TICK_MS / 1000;
+        const instVel = { x: dx / dt, y: dy / dt, z: dz / dt };
+        this.velocity.x += (instVel.x - this.velocity.x) * VELOCITY_EMA_ALPHA;
+        this.velocity.y += (instVel.y - this.velocity.y) * VELOCITY_EMA_ALPHA;
+        this.velocity.z += (instVel.z - this.velocity.z) * VELOCITY_EMA_ALPHA;
+      }
     }
     this.lastArrival = arrivalMs;
     this.lastPushedPose = pose;

@@ -13,6 +13,16 @@ export interface Vec2 {
   z: number;
 }
 
+// Full 3D position/direction — added for pitched flight (rockets now sample
+// ground slope at launch and fly a straight but tilted line, see
+// computeLaunchPitchRad below). Vec2 stays in use for the purely-horizontal
+// math (proximity hit, AOE falloff) that never needed a vertical axis.
+export interface Vec3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface MuzzleDirection {
   dx: number;
   dz: number;
@@ -44,18 +54,56 @@ function directionAt(yaw: number, offset: number): MuzzleDirection {
   return { dx: -Math.sin(y), dz: -Math.cos(y), yawOffsetRad: offset };
 }
 
-// One straight-line, constant-velocity step (gravityScale=0 per rocket_config.tres).
-export function stepRocket(pos: Vec2, dir: Vec2, speed: number, dt: number): Vec2 {
-  return { x: pos.x + dir.x * speed * dt, z: pos.z + dir.z * speed * dt };
+// One straight-line, constant-velocity step in full 3D (still gravityScale=0
+// per rocket_config.tres — no arc, `dir` just isn't horizontal-only anymore:
+// its Y component is baked in once at launch from the ground slope under the
+// shooter, see computeLaunchPitchRad/tiltDirection3D).
+export function stepRocket(pos: Vec3, dir: Vec3, speed: number, dt: number): Vec3 {
+  return { x: pos.x + dir.x * speed * dt, y: pos.y + dir.y * speed * dt, z: pos.z + dir.z * speed * dt };
 }
 
 // True if the rocket should explode against terrain/map-edge at `pos`: the
-// ground is higher than the rocket's (constant) flight height, or `pos` is
-// off the heightfield entirely (both read as "hit a wall").
-export function isBlockedByTerrain(pos: Vec2, flightHeight: number, heightfield: Heightfield): boolean {
+// ground is higher than the rocket's CURRENT altitude (pos.y, re-checked every
+// tick as the rocket climbs/descends a pitched line), or `pos` is off the
+// heightfield entirely (both read as "hit a wall").
+export function isBlockedByTerrain(pos: Vec3, heightfield: Heightfield): boolean {
   const groundY = heightfield.sample(pos.x, pos.z);
   if (groundY === null) return true; // off the map = wall
-  return groundY > flightHeight;
+  return groundY > pos.y;
+}
+
+// Safety clamp on the launch pitch so a muzzle sitting right at a cliff edge
+// (huge Δheight over a short lookahead) can't fire a near-vertical rocket —
+// not part of the design spec, just guards against a pathological slope
+// sample; 45° comfortably covers every ramp/plateau angle in the current kit.
+const MAX_LAUNCH_PITCH_RAD = Math.PI / 4;
+
+// Ground-slope-aware launch pitch: samples height directly under the muzzle
+// and a short distance ahead along the horizontal fire direction, and returns
+// the angle of the line between them. Positive = uphill (rocket noses up).
+// Off-map samples (null) fall back to a flat (0 rad) launch rather than
+// guessing.
+export function computeLaunchPitchRad(
+  originX: number,
+  originZ: number,
+  dirX: number,
+  dirZ: number,
+  heightfield: Heightfield,
+  lookaheadM = 0.5
+): number {
+  const h0 = heightfield.sample(originX, originZ);
+  const h1 = heightfield.sample(originX + dirX * lookaheadM, originZ + dirZ * lookaheadM);
+  if (h0 === null || h1 === null) return 0;
+  const pitch = Math.atan2(h1 - h0, lookaheadM);
+  return Math.max(-MAX_LAUNCH_PITCH_RAD, Math.min(MAX_LAUNCH_PITCH_RAD, pitch));
+}
+
+// Tilts a horizontal unit direction (dx,dz) by `pitchRad` into a 3D unit
+// vector. Horizontal components shrink by cos(pitch) so the whole vector
+// stays unit length — speed*dir still gives the correct 3D velocity.
+export function tiltDirection3D(dirX: number, dirZ: number, pitchRad: number): Vec3 {
+  const cp = Math.cos(pitchRad);
+  return { x: dirX * cp, y: Math.sin(pitchRad), z: dirZ * cp };
 }
 
 export interface PlayerPoint extends Vec2 {

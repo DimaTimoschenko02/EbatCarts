@@ -12,10 +12,12 @@ import { faceCenterYaw, pickInitialSpawn, pickRespawnSpawn } from "../spawn/spaw
 import { WEAPON_TYPES } from "../../src/weapons/stats";
 import {
   computeAoeDamage,
+  computeLaunchPitchRad,
   computeMuzzleDirections,
   findProximityHit,
   isBlockedByTerrain,
   stepRocket,
+  tiltDirection3D,
   type PlayerPoint,
 } from "../weapons/rocketSim";
 
@@ -102,13 +104,14 @@ interface ActiveRocket {
   id: string;
   ownerId: string;
   x: number;
+  y: number;
   z: number;
-  dx: number;
-  dz: number;
+  dx: number; // 3D unit direction — no longer horizontal-only, see
+  dy: number; // computeLaunchPitchRad/tiltDirection3D in rocketSim.ts. Still
+  dz: number; // gravityScale=0: the tilt is fixed once at launch, not re-aimed.
   speed: number;
   age: number;
   lifetime: number;
-  flightHeight: number; // constant — gravityScale=0, rocket flies dead level
 }
 
 // Colyseus defaults patchRate to 50ms (20Hz, see @colyseus/core Room.ts
@@ -256,31 +259,42 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     const fwd = { x: -Math.sin(player.yaw), z: -Math.cos(player.yaw) };
     const originX = player.x + fwd.x * MUZZLE_FORWARD_OFFSET_M;
     const originZ = player.z + fwd.z * MUZZLE_FORWARD_OFFSET_M;
-    const flightHeight = player.y + MUZZLE_HEIGHT_OFFSET_M;
+    const originY = player.y + MUZZLE_HEIGHT_OFFSET_M;
 
     for (const dir of computeMuzzleDirections(player.yaw, ROCKET)) {
+      // Ground-slope-aware pitch: nose the rocket up/down to match the
+      // terrain under the shooter (ramps, plateaus) instead of always flying
+      // dead level — sampled once at launch, then baked into a fixed 3D
+      // direction (gravityScale=0, still a straight line, just tilted).
+      const pitch = computeLaunchPitchRad(originX, originZ, dir.dx, dir.dz, ARENA_HEIGHTFIELD);
+      const dir3d = tiltDirection3D(dir.dx, dir.dz, pitch);
+
       const id = `r${this.nextRocketId++}`;
       const rocket: ActiveRocket = {
         id,
         ownerId: client.sessionId,
         x: originX,
+        y: originY,
         z: originZ,
-        dx: dir.dx,
-        dz: dir.dz,
+        dx: dir3d.x,
+        dy: dir3d.y,
+        dz: dir3d.z,
         speed: ROCKET.speed,
         age: 0,
         lifetime: ROCKET.lifetime,
-        flightHeight,
       };
       this.rockets.push(rocket);
       this.broadcast("rocket:spawn", {
         id,
         ownerId: client.sessionId,
         x: rocket.x,
-        y: flightHeight,
+        y: rocket.y,
         z: rocket.z,
-        dx: dir.dx,
-        dz: dir.dz,
+        dx: dir3d.x,
+        dy: dir3d.y, // NEW field — additive to the rocket:spawn payload, lets
+        // the client extrapolate the same tilted straight line the server
+        // simulates instead of assuming flat flight (src/combat/rockets.ts).
+        dz: dir3d.z,
         speed: ROCKET.speed,
         lifetime: ROCKET.lifetime,
       });
@@ -309,12 +323,22 @@ export class MatchRoom extends Room<{ state: MatchState }> {
 
     for (const rocket of this.rockets) {
       rocket.age += dt;
-      const next = stepRocket({ x: rocket.x, z: rocket.z }, { x: rocket.dx, z: rocket.dz }, rocket.speed, dt);
+      const next = stepRocket(
+        { x: rocket.x, y: rocket.y, z: rocket.z },
+        { x: rocket.dx, y: rocket.dy, z: rocket.dz },
+        rocket.speed,
+        dt
+      );
       rocket.x = next.x;
+      rocket.y = next.y;
       rocket.z = next.z;
 
       const hitId = findProximityHit(rocket, alive, ROCKET.hitRadius, rocket.ownerId, ROCKET.selfDamage);
-      const blocked = isBlockedByTerrain(rocket, rocket.flightHeight, ARENA_HEIGHTFIELD);
+      // Checked against the rocket's CURRENT altitude every tick (not a
+      // frozen launch-time height) — this is what lets a rocket that flew
+      // over a low point still explode when it reaches a hill further along
+      // its (possibly tilted) straight line.
+      const blocked = isBlockedByTerrain(next, ARENA_HEIGHTFIELD);
       const expired = rocket.age >= rocket.lifetime;
 
       if (hitId || blocked || expired) {
@@ -331,7 +355,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   // server/weapons/rocketSim.ts file header for why there's no separate
   // "direct hit" damage amount (matches the reference exactly).
   private explodeRocket(rocket: ActiveRocket, alive: readonly PlayerPoint[]): void {
-    this.broadcast("rocket:explode", { id: rocket.id, x: rocket.x, y: rocket.flightHeight, z: rocket.z });
+    this.broadcast("rocket:explode", { id: rocket.id, x: rocket.x, y: rocket.y, z: rocket.z });
     const damage = computeAoeDamage({ x: rocket.x, z: rocket.z }, alive, ROCKET, rocket.ownerId);
     for (const [victimId, dmg] of damage) {
       this.applyDamage(victimId, dmg, rocket.ownerId);
