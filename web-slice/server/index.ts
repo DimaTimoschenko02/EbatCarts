@@ -19,7 +19,9 @@ const PORT = 8091; // 8080 = master Express, 8090 = Vite dev server — both tak
 const gameServer = defineServer({
   transport: new WebSocketTransport(),
   rooms: {
-    match: defineRoom(MatchRoom),
+    // filterBy("code"): clients joining with the same ?room= code from the
+    // lobby land in the same room; clients with no code share default rooms.
+    match: defineRoom(MatchRoom).filterBy(["code"]),
   },
 });
 

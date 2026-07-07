@@ -29,14 +29,19 @@ export function initNet(opts: InitNetOptions): NetClient {
   const remotes = new RemoteKartManager(opts.scene);
   window.__net = { connected: false, players: 0 };
 
-  const nick = opts.nick ?? `guest-${Math.floor(Math.random() * 10000)}`;
+  // Lobby hand-off contract (src/lobby/main.ts): nick in
+  // localStorage["sk-nick"], room code in the ?room= query param.
+  const nick = opts.nick
+    ?? localStorage.getItem("sk-nick")
+    ?? `guest-${Math.floor(Math.random() * 10000)}`;
+  const roomCode = new URLSearchParams(location.search).get("room") ?? undefined;
   client
     .connect(nick, {
       onPlayerAdd: (id, player) => remotes.add(id, player),
       onPlayerRemove: id => remotes.remove(id),
       onPlayerChange: (id, player) => remotes.onSnapshot(id, player),
       ...opts.combat,
-    })
+    }, roomCode)
     .then(connected => {
       window.__net.connected = connected;
       if (connected) client.startSending(opts.getLocalState);
