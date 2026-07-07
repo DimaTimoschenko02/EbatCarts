@@ -15,6 +15,7 @@ import { InputController } from "./core/input";
 import { FixedStepLoop } from "./core/loop";
 import { updateCamera } from "./core/camera";
 import { Telemetry } from "./debug/telemetry";
+import { initParamPanel } from "./debug/paramPanel";
 import { initNet } from "./net";
 import { createCombat } from "./combat";
 
@@ -64,6 +65,7 @@ const kart = new Kart(scene, stats, SPAWN);
 
 const input = new InputController();
 const telemetry = new Telemetry(kart, input);
+initParamPanel(kart); // dev tuner overlay, toggled with P — see src/debug/paramPanel.ts
 const hud = document.getElementById("hud")!;
 
 // Combat wiring (weapons/damage/death/respawn/pickups) — server-authoritative,

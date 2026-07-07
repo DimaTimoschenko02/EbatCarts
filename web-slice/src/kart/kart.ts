@@ -74,6 +74,9 @@ export class Kart {
   // Heightfield follow state: smoothed ground height + slope pitch.
   private groundY = 0;
   private pitchSm = 0;
+  // Accumulated sim time (sum of fixed physics dt), fed to skid-mark fade —
+  // deliberately NOT performance.now() so this stays deterministic/testable.
+  private simTime = 0;
 
   private lastOut: KartTelemetry = {
     fwdSpeed: 0, sideSpeed: 0, omega: 0,
@@ -86,8 +89,7 @@ export class Kart {
     this.params = buildKartPhysicsParams(stats);
     this.bicycle = new BicyclePhysics(this.params);
     this.driftSM = new ContinuousDrift(this.params);
-    // Skid trails: diagnostic-first — any drift-transition kink is visible as
-    // an angle in the arc. Records continuously; brightness = slip intensity.
+    // Skid trails: gameplay marks left only while drifting (see skidMarks.ts).
     this.skids = new RearSkidMarks(scene, this.axle.wheelbase, this.axle.trackWidth);
     this.spawn = spawn.clone();
 
@@ -176,6 +178,16 @@ export class Kart {
     return this.lastOut;
   }
 
+  // Live-tunable params object for the dev param panel (src/debug/paramPanel.ts).
+  // BicyclePhysics/ContinuousDrift both store this exact object by reference
+  // (see their constructors), so mutating a field here takes effect on the
+  // very next physics substep — no patch/reapply step needed. The `params`
+  // class field stays `readonly` (nobody may rebind it to a new object);
+  // this getter only exposes the existing object for in-place field writes.
+  get physicsParams(): KartPhysicsParams {
+    return this.params;
+  }
+
   private smoothInput(raw: RawInput, dt: number): void {
     const slew = Math.abs(raw.steer) > Math.abs(this.steerSm) ? this.params.steerSlewRateIn : this.params.steerSlewRateOut;
     const steerAlpha = 1 - Math.exp(-slew * dt);
@@ -191,6 +203,8 @@ export class Kart {
   // net/remoteKarts.ts getObstacles()), used for local-only kart-vs-kart
   // collision (step 8c below) — defaults to none for offline play / tests.
   update(dt: number, raw: RawInput, map: GameMap | null, obstacles: readonly KartObstacle[] = []): void {
+    this.simTime += dt;
+
     // 1. Input smoothing.
     this.smoothInput(raw, dt);
 
@@ -288,9 +302,12 @@ export class Kart {
     const targetPitch = Math.atan2(hF - hB, this.axle.wheelbase);
     this.pitchSm += (targetPitch - this.pitchSm) * (1 - Math.exp(-10 * dt));
 
-    // Skid trails: intensity from actual rear slip normalized like drift_intensity.
+    // Skid trails: gameplay marks, drawn only while actually drifting.
+    // Intensity from actual rear slip normalized like drift_intensity; the
+    // engage gate (drift.engageFactor) decides whether anything is recorded
+    // at all — see RearSkidMarks.update / engageGateFor.
     const slipNorm = Math.min(Math.abs(out.rearLeftLatSpeed) / Math.max(this.params.driftMaxSlipSpeed, 0.01), 1);
-    this.skids.update(this.state.pos, this.state.yaw, slipNorm);
+    this.skids.update(this.state.pos, this.state.yaw, slipNorm, drift.engageFactor, this.simTime);
 
     // 11. Visual lean (omega-driven) — smoothed toward intensity*maxDeg*(-omegaNorm).
     const omegaNorm = Math.min(Math.max(out.omega / Math.max(this.params.omegaLeanScale, 0.01), -1), 1);

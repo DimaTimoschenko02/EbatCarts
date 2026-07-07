@@ -21,7 +21,15 @@ declare global {
     // completes; stays false forever in offline mode (server unreachable is
     // NOT an error, see net/netClient.ts). `players` is the count of OTHER
     // connected players currently rendered (excludes the local kart).
-    __net: { connected: boolean; players: number };
+    // `delayMs`/`jitterMs`/`underruns` are worst-case remote-kart
+    // interpolation diagnostics (see net/remoteKarts.ts getNetStats() /
+    // net/snapshotBuffer.ts RemoteInterpolator) — glance at these live during
+    // a playtest to sanity-check smoothness fixes: delayMs is the current
+    // adaptive render delay (grows above the 100ms floor when arrivals get
+    // bursty/jittery), jitterMs is the worst recently observed inter-arrival
+    // gap driving that delay, underruns counts render-pointer-outran-buffer
+    // events since connecting (should stay near 0 on a healthy connection).
+    __net: { connected: boolean; players: number; delayMs: number; jitterMs: number; underruns: number };
   }
 }
 

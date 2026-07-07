@@ -1,40 +1,25 @@
 // Renders every OTHER connected player as an interpolated kart model. Not a
 // physics entity — remote karts never run bicyclePhysics.ts, they are pure
-// visual puppets driven by SnapshotBuffer.sample(now - RENDER_DELAY_MS).
+// visual puppets driven by RemoteInterpolator (snapshotBuffer.ts).
 import * as THREE from "three";
 import { loadKartModel } from "../map/assetLoader";
-import { JitterResampler, SnapshotBuffer, lerpAngle } from "./snapshotBuffer";
+import { RemoteInterpolator } from "./snapshotBuffer";
 import type { RemotePlayerState } from "./netClient";
 import type { KartObstacle } from "../physics/kartCollision";
 
-// How far in the past we render remote karts. Bigger = smoother through
-// jitter/loss but more visible lag; smaller = snappier but more prone to
-// underrunning the buffer (sampling past the newest snapshot, which clamps
-// and reads as "remote kart pauses"). Rule of thumb: keep this at ~2.5-3x the
-// send interval so the buffer always has a bracketing pair to interpolate
-// between even with some jitter. At the 30Hz send rate (netClient.ts,
-// ~33ms/packet) that's ~83-100ms — 100ms chosen as the low end of that
-// headroom since this is a shooter (player explicitly asked for minimal
-// added latency over the previous 120ms).
-const RENDER_DELAY_MS = 100;
-// Exponential smoothing applied to the ALREADY-interpolated sample, on top
-// of SnapshotBuffer's linear interpolation — cleans up residual stair-
-// stepping from snapshot-to-snapshot without adding much visible lag (a
-// 20-30/s rate settles within one or two frames). Per smooth-values rule:
-// framerate-independent via 1-exp(-rate*dt), not a fixed per-frame lerp.
-const RENDER_SMOOTH_RATE = 25;
+// Adaptive render delay, jitter buffering, and post-interpolation smoothing
+// all live in RemoteInterpolator (snapshotBuffer.ts) now — see that file's
+// header comment for why a from-scratch synthetic clock (the old
+// JitterResampler) was the actual cause of the periodic rush-then-stall
+// judder, and why raw arrival timestamps + an adaptive delay replaced it.
 const KART_MODEL = "craft_racer";
 const KART_LENGTH = 2.2;
 
 interface RemoteKart {
   group: THREE.Group;
-  buffer: SnapshotBuffer;
-  resampler: JitterResampler;
+  interp: RemoteInterpolator;
   modelReady: boolean;
   alive: boolean;
-  // Post-interpolation smoothed render pose (see RENDER_SMOOTH_RATE above).
-  smoothPos: THREE.Vector3;
-  smoothYaw: number;
 }
 
 export class RemoteKartManager {
@@ -57,17 +42,13 @@ export class RemoteKartManager {
     group.visible = player.alive;
     this.scene.add(group);
 
-    const resampler = new JitterResampler();
     const entry: RemoteKart = {
       group,
-      buffer: new SnapshotBuffer(),
-      resampler,
+      interp: new RemoteInterpolator({ x: player.x, y: player.y, z: player.z, yaw: player.yaw }),
       modelReady: false,
       alive: player.alive,
-      smoothPos: new THREE.Vector3(player.x, player.y, player.z),
-      smoothYaw: player.yaw,
     };
-    entry.buffer.push({ t: resampler.resample(performance.now()), x: player.x, y: player.y, z: player.z, yaw: player.yaw });
+    entry.interp.push(performance.now(), { x: player.x, y: player.y, z: player.z, yaw: player.yaw });
     this.karts.set(sessionId, entry);
 
     loadKartModel(KART_MODEL, KART_LENGTH)
@@ -95,17 +76,10 @@ export class RemoteKartManager {
   onSnapshot(sessionId: string, player: RemotePlayerState): void {
     const kart = this.karts.get(sessionId);
     if (!kart) return;
-    // Resample the receive-time timestamp onto a jitter-smoothed nominal
-    // clock BEFORE it goes into the interpolation buffer (see
-    // JitterResampler in snapshotBuffer.ts for why raw arrival time causes
-    // judder even when the sender's own cadence is perfectly steady).
-    kart.buffer.push({
-      t: kart.resampler.resample(performance.now()),
-      x: player.x,
-      y: player.y,
-      z: player.z,
-      yaw: player.yaw,
-    });
+    // Feed the raw arrival wall-clock time straight in — see snapshotBuffer.ts
+    // (RemoteInterpolator / JitterResampler history note) for why a
+    // reconstructed "nominal" clock caused periodic rush-then-stall judder.
+    kart.interp.push(performance.now(), { x: player.x, y: player.y, z: player.z, yaw: player.yaw });
     kart.alive = player.alive;
     kart.group.visible = player.alive;
   }
@@ -115,20 +89,10 @@ export class RemoteKartManager {
     const now = performance.now();
     const dt = Math.max(0, (now - this.lastUpdateMs) / 1000);
     this.lastUpdateMs = now;
-    const renderTime = now - RENDER_DELAY_MS;
-    const smoothAlpha = 1 - Math.exp(-RENDER_SMOOTH_RATE * dt);
     for (const kart of this.karts.values()) {
-      const s = kart.buffer.sample(renderTime);
-      if (!s) continue;
-      // Post-interpolation exp-filter: smooths residual stair-stepping from
-      // snapshot-to-snapshot transitions without adding meaningful lag (see
-      // RENDER_SMOOTH_RATE comment above).
-      kart.smoothPos.x += (s.x - kart.smoothPos.x) * smoothAlpha;
-      kart.smoothPos.y += (s.y - kart.smoothPos.y) * smoothAlpha;
-      kart.smoothPos.z += (s.z - kart.smoothPos.z) * smoothAlpha;
-      kart.smoothYaw = lerpAngle(kart.smoothYaw, s.yaw, smoothAlpha);
-      kart.group.position.copy(kart.smoothPos);
-      kart.group.rotation.y = kart.smoothYaw;
+      const pose = kart.interp.update(now, dt);
+      kart.group.position.set(pose.x, pose.y, pose.z);
+      kart.group.rotation.y = pose.yaw;
     }
   }
 
@@ -136,17 +100,34 @@ export class RemoteKartManager {
   // collision (see physics/kartCollision.ts) — exposes the SAME rendered
   // (interpolated + smoothed) position every remote kart is currently drawn
   // at, so the local push resolves against what the player actually sees,
-  // not the latest raw network snapshot (which can be up to RENDER_DELAY_MS
-  // ahead of what's on screen).
+  // not the latest raw network snapshot (which can be ahead of what's
+  // currently on screen by the interpolator's adaptive render delay).
   getObstacles(): KartObstacle[] {
     const out: KartObstacle[] = [];
     for (const kart of this.karts.values()) {
-      out.push({ x: kart.smoothPos.x, z: kart.smoothPos.z, alive: kart.alive });
+      out.push({ x: kart.group.position.x, z: kart.group.position.z, alive: kart.alive });
     }
     return out;
   }
 
   get count(): number {
     return this.karts.size;
+  }
+
+  // Worst-case interpolation diagnostics across all currently rendered
+  // remote karts — surfaced through window.__net (net/index.ts) so jitter/
+  // catch-up behavior can be sanity-checked during a live playtest without
+  // needing devtools breakpoints.
+  getNetStats(): { delayMs: number; jitterMs: number; underruns: number } {
+    let delayMs = 0;
+    let jitterMs = 0;
+    let underruns = 0;
+    for (const kart of this.karts.values()) {
+      const s = kart.interp.stats;
+      delayMs = Math.max(delayMs, s.delayMs);
+      jitterMs = Math.max(jitterMs, s.jitterMs);
+      underruns += s.underruns;
+    }
+    return { delayMs, jitterMs, underruns };
   }
 }
