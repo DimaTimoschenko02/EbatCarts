@@ -266,7 +266,10 @@ export class MatchRoom extends Room<{ state: MatchState }> {
       // terrain under the shooter (ramps, plateaus) instead of always flying
       // dead level — sampled once at launch, then baked into a fixed 3D
       // direction (gravityScale=0, still a straight line, just tilted).
-      const pitch = computeLaunchPitchRad(originX, originZ, dir.dx, dir.dz, ARENA_HEIGHTFIELD);
+      // Probed around the KART (player.x/z), NOT the muzzle: the muzzle sits
+      // 1.2m ahead, past the edge of a 1m ramp tile — see the regression
+      // note on computeLaunchPitchRad in rocketSim.ts.
+      const pitch = computeLaunchPitchRad(player.x, player.z, dir.dx, dir.dz, ARENA_HEIGHTFIELD);
       const dir3d = tiltDirection3D(dir.dx, dir.dz, pitch);
 
       const id = `r${this.nextRocketId++}`;

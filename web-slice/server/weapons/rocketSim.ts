@@ -78,21 +78,30 @@ export function isBlockedByTerrain(pos: Vec3, heightfield: Heightfield): boolean
 // sample; 45° comfortably covers every ramp/plateau angle in the current kit.
 const MAX_LAUNCH_PITCH_RAD = Math.PI / 4;
 
-// Ground-slope-aware launch pitch: samples height directly under the muzzle
-// and a short distance ahead along the horizontal fire direction, and returns
-// the angle of the line between them. Positive = uphill (rocket noses up).
-// Off-map samples (null) fall back to a flat (0 rad) launch rather than
-// guessing.
+// Ground-slope-aware launch pitch: samples height a short distance behind
+// and ahead of the KART's position (not the muzzle!) along the horizontal
+// fire direction, and returns the angle of the line between them. Positive =
+// uphill (rocket noses up). Off-map samples (null) fall back to a flat
+// (0 rad) launch rather than guessing.
+//
+// The probe MUST straddle the kart position, not the muzzle: ramps in the
+// current kit are single 1m tiles, and the muzzle sits 1.2m ahead of the
+// kart (MUZZLE_FORWARD_OFFSET_M) — a kart standing ON a ramp has its muzzle
+// already hanging over the flat tile beyond the ramp, so probing under the
+// muzzle reads slope 0 and every rocket flies dead level (live-playtest
+// regression, 2026-07-07). A symmetric ±lookahead/2 probe around the kart
+// stays inside the ramp tile the kart is actually tilted by.
 export function computeLaunchPitchRad(
-  originX: number,
-  originZ: number,
+  kartX: number,
+  kartZ: number,
   dirX: number,
   dirZ: number,
   heightfield: Heightfield,
-  lookaheadM = 0.5
+  lookaheadM = 0.7
 ): number {
-  const h0 = heightfield.sample(originX, originZ);
-  const h1 = heightfield.sample(originX + dirX * lookaheadM, originZ + dirZ * lookaheadM);
+  const half = lookaheadM / 2;
+  const h0 = heightfield.sample(kartX - dirX * half, kartZ - dirZ * half);
+  const h1 = heightfield.sample(kartX + dirX * half, kartZ + dirZ * half);
   if (h0 === null || h1 === null) return 0;
   const pitch = Math.atan2(h1 - h0, lookaheadM);
   return Math.max(-MAX_LAUNCH_PITCH_RAD, Math.min(MAX_LAUNCH_PITCH_RAD, pitch));

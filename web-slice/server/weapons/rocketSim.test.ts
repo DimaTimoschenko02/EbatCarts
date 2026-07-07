@@ -69,29 +69,37 @@ describe("isBlockedByTerrain", () => {
 });
 
 describe("computeLaunchPitchRad", () => {
-  // Ramp climbing toward +z (see .claude/rules/map-building.md ramp table):
-  // cell (0,0) at y_level=0 (ground 0.0m), cell (0,1) at y_level=1 (ground
-  // 0.5m) — a straight uphill slope along +Z.
-  const uphillHf = Heightfield.fromMapJson({
+  // A single-tile ramp — the actual arena_slice layout that regressed in the
+  // 2026-07-07 live playtest: flat ground (z=0), a 1m terrain_ramp ascending
+  // toward +Z (z=1, height 0..0.5 across the tile), flat plateau (z=2).
+  const rampHf = Heightfield.fromMapJson({
     meta: { tile_size: 1, level_height: 0.5, origin_offset: [0, 0, 0] },
     cells: [
       { asset: "terrain", x: 0, z: 0, y_level: 0 },
-      { asset: "terrain", x: 0, z: 1, y_level: 1 },
+      { asset: "terrain_ramp", x: 0, z: 1, y_level: 0, rot: 0 }, // ascends +Z
+      { asset: "terrain", x: 0, z: 2, y_level: 1 },
     ],
   });
 
-  it("returns a positive (uphill) pitch when firing up a slope", () => {
-    const pitch = computeLaunchPitchRad(0, 0, 0, 1, uphillHf, 0.5);
-    expect(pitch).toBeGreaterThan(0);
+  it("returns a positive (uphill) pitch for a kart standing ON a ramp firing uphill", () => {
+    const pitch = computeLaunchPitchRad(0, 1, 0, 1, rampHf);
+    expect(pitch).toBeGreaterThan(0.3); // ~26.6deg for a 0.5m/1m ramp
   });
 
-  it("returns a negative (downhill) pitch when firing down the same slope", () => {
-    // Standing at the high end (z=1, 0.5m) firing back toward the low end
-    // (z=0, 0.0m) — the mirror image of the uphill case above. Lookahead
-    // bumped to 0.6 so the sample point (z=0.4) clearly lands in cell z=0
-    // rather than sitting exactly on the round()-to-1 boundary at z=0.5.
-    const pitch = computeLaunchPitchRad(0, 1, 0, -1, uphillHf, 0.6);
-    expect(pitch).toBeLessThan(0);
+  it("returns a negative (downhill) pitch firing down the same ramp", () => {
+    const pitch = computeLaunchPitchRad(0, 1, 0, -1, rampHf);
+    expect(pitch).toBeLessThan(-0.3);
+  });
+
+  it("REGRESSION: probing around the muzzle (1.2m ahead, past the 1m ramp tile) reads flat — the probe must straddle the kart", () => {
+    // This is what the pre-fix code effectively did: the kart stands on the
+    // ramp (z=1) but the muzzle origin sits at z=2.2, over the flat plateau,
+    // so a probe around the MUZZLE reads slope 0 and every rocket flew level.
+    const aroundMuzzle = computeLaunchPitchRad(0, 2.2, 0, 1, rampHf);
+    expect(Math.abs(aroundMuzzle)).toBeLessThan(0.05);
+    // The fixed call site (MatchRoom.handleFire) passes the KART position:
+    const aroundKart = computeLaunchPitchRad(0, 1, 0, 1, rampHf);
+    expect(aroundKart).toBeGreaterThan(0.3);
   });
 
   it("returns 0 on flat ground", () => {
@@ -106,7 +114,7 @@ describe("computeLaunchPitchRad", () => {
   });
 
   it("falls back to 0 when a sample point is off the map", () => {
-    expect(computeLaunchPitchRad(0, 0, 0, 1, uphillHf, 50)).toBe(0);
+    expect(computeLaunchPitchRad(0, 1, 0, 1, rampHf, 50)).toBe(0);
   });
 
   it("clamps extreme slopes to a maximum launch pitch (cliff-edge safety)", () => {
@@ -117,7 +125,8 @@ describe("computeLaunchPitchRad", () => {
         { asset: "terrain", x: 0, z: 1, y_level: 40 }, // absurd 20m wall right ahead
       ],
     });
-    const pitch = computeLaunchPitchRad(0, 0, 0, 1, cliffHf, 0.5);
+    // Kart parked right at the seam so the symmetric probe straddles the step.
+    const pitch = computeLaunchPitchRad(0, 0.5, 0, 1, cliffHf, 0.5);
     expect(pitch).toBeCloseTo(Math.PI / 4, 5);
   });
 });
