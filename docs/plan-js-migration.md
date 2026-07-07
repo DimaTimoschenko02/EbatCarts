@@ -122,7 +122,9 @@ MVP редактора (одна сессия):
 - 🔄 Клик-тест Димы: редактор открыл, работает. Детальный фидбек по UX — по мере использования.
 - Найденные Димой косяки карты `arena_slice.json` (скриншот 2026-07-07): (1) один sideCorner повёрнут не туда; (2) заезд (ramp) развёрнут не в ту сторону; (3) угловые части выбраны неправильно (не тот ассет для стыка). Фиксятся после asset-каталога (P1.75) — сначала понять правила сочетаемости, потом чинить.
 
-### P1.75 — Фундамент масштабирования («день Fable», 2026-07-07) — 🔄 in progress
+### P1.75 — Фундамент масштабирования («день Fable», 2026-07-07) — ✅ DONE 2026-07-07
+
+Итог: скиллы `.claude/skills/{web-slice-workflow,map-building-js,subagent-orchestration}` (коммит `1fc38cb`); каталог `docs/space-kit-terrain-catalog.md` + `tools/glb-catalog.mjs`/`scan_heightfield.mjs`; **root cause всех 3 багов карты — таблица RAMP_ASCENT в mapLoader была повёрнута на 90° от реальной геометрии меша, исправлено** (коммит `7b4bb7a`; углы юбки были правильные, corner-seam ~0.2м — known limitation); рефакторинг main.ts → core/kart/map/fx/debug + KartStats registry (коммит `dbc8a79`, 37/37 тестов).
 
 Цель: законсервировать знания в скиллы + подготовить архитектуру к P2, чтобы после ухода Fable 5 из подписки слабые модели тянули проект на том же уровне.
 
@@ -134,8 +136,8 @@ MVP редактора (одна сессия):
 
 ### P2 — Мультиплеер на Colyseus + перенос имеющегося — ⬜ pending
 
-1. Colyseus server: комната = match, авторитарный тик с bicycle-физикой на сервере (та же TS-библиотека, что на клиенте — shared package), state sync позиций.
-2. Клиент: подключение, интерполяция удалённых картов (аналог snapshot_buffer), прогноз своего.
+1. Colyseus server: комната = match. **Решение 2026-07-07 (упрощение против исходного плана):** движение — owner-authoritative (клиент владеет своим картом, шлёт позицию, сервер релеит через state) — как в Godot-версии с MultiplayerSynchronizer. Серверная bicycle-физика + prediction/reconciliation НЕ делаем в MVP (игра для компании друзей, не конкурентка; экономит самый дорогой кусок). Server-authoritative остаются: урон/kill, weapon-боксы, спавн, таймер матча. Апгрейд до server-auth физики — post-MVP, если появится читерство.
+2. Клиент: подключение, интерполяция удалённых картов через snapshot buffer (~100-150мс задержка, аналог Godot snapshot_buffer). Прогноз своего не нужен (own kart локальный).
 3. Интеграция с существующим `server/`: profiles/matches/db остаются; rooms.spawn.js/ws_proxy/healthcheck (~260 LOC) заменить на Colyseus-комнаты (или Colyseus встроить в тот же процесс Express — решить при реализации).
 4. Стрельба: снаряды server-authoritative (перенос логики base_projectile/rocket + урон/kill из game_manager.gd).
 5. Лобби UI на HTML/CSS (перенос флоу lobby_controller: Splash/FirstTime/Home/RoomLobby + создание/вход в комнату; палитра Neon Stadium из `ui_palette.gd`).
