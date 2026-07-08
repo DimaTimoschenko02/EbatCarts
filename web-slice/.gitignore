@@ -5,3 +5,7 @@ dist/
 # scratch state, not a build artifact. Final values go into
 # DEFAULT_KART_PHYSICS_PARAMS via the panel's "Copy JSON" button instead.
 dev-params.local.json
+
+# Editor "Save to server" backups (vite.config.ts editorMapsFilePlugin) —
+# timestamped copies of overwritten maps, not meant to be committed.
+public/maps/.backup/

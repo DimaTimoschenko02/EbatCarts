@@ -19,6 +19,16 @@
   }
   button:hover, .file-btn:hover { background: #00ffee22; }
 
+  #topbar select, #topbar input[type="number"] {
+    background: #12122a; color: #00ffee; border: 1px solid #00ffee88;
+    padding: 5px 8px; font-family: inherit; font-size: 13px; border-radius: 4px;
+  }
+  #topbar label.inline { font-size: 12px; color: #00ffee99; display: flex; align-items: center; gap: 6px; }
+  #gridSizeInput { width: 56px; }
+  #serverStatus { font-size: 12px; color: #00ffee99; margin-left: 4px; white-space: nowrap; }
+  #serverStatus.error { color: #ff5566; }
+  #serverStatus.ok { color: #66ff99; }
+
   #main { flex: 1; display: flex; min-height: 0; }
 
   #sidebar {
@@ -56,8 +66,16 @@
     <button id="btnExport">Export</button>
     <label class="file-btn" for="fileImport">Import</label>
     <input type="file" id="fileImport" accept="application/json" style="display:none">
+    <select id="selLoad" title="Load a map from the dev server (public/maps/)">
+      <option value="">Load ▾</option>
+    </select>
+    <button id="btnSaveServer">Save to server</button>
+    <span id="serverStatus"></span>
     <button id="btnClear">Clear</button>
     <button id="btnDrive">Drive</button>
+    <label class="inline" for="gridSizeInput">Grid size
+      <input type="number" id="gridSizeInput" min="16" max="96" step="16" value="32">
+    </label>
   </div>
   <div id="main">
     <div id="sidebar"></div>

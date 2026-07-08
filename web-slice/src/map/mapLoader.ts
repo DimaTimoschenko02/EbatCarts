@@ -10,8 +10,30 @@
 import * as THREE from "three";
 import type { AssetLibrary } from "./assetLoader";
 import { Heightfield, type CellDef, type MapJson, type PropDef } from "../shared/heightfield";
+import type { KartObstacle } from "../physics/kartCollision";
 
 export type { MapJson };
+
+// A static (never-moving, always-alive) collision circle contributed by a
+// map prop — see LARGE_PROP_ASSETS below. Superset of KartObstacle so it can
+// be concatenated straight into the `obstacles` array Kart.update() already
+// accepts from net/remoteKarts.ts getObstacles() (see main.ts wiring).
+export interface StaticObstacle extends KartObstacle {
+  radius: number;
+}
+
+// Which prop asset names get a physical collision circle — everything else
+// (rock, rocks_smallA/B, rock_crystals) is pure decoration the kart drives
+// straight through. See .claude/rules/map-building.md "Props" section for
+// the asset catalog this mirrors. Keep this in sync if new big rock/crystal
+// props are added to the Space Kit prop set.
+const LARGE_PROP_ASSETS = new Set(["rock_largeA", "rock_crystalsLargeA", "rock_crystalsLargeB"]);
+
+// Large props get a collision circle shrunk from their raw footprint AABB by
+// this factor — arcade standard so grazing the rock's rough/uneven visual
+// edge doesn't get treated as a hard hit (mirrors why KART_COLLISION_RADIUS
+// itself is smaller than the kart mesh's own footprint).
+const PROP_COLLISION_SHRINK = 0.8;
 
 export class GameMap {
   readonly root = new THREE.Group();
@@ -19,6 +41,14 @@ export class GameMap {
   private tile = 1;
   private levelHeight = 0.5;
   private origin = new THREE.Vector3();
+  private staticObstacles: StaticObstacle[] = [];
+
+  // Static collision circles contributed by large decorative props (see
+  // LARGE_PROP_ASSETS) — concatenate with net.getObstacles() before passing
+  // to Kart.update() (see main.ts).
+  getStaticObstacles(): readonly StaticObstacle[] {
+    return this.staticObstacles;
+  }
 
   // Ground height at a world XZ point, or null when there is no cell there
   // (off the map edge → the mover treats it as a wall).
@@ -58,6 +88,17 @@ export class GameMap {
     inst.rotation.y = THREE.MathUtils.degToRad(def.rot ?? 0);
     inst.scale.setScalar(def.scale ?? 1);
     this.root.add(inst);
+
+    if (LARGE_PROP_ASSETS.has(def.asset)) {
+      // Radius from the UNSCALED template's own footprint AABB (rotation
+      // around Y doesn't change the circle enclosing a centered footprint,
+      // so def.rot needs no compensation here — only def.scale does).
+      const box = new THREE.Box3().setFromObject(template);
+      const size = box.getSize(new THREE.Vector3());
+      const scale = def.scale ?? 1;
+      const radius = (Math.max(size.x, size.z) / 2) * scale * PROP_COLLISION_SHRINK;
+      this.staticObstacles.push({ x: inst.position.x, z: inst.position.z, alive: true, radius });
+    }
   }
 
   static async load(url: string, lib: AssetLibrary): Promise<GameMap> {

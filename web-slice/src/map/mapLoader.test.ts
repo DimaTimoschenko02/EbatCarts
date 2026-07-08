@@ -92,3 +92,75 @@ describe("GameMap heightfield", () => {
     expect(map.sampleHeight(1, 1)).toBe(1.0); // overridden by the cell
   });
 });
+
+// Static prop collision (large decorative rocks get a physics circle, small
+// ones stay pure decoration) — see gameplay-programmer brief and
+// .claude/rules/map-building.md "Props" section for the asset catalog.
+describe("GameMap static prop obstacles", () => {
+  // A template's footprint is whatever geometry it carries — real asset
+  // templates are recentered on XZ by assetLoader.ts before they ever reach
+  // GameMap, so a Box3 built here (already centered at the mesh's local
+  // origin) is representative of what placeProp() actually sees at runtime.
+  function boxTemplate(sizeX: number, sizeZ: number): THREE.Group {
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(new THREE.BoxGeometry(sizeX, 1, sizeZ)));
+    return group;
+  }
+
+  function libWithProps(): Map<string, THREE.Group> {
+    return new Map<string, THREE.Group>([
+      ["terrain", new THREE.Group()],
+      ["rock_largeA", boxTemplate(2.0, 1.2)], // non-square footprint, max dim = x
+      ["rock_crystalsLargeA", boxTemplate(1.0, 1.6)], // max dim = z
+      ["rock", boxTemplate(0.6, 0.6)], // small decorative rock — no collision
+      ["rocks_smallA", boxTemplate(0.8, 0.8)], // small scatter — no collision
+    ]);
+  }
+
+  function makePropMap(props: MapJson["props"], originOffset: [number, number, number] = [0, 0, 0]): GameMap {
+    return GameMap.fromJson(
+      {
+        meta: { tile_size: 1, level_height: 0.5, origin_offset: originOffset },
+        props,
+      },
+      libWithProps()
+    );
+  }
+
+  it("large prop (rock_largeA) gets a collision circle at its world position, scaled and shrunk", () => {
+    const map = makePropMap([{ asset: "rock_largeA", x: 3, z: -2, y_level: 1, scale: 0.8 }], [-1, 0, 0.5]);
+    const obstacles = map.getStaticObstacles();
+    expect(obstacles).toHaveLength(1);
+    // world x = 3*1 + (-1) = 2, world z = -2*1 + 0.5 = -1.5.
+    expect(obstacles[0].x).toBeCloseTo(2, 6);
+    expect(obstacles[0].z).toBeCloseTo(-1.5, 6);
+    expect(obstacles[0].alive).toBe(true);
+    // footprint max(size.x, size.z) = max(2.0, 1.2) = 2.0 → radius = (2.0/2) * 0.8(scale) * 0.8(shrink) = 0.64.
+    expect(obstacles[0].radius).toBeCloseTo(0.64, 6);
+  });
+
+  it("uses max(size.x, size.z) regardless of which axis is longer", () => {
+    const map = makePropMap([{ asset: "rock_crystalsLargeA", x: 0, z: 0, y_level: 0, scale: 1 }]);
+    // footprint max(1.0, 1.6) = 1.6 → radius = (1.6/2) * 1 * 0.8 = 0.64.
+    expect(map.getStaticObstacles()[0].radius).toBeCloseTo(0.64, 6);
+  });
+
+  it("small decorative props (rock, rocks_smallA) get NO collision circle", () => {
+    const map = makePropMap([
+      { asset: "rock", x: 1, z: 1, y_level: 0 },
+      { asset: "rocks_smallA", x: 2, z: 2, y_level: 0 },
+    ]);
+    expect(map.getStaticObstacles()).toHaveLength(0);
+  });
+
+  it("defaults to scale 1 when a large prop omits it", () => {
+    const map = makePropMap([{ asset: "rock_largeA", x: 0, z: 0, y_level: 0 }]);
+    // radius = (2.0/2) * 1(default scale) * 0.8 = 0.8.
+    expect(map.getStaticObstacles()[0].radius).toBeCloseTo(0.8, 6);
+  });
+
+  it("a map with no large props exposes an empty static obstacle list", () => {
+    const map = makeMap([{ asset: "terrain", x: 0, z: 0, y_level: 0 }]);
+    expect(map.getStaticObstacles()).toEqual([]);
+  });
+});

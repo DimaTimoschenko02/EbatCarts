@@ -23,9 +23,13 @@ import { createCombat } from "./combat";
 // Keep in sync with the editor palette (src/editor/main.ts) — a map driven
 // from the editor must not silently drop tiles the game never preloaded.
 const MAP_ASSETS = [
-  "terrain", "terrain_ramp", "terrain_roadStraight", "terrain_roadCorner",
-  "terrain_roadCross", "terrain_side", "terrain_sideCorner", "terrain_sideCornerInner",
-  "rock_largeA", "rock_crystals", "rocks_smallA", "rocks_smallB",
+  "terrain", "terrain_ramp", "terrain_rampLarge", "terrain_rampLarge_detailed",
+  "terrain_roadStraight", "terrain_roadCorner", "terrain_roadCross",
+  "terrain_roadEnd", "terrain_roadSplit",
+  "terrain_side", "terrain_sideCorner", "terrain_sideCornerInner",
+  "terrain_sideEnd", "terrain_sideCliff",
+  "rock", "rock_largeA", "rock_largeB", "rock_crystals",
+  "rock_crystalsLargeA", "rock_crystalsLargeB", "rocks_smallA", "rocks_smallB",
 ] as const;
 
 // ── Scene ──────────────────────────────────────────────────────────────
@@ -124,7 +128,10 @@ let lastRawInput = { throttle: 0, steer: 0 };
 function physTick(): void {
   loop.tick(dt => {
     const raw = input.next(dt * 1000);
-    kart.update(dt, raw, map, net.getObstacles());
+    // Static rock props (map/mapLoader.ts GameMap.getStaticObstacles()) get
+    // the exact same push-out treatment as other players' karts — see
+    // kart.ts step 8c for how it tells the two apart via `radius`.
+    kart.update(dt, raw, map, [...net.getObstacles(), ...(map?.getStaticObstacles() ?? [])]);
     telemetry.recordSubstep(dt, raw);
     lastRawInput = raw;
   });

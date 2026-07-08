@@ -18,7 +18,7 @@ import { loadKartModel } from "../map/assetLoader";
 import type { GameMap } from "../map/mapLoader";
 import { buildKartPhysicsParams, type KartStats } from "./stats";
 import type { RawInput } from "../core/input";
-import { resolveKartPush, type KartObstacle } from "../physics/kartCollision";
+import { KART_COLLISION_RADIUS, resolveKartPush, type KartObstacle } from "../physics/kartCollision";
 import { createVerticalState, stepVertical, type VerticalState } from "../physics/vertical";
 import { computeAttitudeTarget } from "./attitude";
 
@@ -32,6 +32,15 @@ export function rightOf(yaw: number): THREE.Vector3 {
 
 // Max climbable rise per move — a full tile step is 0.5, ramps rise gradually.
 const MAX_STEP = 0.3;
+
+// `obstacles` (step 8c below) may mix two sources: other connected players'
+// rendered karts (net/remoteKarts.ts getObstacles(), no `radius` — always
+// treated as KART_COLLISION_RADIUS on both sides, unchanged from before) and
+// static map props (map/mapLoader.ts GameMap.getStaticObstacles(), which DO
+// carry their own per-asset `radius`). resolveKartPush only accepts one
+// shared radius for its whole obstacle list, so a rock's differently-sized
+// circle can't just be batched in — see the step 8c loop below.
+type ObstacleWithOptionalRadius = KartObstacle & { radius?: number };
 
 // Ground-slope sampling for the slope gravity assist (bicyclePhysics.ts
 // PhysicsInput.groundSlopeRad) — owner playtest 2026-07-07: "kart climbs a
@@ -366,13 +375,29 @@ export class Kart {
     if (obstacles.length > 0) {
       const preX = this.state.pos.x;
       const preZ = this.state.pos.z;
-      const pushed = resolveKartPush(
-        { x: preX, z: preZ },
-        { x: this.state.vel.x, z: this.state.vel.z },
-        obstacles
-      );
-      let pushedX = pushed.pos.x;
-      let pushedZ = pushed.pos.z;
+      // Resolved ONE obstacle at a time instead of a single batched
+      // resolveKartPush(pos, vel, obstacles) call: that call only takes one
+      // shared `radius` for every obstacle in the list, but a static rock's
+      // radius differs from KART_COLLISION_RADIUS (see ObstacleWithOptionalRadius
+      // above). resolveKartPush's own internal loop already resolves its list
+      // sequentially — each obstacle's push chaining off the previous one's
+      // already-corrected pos/vel — so looping externally one obstacle at a
+      // time here reproduces that exact chaining. For plain kart-vs-kart
+      // obstacles (no `radius`, effective radius = KART_COLLISION_RADIUS for
+      // every one of them) the result is byte-for-byte identical to the old
+      // single batched call.
+      let pushedX = preX;
+      let pushedZ = preZ;
+      let pushedVelX = this.state.vel.x;
+      let pushedVelZ = this.state.vel.z;
+      for (const o of obstacles as readonly ObstacleWithOptionalRadius[]) {
+        const radius = o.radius !== undefined ? (KART_COLLISION_RADIUS + o.radius) / 2 : KART_COLLISION_RADIUS;
+        const res = resolveKartPush({ x: pushedX, z: pushedZ }, { x: pushedVelX, z: pushedVelZ }, [o], radius);
+        pushedX = res.pos.x;
+        pushedZ = res.pos.z;
+        pushedVelX = res.vel.x;
+        pushedVelZ = res.vel.z;
+      }
       if (map) {
         const curH = map.sampleHeight(preX, preZ) ?? this.vertical.y;
         const hx = map.sampleHeight(pushedX, preZ);
@@ -382,8 +407,8 @@ export class Kart {
       }
       this.state.pos.x = pushedX;
       this.state.pos.z = pushedZ;
-      this.state.vel.x = pushed.vel.x;
-      this.state.vel.z = pushed.vel.z;
+      this.state.vel.x = pushedVelX;
+      this.state.vel.z = pushedVelZ;
     }
 
     // 8b. Vertical step (physics/vertical.ts) — grounded heightfield-follow

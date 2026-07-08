@@ -15,10 +15,13 @@ import { loadAssetLibrary } from "../map/assetLoader";
 import type { AssetLibrary } from "../map/assetLoader";
 import type { MapJson } from "../map/mapLoader";
 
-const GRID_SIZE = 32; // cells per side
+const MIN_GRID_SIZE = 16;
+const MAX_GRID_SIZE = 96;
+const GRID_SIZE_STEP = 16;
+let GRID_SIZE = 32; // cells per side — mutable, see setGridSize()
 const TILE_SIZE = 1;
 const LEVEL_HEIGHT = 0.5;
-const HALF = (GRID_SIZE - 1) / 2; // world offset: world = cell - HALF
+let HALF = (GRID_SIZE - 1) / 2; // world offset: world = cell - HALF, kept in sync with GRID_SIZE
 const MAX_Y_LEVEL = 6;
 const ROT_CYCLE = [0, 90, 180, -90] as const;
 const PROP_STEP = 0.25;
@@ -30,20 +33,30 @@ const PALETTE: PaletteCategory[] = [
   { category: "Terrain", isProp: false, items: [
     { asset: "terrain", label: "Terrain" },
     { asset: "terrain_ramp", label: "Ramp" },
+    { asset: "terrain_rampLarge", label: "Ramp Large (2x)" },
+    { asset: "terrain_rampLarge_detailed", label: "Ramp Large Detailed (2x)" },
   ] },
   { category: "Roads", isProp: false, items: [
     { asset: "terrain_roadStraight", label: "Road Straight" },
     { asset: "terrain_roadCorner", label: "Road Corner" },
     { asset: "terrain_roadCross", label: "Road Cross" },
+    { asset: "terrain_roadEnd", label: "Road End" },
+    { asset: "terrain_roadSplit", label: "Road Split" },
   ] },
   { category: "Edges", isProp: false, items: [
     { asset: "terrain_side", label: "Side" },
     { asset: "terrain_sideCorner", label: "Side Corner" },
     { asset: "terrain_sideCornerInner", label: "Side Corner Inner" },
+    { asset: "terrain_sideEnd", label: "Side End" },
+    { asset: "terrain_sideCliff", label: "Side Cliff" },
   ] },
   { category: "Props", isProp: true, items: [
-    { asset: "rock_largeA", label: "Rock Large" },
+    { asset: "rock", label: "Rock" },
+    { asset: "rock_largeA", label: "Rock Large A" },
+    { asset: "rock_largeB", label: "Rock Large B" },
     { asset: "rock_crystals", label: "Rock Crystals" },
+    { asset: "rock_crystalsLargeA", label: "Rock Crystals Large A" },
+    { asset: "rock_crystalsLargeB", label: "Rock Crystals Large B" },
     { asset: "rocks_smallA", label: "Rocks Small A" },
     { asset: "rocks_smallB", label: "Rocks Small B" },
   ] },
@@ -60,6 +73,9 @@ const canvasContainer = document.getElementById("canvas-container")!;
 const sidebar = document.getElementById("sidebar")!;
 const statusMain = document.getElementById("statusMain")!;
 const statusHint = document.getElementById("statusHint")!;
+const gridSizeInput = document.getElementById("gridSizeInput") as HTMLInputElement;
+const selLoad = document.getElementById("selLoad") as HTMLSelectElement;
+const serverStatus = document.getElementById("serverStatus")!;
 
 // ── Scene ──────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -85,7 +101,7 @@ function resizeRenderer(): void {
 resizeRenderer();
 addEventListener("resize", resizeRenderer);
 
-const grid = new THREE.GridHelper(GRID_SIZE, GRID_SIZE, 0x00ffee, 0x333366);
+let grid = new THREE.GridHelper(GRID_SIZE, GRID_SIZE, 0x00ffee, 0x333366);
 scene.add(grid);
 
 // OrbitControls: LEFT/RIGHT mouse are reserved for place/delete, so orbiting
@@ -240,6 +256,38 @@ function removeNearestProp(x: number, z: number, maxDist = 0.6): boolean {
   props.splice(bestIdx, 1);
   propObjs.splice(bestIdx, 1);
   return true;
+}
+
+// Re-derives world position (position.x/z depend on HALF) for every already-
+// placed cell/prop object, without touching the stored cell-space records.
+// Called after GRID_SIZE (and therefore HALF) changes.
+function rebuildAllPlacements(): void {
+  for (const [key, rec] of cells) {
+    const obj = cellObjs.get(key);
+    if (obj) obj.position.set(rec.x - HALF, rec.y_level * LEVEL_HEIGHT, rec.z - HALF);
+  }
+  for (let i = 0; i < props.length; i++) {
+    propObjs[i].position.set(props[i].x - HALF, props[i].y_level * LEVEL_HEIGHT, props[i].z - HALF);
+  }
+}
+
+// Changes the grid size: recreates the GridHelper, updates HALF (which
+// shifts every already-placed object's world position to match — cell-space
+// records are unaffected), and re-clamps the cursor to the new bounds.
+function setGridSize(size: number): void {
+  const clamped = THREE.MathUtils.clamp(
+    Math.round(size / GRID_SIZE_STEP) * GRID_SIZE_STEP,
+    MIN_GRID_SIZE, MAX_GRID_SIZE
+  );
+  if (clamped === GRID_SIZE) return;
+  GRID_SIZE = clamped;
+  HALF = (GRID_SIZE - 1) / 2;
+  scene.remove(grid);
+  grid = new THREE.GridHelper(GRID_SIZE, GRID_SIZE, 0x00ffee, 0x333366);
+  scene.add(grid);
+  gridSizeInput.value = String(GRID_SIZE);
+  rebuildAllPlacements();
+  refreshCursor(lastClientX, lastClientY);
 }
 
 function clearAll(): void {
@@ -399,6 +447,26 @@ function loadMapJson(data: MapJson): void {
   }
 }
 
+// Finds the largest cell-space coordinate used anywhere in a MapJson (rect
+// fills, cells, props), so the editor grid can auto-fit around an imported
+// or server-loaded map instead of clipping it against the default 32x32.
+function maxCoordOf(data: MapJson): number {
+  let max = 0;
+  for (const r of data.rect_fills ?? []) max = Math.max(max, r.x_max, r.z_max);
+  for (const c of data.cells ?? []) max = Math.max(max, c.x, c.z);
+  for (const p of data.props ?? []) max = Math.max(max, p.x, p.z);
+  return max;
+}
+
+// Grows the grid to comfortably fit a loaded map when it doesn't already:
+// +4 cells of margin past the farthest placed tile, rounded up to the next
+// multiple of GRID_SIZE_STEP. Never shrinks — loading a small map after a
+// big one keeps the current (larger) grid, per owner's call.
+function fitGridToMap(data: MapJson): void {
+  const needed = Math.ceil((maxCoordOf(data) + 4) / GRID_SIZE_STEP) * GRID_SIZE_STEP;
+  if (needed > GRID_SIZE) setGridSize(needed);
+}
+
 document.getElementById("btnExport")!.addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(buildMapJson(), null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -416,6 +484,8 @@ document.getElementById("fileImport")!.addEventListener("change", e => {
   file.text().then(text => {
     const data = JSON.parse(text) as MapJson;
     loadMapJson(data);
+    fitGridToMap(data);
+    loadedMapName = file.name.replace(/\.json$/i, "");
     scheduleAutosave();
   }).catch(err => console.error("[editor] import failed:", err));
   input.value = ""; // allow re-importing the same filename later
@@ -432,6 +502,87 @@ document.getElementById("btnDrive")!.addEventListener("click", () => {
   window.open("/?map=editor", "_blank");
 });
 
+gridSizeInput.addEventListener("change", () => {
+  setGridSize(Number(gridSizeInput.value) || GRID_SIZE);
+});
+
+// ── Save/Load via the dev server (vite.config.ts editorMapsFilePlugin) ────
+// Closes the loop for the two-laptop LAN setup: the editor's Export/Import
+// buttons only touch the browser's local filesystem, which is useless when
+// the editor is opened from a laptop other than the one the repo lives on.
+let loadedMapName: string | null = null;
+
+function showServerStatus(text: string, kind: "ok" | "error"): void {
+  serverStatus.textContent = text;
+  serverStatus.className = kind;
+  setTimeout(() => { serverStatus.textContent = ""; serverStatus.className = ""; }, 4000);
+}
+
+async function refreshServerMapList(): Promise<void> {
+  try {
+    const res = await fetch("/__editor-maps");
+    if (!res.ok) throw new Error(String(res.status));
+    const { maps } = (await res.json()) as { maps: string[] };
+    const previous = selLoad.value;
+    selLoad.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Load ▾";
+    selLoad.appendChild(placeholder);
+    for (const name of maps) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      selLoad.appendChild(opt);
+    }
+    selLoad.value = maps.includes(previous) ? previous : "";
+  } catch (err) {
+    console.error("[editor] failed to list server maps:", err);
+  }
+}
+
+selLoad.addEventListener("change", () => {
+  const name = selLoad.value;
+  if (!name) return;
+  fetch(`/maps/${name}.json`)
+    .then(res => {
+      if (!res.ok) throw new Error(String(res.status));
+      return res.json();
+    })
+    .then((data: MapJson) => {
+      loadMapJson(data);
+      fitGridToMap(data);
+      loadedMapName = name;
+      scheduleAutosave();
+      showServerStatus(`loaded ${name}`, "ok");
+    })
+    .catch(err => {
+      console.error("[editor] load from server failed:", err);
+      showServerStatus(`load failed: ${String(err)}`, "error");
+    })
+    .finally(() => { selLoad.value = ""; });
+});
+
+document.getElementById("btnSaveServer")!.addEventListener("click", () => {
+  const name = prompt("Save as (letters/digits/-/_ only):", loadedMapName ?? "map");
+  if (!name) return;
+  fetch("/__editor-maps", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, data: buildMapJson() }),
+  })
+    .then(res => {
+      if (!res.ok) return res.text().then(msg => { throw new Error(msg || String(res.status)); });
+      loadedMapName = name;
+      showServerStatus(`saved ${name}.json`, "ok");
+      return refreshServerMapList();
+    })
+    .catch(err => {
+      console.error("[editor] save to server failed:", err);
+      showServerStatus(`save failed: ${String(err)}`, "error");
+    });
+});
+
 // ── Autosave (debounced) ─────────────────────────────────────────────────
 let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
 function scheduleAutosave(): void {
@@ -445,9 +596,14 @@ function scheduleAutosave(): void {
 (async () => {
   buildPalette();
   lib = await loadAssetLibrary(ASSET_NAMES);
+  void refreshServerMapList();
   const saved = localStorage.getItem("editor-autosave");
   if (saved) {
-    try { loadMapJson(JSON.parse(saved) as MapJson); }
+    try {
+      const data = JSON.parse(saved) as MapJson;
+      loadMapJson(data);
+      fitGridToMap(data);
+    }
     catch (err) { console.error("[editor] autosave restore failed:", err); }
   }
   statusMain.textContent = "asset: (none)  rot: 0  y_level: 0  cell: (—, —)";
