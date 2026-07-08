@@ -18,10 +18,22 @@ const D = Math.SQRT1_2;
 // RAMP_ASCENT fixed 2026-07-07 to match real GLB geometry (was rotated 90° off
 // from the mesh — see docs/space-kit-terrain-catalog.md). Now identical to
 // SIDE_ASCENT since both meshes ascend +Z at rot=0. Keep this duplicate in sync
-// with web-slice/src/map/mapLoader.ts manually if that file changes again.
+// with web-slice/src/shared/heightfield.ts manually if that file changes again.
 const RAMP_ASCENT = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] };
 const SIDE_ASCENT = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] };
 const CORNER_ASCENT = { 0: [-D, D], 90: [D, D], 180: [D, -D], 270: [-D, -D] };
+// sideCliff: same axial basis as SIDE_ASCENT but y_level = LOW edge (mesh
+// spans above the pivot like a ramp) — see catalog "terrain_sideCliff".
+const CLIFF_ASCENT = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] };
+// sideCornerInner: two axis-aligned ascent gradients (toward each of the two
+// straight high edges), combined via MAX in sampleHeight below — see catalog
+// "terrain_sideCornerInner" and HeightCell doc comment in heightfield.ts.
+const CORNER_INNER_ASCENT = {
+  0: [-1, 0, 0, 1],
+  90: [-1, 0, 0, -1],
+  180: [1, 0, 0, -1],
+  270: [1, 0, 0, 1],
+};
 
 function normRot(rot) {
   return ((Math.round(rot ?? 0) % 360) + 360) % 360;
@@ -36,8 +48,16 @@ function heightCellFor(asset, yLevel, rot, lh) {
     const [ax, az] = RAMP_ASCENT[rot] ?? [0, 0];
     return { base: yLevel * lh, rise: lh, ax, az };
   }
+  if (asset.startsWith("terrain_sideCornerInner")) {
+    const [ax, az, ax2, az2] = CORNER_INNER_ASCENT[rot] ?? [0, 0, 0, 0];
+    return { base: yLevel * lh, rise: lh, ax, az, ax2, az2 };
+  }
   if (asset.startsWith("terrain_sideCorner")) {
     const [ax, az] = CORNER_ASCENT[rot] ?? [0, 0];
+    return { base: yLevel * lh, rise: lh, ax, az };
+  }
+  if (asset.startsWith("terrain_sideCliff")) {
+    const [ax, az] = CLIFF_ASCENT[rot] ?? [0, 0];
     return { base: yLevel * lh, rise: lh, ax, az };
   }
   if (asset.startsWith("terrain_side")) {
@@ -73,7 +93,13 @@ class GameMap {
     const cz = Math.round(fz);
     const cell = this.heights.get(cx + "," + cz);
     if (!cell) return null;
-    const t = clamp(0.5 + (fx - cx) * cell.ax + (fz - cz) * cell.az, 0, 1);
+    const lx = fx - cx;
+    const lz = fz - cz;
+    let t = clamp(0.5 + lx * cell.ax + lz * cell.az, 0, 1);
+    if (cell.ax2 !== undefined || cell.az2 !== undefined) {
+      const t2 = clamp(0.5 + lx * (cell.ax2 ?? 0) + lz * (cell.az2 ?? 0), 0, 1);
+      t = Math.max(t, t2);
+    }
     return cell.base + cell.rise * t;
   }
 }
