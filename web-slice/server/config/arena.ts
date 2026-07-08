@@ -1,21 +1,28 @@
-// Server-side arena data: loads the same map JSON the client renders
-// (public/maps/arena_slice.json) and builds a Heightfield from it (shared
-// math with the client, see src/shared/heightfield.ts) so rocket-vs-terrain
-// collision uses the exact same slope rules the player sees.
+// Server-side arena data: loads the SAME map JSON the client renders by
+// default (public/maps/${ACTIVE_MAP}.json, see src/shared/activeMap.ts — the
+// one place that name is chosen, imported by both sides) and builds a
+// Heightfield from it (shared math with the client, see
+// src/shared/heightfield.ts) so rocket-vs-terrain collision uses the exact
+// same slope rules the player sees.
 //
-// Spawn points and weapon-box points are hand-picked grid coordinates read
-// directly off arena_slice.json (ground level, clear of roads/plateau edges)
-// — same "hardcode for now" approach as the existing
-// `// TODO: read spawn points from the map JSON once the match room knows
-// which map is active` comment in rooms/MatchRoom.ts. Not derived from a
-// map-authored "spawn" marker layer because that format doesn't exist yet.
+// Spawn points and weapon-box points are DERIVED from the map JSON (flat
+// cells clear of the island's edges, spread out via farthest-point sampling
+// — see server/spawn/autoSpawn.ts) rather than hand-picked per map. This is
+// what closes out the `// TODO: read spawn points from the map JSON once the
+// match room knows which map is active` note that used to live in
+// rooms/MatchRoom.ts: hardcoded grid coords only made sense while exactly
+// one map (arena_slice) ever loaded; ACTIVE_MAP switching to mars_base
+// exposed that they don't generalize (wrong plateau height → spawns
+// underground / mid-air).
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { Heightfield, type MapJson } from "../../src/shared/heightfield";
+import { ACTIVE_MAP } from "../../src/shared/activeMap";
+import { deriveBoxGrid, deriveSpawnGrid, type GridPoint } from "../spawn/autoSpawn";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MAP_PATH = path.join(__dirname, "../../public/maps/arena_slice.json");
+const MAP_PATH = path.join(__dirname, `../../public/maps/${ACTIVE_MAP}.json`);
 
 const mapJson = JSON.parse(readFileSync(MAP_PATH, "utf-8")) as MapJson;
 export const ARENA_HEIGHTFIELD = Heightfield.fromMapJson(mapJson);
@@ -25,22 +32,15 @@ export interface WorldPoint {
   z: number;
 }
 
-// Ground-level points around the ring, clear of the road bands and the
-// central plateau/skirt — verified against arena_slice.json's rect_fills
-// (ground bands + inside-ring ground) and cell lists (road corners, plateau
-// skirt cells). MIN_KART_SPAWNS in the reference is 4; we provide 6.
-const SPAWN_GRID: readonly [number, number][] = [
-  [2, 2], [21, 2], [2, 21], [21, 21], [11, 2], [11, 21],
-];
+// MIN_KART_SPAWNS in the reference (spawn_manager.gd) is 4; we ask for 6 —
+// deriveSpawnGrid returns fewer only if the map genuinely doesn't have that
+// many flat, edge-clear cells (see autoSpawn.ts doc).
+const SPAWN_GRID: readonly GridPoint[] = deriveSpawnGrid(mapJson, 6);
 
-// Mix of ground-level and plateau boxes (2 of 6 on the plateau) — a
-// reasonable spread across the arena per docs/p2-port-notes.md §2, without
-// inventing a map-authored box layer yet.
-const BOX_GRID: readonly [number, number][] = [
-  [2, 11], [21, 11], [6, 6], [17, 17], [10, 10], [13, 13],
-];
+// Excludes the spawn cells so a box never stacks exactly on a spawn point.
+const BOX_GRID: readonly GridPoint[] = deriveBoxGrid(mapJson, 6, SPAWN_GRID);
 
-function toWorldPoints(grid: readonly [number, number][]): WorldPoint[] {
+function toWorldPoints(grid: readonly GridPoint[]): WorldPoint[] {
   return grid.map(([gx, gz]) => ARENA_HEIGHTFIELD.gridToWorld(gx, gz));
 }
 

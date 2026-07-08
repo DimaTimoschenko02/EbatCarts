@@ -76,6 +76,7 @@ const statusHint = document.getElementById("statusHint")!;
 const gridSizeInput = document.getElementById("gridSizeInput") as HTMLInputElement;
 const selLoad = document.getElementById("selLoad") as HTMLSelectElement;
 const serverStatus = document.getElementById("serverStatus")!;
+const btnUndo = document.getElementById("btnUndo") as HTMLButtonElement;
 
 // ── Scene ──────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -118,6 +119,50 @@ controls.update();
 // Canvas owns right-click: suppress the native context menu everywhere over it.
 renderer.domElement.addEventListener("contextmenu", e => e.preventDefault());
 
+// ── WASD / arrow-key camera panning ─────────────────────────────────────
+// Middle-drag orbit + wheel zoom aren't enough to cover a large map — the
+// owner asked for keyboard panning too. We move both camera.position and
+// controls.target by the same screen-projected delta each frame, which
+// preserves OrbitControls' internal spherical offset (same trick its own
+// .pan() uses internally), so orbiting/zooming keep working unmodified.
+const CAMERA_PAN_SPEED = 15; // world units / second
+const CAMERA_PAN_KEYS = new Set([
+  "KeyW", "KeyA", "KeyS", "KeyD",
+  "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+]);
+const pressedKeys = new Set<string>();
+const panClock = new THREE.Clock();
+
+function updateCameraPan(dt: number): void {
+  if (pressedKeys.size === 0) return;
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+  forward.y = 0;
+  if (forward.lengthSq() < 1e-6) forward.set(0, 0, -1);
+  forward.normalize();
+  const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+  const move = new THREE.Vector3();
+  if (pressedKeys.has("KeyW") || pressedKeys.has("ArrowUp")) move.add(forward);
+  if (pressedKeys.has("KeyS") || pressedKeys.has("ArrowDown")) move.sub(forward);
+  if (pressedKeys.has("KeyD") || pressedKeys.has("ArrowRight")) move.add(right);
+  if (pressedKeys.has("KeyA") || pressedKeys.has("ArrowLeft")) move.sub(right);
+  if (move.lengthSq() < 1e-9) return;
+  move.normalize().multiplyScalar(CAMERA_PAN_SPEED * dt);
+  camera.position.add(move);
+  controls.target.add(move);
+}
+
+// Text fields (grid-size input, server-map select) must keep their own
+// keyboard input — WASD/arrows/R/Q/E/Ctrl+Z must not be hijacked while
+// the owner is typing in them.
+function isTextInputFocused(): boolean {
+  const el = document.activeElement;
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA";
+}
+
 // ── Editor state ─────────────────────────────────────────────────────────
 interface CellRecord { asset: string; x: number; z: number; y_level: number; rot: number }
 interface PropRecord { asset: string; x: number; z: number; y_level: number; rot: number; scale: number }
@@ -156,12 +201,86 @@ function buildPalette(): void {
     for (const item of cat.items) {
       const btn = document.createElement("button");
       btn.className = "palette-btn";
-      btn.textContent = item.label;
+      // Label lives in its own span so a thumbnail <img> can be prepended
+      // later (once the asset library is loaded) without clobbering the text.
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "palette-label";
+      labelSpan.textContent = item.label;
+      btn.appendChild(labelSpan);
       btn.addEventListener("click", () => selectAsset(item.asset));
       sidebar.appendChild(btn);
       paletteButtons.set(item.asset, btn);
     }
   }
+}
+
+// ── Palette thumbnails ──────────────────────────────────────────────────
+// Renders each palette asset's template to a small offscreen canvas once
+// the asset library has loaded, and stamps it as an <img> in front of the
+// button's label. One shared renderer is reused across all assets (cheaper
+// than allocating a WebGL context per thumbnail); failures are swallowed —
+// the button just keeps its plain-text label.
+const THUMB_RENDER_SIZE = 96; // rendered at 2.4x the ~40px CSS display size
+let thumbRenderer: THREE.WebGLRenderer | null = null;
+
+function getThumbRenderer(): THREE.WebGLRenderer {
+  if (!thumbRenderer) {
+    thumbRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    thumbRenderer.setSize(THUMB_RENDER_SIZE, THUMB_RENDER_SIZE);
+    thumbRenderer.setClearColor(0x000000, 0);
+  }
+  return thumbRenderer;
+}
+
+function renderThumbnail(template: THREE.Object3D): string | null {
+  try {
+    const r = getThumbRenderer();
+    const thumbScene = new THREE.Scene();
+    thumbScene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+    dir.position.set(3, 5, 2);
+    thumbScene.add(dir);
+
+    const clone = template.clone(true);
+    thumbScene.add(clone);
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z, 1e-3);
+    clone.position.sub(center); // center the model at the origin for framing
+
+    const cam = new THREE.PerspectiveCamera(35, 1, 0.01, 1000);
+    const dist = maxDim * 2.3;
+    cam.position.set(dist, dist * 0.85, dist); // fixed iso-ish angle for every asset
+    cam.lookAt(0, 0, 0);
+
+    r.render(thumbScene, cam);
+    return r.domElement.toDataURL("image/png");
+  } catch (err) {
+    console.error("[editor] thumbnail render failed:", err);
+    return null;
+  }
+}
+
+function addPaletteThumbnails(): void {
+  if (!lib) return;
+  for (const cat of PALETTE) {
+    for (const item of cat.items) {
+      const template = lib.get(item.asset);
+      const btn = paletteButtons.get(item.asset);
+      if (!template || !btn) continue;
+      const dataUrl = renderThumbnail(template);
+      if (!dataUrl) continue; // graceful fallback: leave the text-only button
+      const img = document.createElement("img");
+      img.className = "palette-thumb";
+      img.src = dataUrl;
+      img.alt = "";
+      btn.prepend(img);
+    }
+  }
+  // The offscreen GL context isn't needed again after this pass.
+  thumbRenderer?.dispose();
+  thumbRenderer = null;
 }
 
 function selectAsset(asset: string): void {
@@ -243,19 +362,84 @@ function addProp(rec: PropRecord): void {
   propObjs.push(inst);
 }
 
-// Removes the prop whose cell-space XZ is closest to (x, z), if within reach.
-function removeNearestProp(x: number, z: number, maxDist = 0.6): boolean {
+// Finds the index of the prop whose cell-space XZ is closest to (x, z),
+// within reach, or -1 if none. Split from the removal itself so callers
+// (delete handler, undo/redo) can grab the record before it's gone.
+function findNearestPropIndex(x: number, z: number, maxDist = 0.6): number {
   let bestIdx = -1;
   let bestDist = maxDist;
   for (let i = 0; i < props.length; i++) {
     const d = Math.hypot(props[i].x - x, props[i].z - z);
     if (d <= bestDist) { bestDist = d; bestIdx = i; }
   }
-  if (bestIdx < 0) return false;
-  scene.remove(propObjs[bestIdx]);
-  props.splice(bestIdx, 1);
-  propObjs.splice(bestIdx, 1);
+  return bestIdx;
+}
+
+// Removes a prop by object identity (not by re-deriving position), so undo
+// can restore/re-remove the exact same record instance regardless of how
+// the array shifted since it was captured.
+function removePropByRef(rec: PropRecord): boolean {
+  const idx = props.indexOf(rec);
+  if (idx < 0) return false;
+  scene.remove(propObjs[idx]);
+  props.splice(idx, 1);
+  propObjs.splice(idx, 1);
   return true;
+}
+
+// ── Undo / redo ──────────────────────────────────────────────────────────
+// Each entry stores the before/after state of exactly one cell (keyed) or
+// prop (by object identity) mutation. Undo restores "before", redo
+// re-applies "after" — the same apply function drives both directions.
+const UNDO_LIMIT = 50;
+interface CellUndoEntry { kind: "cell"; key: string; before: CellRecord | null; after: CellRecord | null }
+interface PropUndoEntry { kind: "prop"; before: PropRecord | null; after: PropRecord | null }
+type UndoEntry = CellUndoEntry | PropUndoEntry;
+
+const undoStack: UndoEntry[] = [];
+const redoStack: UndoEntry[] = [];
+
+function updateUndoButton(): void {
+  btnUndo.disabled = undoStack.length === 0;
+}
+
+function pushUndo(entry: UndoEntry): void {
+  undoStack.push(entry);
+  if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+  redoStack.length = 0; // a fresh action invalidates the redo history
+  updateUndoButton();
+}
+
+function applyEntry(entry: UndoEntry, direction: "undo" | "redo"): void {
+  if (entry.kind === "cell") {
+    const target = direction === "undo" ? entry.before : entry.after;
+    if (target) placeCell(target); else removeCell(entry.key);
+    return;
+  }
+  const removeTarget = direction === "undo" ? entry.after : entry.before;
+  const restoreTarget = direction === "undo" ? entry.before : entry.after;
+  if (removeTarget) removePropByRef(removeTarget);
+  if (restoreTarget) addProp(restoreTarget);
+}
+
+function undo(): void {
+  const entry = undoStack.pop();
+  if (!entry) return;
+  applyEntry(entry, "undo");
+  redoStack.push(entry);
+  updateUndoButton();
+  refreshCursor(lastClientX, lastClientY);
+  scheduleAutosave();
+}
+
+function redo(): void {
+  const entry = redoStack.pop();
+  if (!entry) return;
+  applyEntry(entry, "redo");
+  undoStack.push(entry);
+  updateUndoButton();
+  refreshCursor(lastClientX, lastClientY);
+  scheduleAutosave();
 }
 
 // Re-derives world position (position.x/z depend on HALF) for every already-
@@ -297,6 +481,11 @@ function clearAll(): void {
   for (const obj of propObjs) scene.remove(obj);
   props.length = 0;
   propObjs.length = 0;
+  // A bulk clear/import/load invalidates any prior undo history — replaying
+  // an old entry against the now-cleared map would resurrect stale records.
+  undoStack.length = 0;
+  redoStack.length = 0;
+  updateUndoButton();
 }
 
 // ── Raycast / cursor ─────────────────────────────────────────────────────
@@ -378,23 +567,53 @@ renderer.domElement.addEventListener("pointerdown", e => {
     if (!activeAsset) return;
     const rot = ROT_CYCLE[rotIndex];
     if (isPropAsset(activeAsset)) {
-      addProp({ asset: activeAsset, x: lastFloatX, z: lastFloatZ, y_level: yLevel, rot, scale: 1.0 });
+      const rec: PropRecord = { asset: activeAsset, x: lastFloatX, z: lastFloatZ, y_level: yLevel, rot, scale: 1.0 };
+      addProp(rec);
+      pushUndo({ kind: "prop", before: null, after: rec });
     } else {
-      placeCell({ asset: activeAsset, x: lastCellX, z: lastCellZ, y_level: yLevel, rot });
+      const key = cellKey(lastCellX, lastCellZ);
+      const before = cells.get(key) ?? null;
+      const rec: CellRecord = { asset: activeAsset, x: lastCellX, z: lastCellZ, y_level: yLevel, rot };
+      placeCell(rec);
+      pushUndo({ kind: "cell", key, before, after: rec });
     }
     scheduleAutosave();
   } else if (e.button === 2) {
     // Right click: delete whatever is under the cursor — a snapped cell tile
     // first, then the nearest prop, regardless of the currently active asset.
     const key = cellKey(lastCellX, lastCellZ);
+    const cellBefore = cells.get(key) ?? null;
     const removedCell = removeCell(key);
-    const removedProp = !removedCell && removeNearestProp(lastFloatX, lastFloatZ);
-    if (removedCell || removedProp) scheduleAutosave();
+    if (removedCell) {
+      pushUndo({ kind: "cell", key, before: cellBefore, after: null });
+      scheduleAutosave();
+      return;
+    }
+    const propIdx = findNearestPropIndex(lastFloatX, lastFloatZ);
+    if (propIdx >= 0) {
+      const rec = props[propIdx];
+      removePropByRef(rec);
+      pushUndo({ kind: "prop", before: rec, after: null });
+      scheduleAutosave();
+    }
   }
 });
 
-// ── Keyboard: R rotate, Q/E y_level, Esc deselect ───────────────────────
+// ── Keyboard: R rotate, Q/E y_level, WASD/arrows pan, Ctrl+Z undo, Esc ──
 addEventListener("keydown", e => {
+  if (isTextInputFocused()) return;
+
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.code === "KeyZ") {
+    e.preventDefault();
+    undo();
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && (e.code === "KeyY" || (e.shiftKey && e.code === "KeyZ"))) {
+    e.preventDefault();
+    redo();
+    return;
+  }
+
   if (e.code === "KeyR") {
     rotIndex = (rotIndex + 1) % ROT_CYCLE.length;
     refreshCursor(lastClientX, lastClientY);
@@ -408,8 +627,24 @@ addEventListener("keydown", e => {
     refreshCursor(lastClientX, lastClientY);
   } else if (e.code === "Escape") {
     deselectAsset();
+  } else if (CAMERA_PAN_KEYS.has(e.code)) {
+    pressedKeys.add(e.code);
+    e.preventDefault();
   }
 });
+
+addEventListener("keyup", e => {
+  pressedKeys.delete(e.code);
+});
+
+// If focus leaves the window mid-pan (alt-tab, devtools) the keyup never
+// fires — clear held keys so the camera doesn't drift forever.
+addEventListener("blur", () => {
+  pressedKeys.clear();
+});
+
+btnUndo.addEventListener("click", () => undo());
+updateUndoButton();
 
 // ── Export / Import / Clear / Drive ─────────────────────────────────────
 function buildMapJson(): MapJson {
@@ -596,6 +831,7 @@ function scheduleAutosave(): void {
 (async () => {
   buildPalette();
   lib = await loadAssetLibrary(ASSET_NAMES);
+  addPaletteThumbnails();
   void refreshServerMapList();
   const saved = localStorage.getItem("editor-autosave");
   if (saved) {
@@ -612,6 +848,7 @@ function scheduleAutosave(): void {
 
 function frame(): void {
   requestAnimationFrame(frame);
+  updateCameraPan(panClock.getDelta());
   controls.update();
   renderer.render(scene, camera);
 }

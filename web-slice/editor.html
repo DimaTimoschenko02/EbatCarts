@@ -18,6 +18,8 @@
     padding: 6px 14px; cursor: pointer; font-family: inherit; font-size: 13px; border-radius: 4px;
   }
   button:hover, .file-btn:hover { background: #00ffee22; }
+  button:disabled { opacity: 0.35; cursor: default; }
+  button:disabled:hover { background: #12122a; }
 
   #topbar select, #topbar input[type="number"] {
     background: #12122a; color: #00ffee; border: 1px solid #00ffee88;
@@ -41,15 +43,28 @@
   }
   .category-label:first-child { margin-top: 0; }
   .palette-btn {
-    display: block; width: 100%; text-align: left; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; margin-bottom: 4px;
     background: #12122a; color: #cde; border: 1px solid #333366;
-    padding: 6px 8px; cursor: pointer; font-family: inherit; font-size: 12px; border-radius: 3px;
+    padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 12px; border-radius: 3px;
   }
   .palette-btn:hover { border-color: #00ffee88; }
   .palette-btn.active { background: #00ffee33; border-color: #00ffee; color: #00ffee; }
+  .palette-thumb {
+    width: 32px; height: 32px; flex: 0 0 auto;
+    background: #0a0a1a; border: 1px solid #333366; border-radius: 3px;
+  }
+  .palette-label { flex: 1 1 auto; }
 
   #canvas-container { flex: 1; position: relative; min-width: 0; }
   #canvas-container canvas { display: block; }
+
+  #hintPanel {
+    position: absolute; right: 12px; bottom: 12px; max-width: 380px;
+    background: #12122ad9; border: 1px solid #00ffee55; border-radius: 6px;
+    padding: 8px 12px; font-size: 11px; line-height: 1.7; color: #cde;
+    pointer-events: none; z-index: 5;
+  }
+  #hintPanel b { color: #00ffee; }
 
   #statusbar {
     height: 28px; flex: 0 0 auto; display: flex; align-items: center; gap: 18px;
@@ -71,6 +86,7 @@
     </select>
     <button id="btnSaveServer">Save to server</button>
     <span id="serverStatus"></span>
+    <button id="btnUndo" title="Undo (Ctrl+Z)" disabled>Undo</button>
     <button id="btnClear">Clear</button>
     <button id="btnDrive">Drive</button>
     <label class="inline" for="gridSizeInput">Grid size
@@ -79,7 +95,14 @@
   </div>
   <div id="main">
     <div id="sidebar"></div>
-    <div id="canvas-container"></div>
+    <div id="canvas-container">
+      <div id="hintPanel">
+        <b>ЛКМ</b> — поставить · <b>ПКМ</b> — удалить<br>
+        <b>R</b> — повернуть · <b>Q</b>/<b>E</b> — уровень ниже/выше<br>
+        <b>WASD</b> / стрелки — камера · колесо — зум<br>
+        <b>Ctrl+Z</b> — отмена · <b>Ctrl+Y</b> — повтор
+      </div>
+    </div>
   </div>
   <div id="statusbar">
     <span id="statusMain">loading assets…</span>

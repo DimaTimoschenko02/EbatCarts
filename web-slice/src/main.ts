@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { createSpaceSky } from "./fx/sky";
 import { loadAssetLibrary } from "./map/assetLoader";
 import { GameMap } from "./map/mapLoader";
+import { ACTIVE_MAP } from "./shared/activeMap";
 import { Kart } from "./kart/kart";
 import { KART_TYPES } from "./kart/stats";
 import { InputController } from "./core/input";
@@ -104,7 +105,7 @@ let map: GameMap | null = null;
     const driveJson = new URLSearchParams(location.search).get("map") === "editor"
       ? localStorage.getItem("editor-drive-map")
       : null;
-    map = driveJson ? GameMap.fromJson(JSON.parse(driveJson), lib) : await GameMap.load("/maps/arena_slice.json", lib);
+    map = driveJson ? GameMap.fromJson(JSON.parse(driveJson), lib) : await GameMap.load(`/maps/${ACTIVE_MAP}.json`, lib);
     scene.add(map.root);
     telemetry.setMapHandles(map, scene);
     net.setMap(map); // remote-kart body tilt (src/net/remoteKarts.ts) needs the heightfield too

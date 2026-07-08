@@ -118,7 +118,14 @@ for (x, z), lv in sorted(LEVEL.items()):
 
     if len(higher) == 1:
         rot = SIDE_ROT[higher[0]]
-        cells.append({"asset": "terrain_side", "x": x, "z": z, "y_level": lv + 1, "rot": rot})
+        # terrain_sideCliff, NOT terrain_side: side is a thin tilted quad that
+        # hangs BELOW its pivot with no back wall — inside a pit its open
+        # underside faces the camera and reads as jagged shards. sideCliff is a
+        # SOLID cliff face spanning [lv, lv+0.5] ABOVE the pivot, so y_level is
+        # the LOW level (lv) not the high one, and it never shows a hole.
+        # Same +Z-ascent-at-rot0 basis as side, so SIDE_ROT is unchanged.
+        # (vertex-verified in src/assetDiag + docs/space-kit-terrain-catalog.md)
+        cells.append({"asset": "terrain_sideCliff", "x": x, "z": z, "y_level": lv, "rot": rot})
     elif len(higher) == 2:
         (ax, az), (bx, bz) = higher
         if (ax + bx, az + bz) == (0, 0):

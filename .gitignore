@@ -57,3 +57,4 @@ bash.exe.stackdump
 
 # Reference videos — large binaries, analysis lives in reference-videos/README.md
 reference-videos/*.mp4
+web-slice/public/assets/space-kit/*.import
