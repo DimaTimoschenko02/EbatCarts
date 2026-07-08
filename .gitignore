@@ -54,3 +54,6 @@ assets-full-data/
 # Windows bash crash dumps
 bash.exe.stackdump
 *.stackdump
+
+# Reference videos — large binaries, analysis lives in reference-videos/README.md
+reference-videos/*.mp4

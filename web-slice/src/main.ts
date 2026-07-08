@@ -15,6 +15,7 @@ import { InputController } from "./core/input";
 import { FixedStepLoop } from "./core/loop";
 import { ChaseCamera } from "./core/camera";
 import { Telemetry } from "./debug/telemetry";
+import { InputOverlay } from "./debug/inputOverlay";
 import { initParamPanel } from "./debug/paramPanel";
 import { initNet } from "./net";
 import { createCombat } from "./combat";
@@ -67,6 +68,7 @@ const chaseCamera = new ChaseCamera();
 const input = new InputController();
 const telemetry = new Telemetry(kart, input);
 initParamPanel(kart); // dev tuner overlay, toggled with P — see src/debug/paramPanel.ts
+const inputOverlay = new InputOverlay(); // W/A/S/D + SPACE key highlight, for gameplay recordings
 const hud = document.getElementById("hud")!;
 
 // Combat wiring (weapons/damage/death/respawn/pickups) — server-authoritative,
@@ -115,11 +117,16 @@ const MAX_CATCHUP = 1.1; // never simulate more than ~1s per tick
 const loop = new FixedStepLoop(PHYS_STEP, MAX_CATCHUP);
 
 // Physics ticks on setInterval, NOT rAF (see file header). rAF renders only.
+// lastRawInput feeds the input overlay once per rendered frame below — it's
+// deliberately updated per-substep but only READ once per frame, so the
+// overlay shows the most recent input without re-driving physics itself.
+let lastRawInput = { throttle: 0, steer: 0 };
 function physTick(): void {
   loop.tick(dt => {
     const raw = input.next(dt * 1000);
     kart.update(dt, raw, map, net.getObstacles());
     telemetry.recordSubstep(dt, raw);
+    lastRawInput = raw;
   });
 }
 setInterval(physTick, 50);
@@ -138,6 +145,7 @@ function frame(): void {
   const frameDt = Math.min((now - lastFrameMs) / 1000, 0.1);
   chaseCamera.update(camera, kart.position, kart.yaw, kart.velocity, kart.physicsParams, frameDt);
   telemetry.updateHud(hud);
+  inputOverlay.update(lastRawInput);
   combat.update(net.client, input, frameDt); // dt: box spin visual only
   lastFrameMs = now;
   renderer.render(scene, camera);
