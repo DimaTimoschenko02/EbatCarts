@@ -235,13 +235,15 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // is a separate arcade "grade resistance" knob for ground-following.
   slopeGravityAccel: 10,
 
-  // steerSlewRateIn 2.2 -> 1.4 (owner video-diff session 2026-07-08, point 2:
-  // "starts turning too fast after the key press" — ~0.45s to full lock read
-  // as snappier than the SmashKarts.io reference in the frame-by-frame
-  // comparison). 1.4 stretches that to ~0.7s to full lock — noticeably softer
-  // turn-in without going so slow it feels laggy on a quick correction.
-  steerSlewRateIn: 1.4,
-  steerSlewRateOut: 11,
+  // steerSlewRate In/Out 1.4/11 -> 6.5/6.5 (owner live-tuning playtest
+  // 2026-07-08, "best driving version yet"): the video-diff session first
+  // softened turn-in to 1.4 (~0.7s to full lock), but hands-on that read as
+  // laggy once maxSteerAngleDeg dropped — with the SMALLER max angle a fast
+  // slew feels precise, not snappy, so the owner brought responsiveness back
+  // through slew and kept softness in the angle itself. Out matched to In so
+  // the wheel releases at the same pace it engages.
+  steerSlewRateIn: 6.5,
+  steerSlewRateOut: 6.5,
   throttleSlewRate: 2,
 
   // steerLowSpeedMult 0.9 -> 0.72, steerHighSpeedMult 0.85 -> 0.62,
@@ -267,7 +269,14 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // (non-drift) turning, a matched gentle-steer (0.3) test at cruise softened
   // proportionally too: 58.6 -> 27.3 deg/s (~53% down), satisfying the "ordinary
   // turning also softer" requirement without a separate knob.
-  steerLowSpeedMult: 0.72,
+  // OWNER OVERRIDE (live-tuning playtest 2026-07-08, "best driving version
+  // yet"): after hands-on with the video-diff defaults the owner settled on
+  // steerLowSpeedMult back to 0.9, maxSteerAngleDeg 16 -> 20, plus
+  // frontGripStiffness 17.5 -> 17, tireSaturationSpeed 5 -> 4.5,
+  // omegaDamping 5 -> 4.5 — a slightly sharper, livelier wheel than the
+  // strict video-matched numbers. Measured drift circle stays in the
+  // regression-test band (bicyclePhysics.test.ts drift-circle guard).
+  steerLowSpeedMult: 0.9,
   steerHighSpeedMult: 0.62,
 
   // 2.2 (numerical tuning, tools/diagnose_reverse.ts 2026-07-07, swept
@@ -295,7 +304,7 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // config-driven so it doesn't reintroduce this feedback loop) — flagging
   // for game-designer/systems-designer if the deeper target still matters
   // after playtesting this measured improvement.
-  reverseSteerGain: 2.2,
+  reverseSteerGain: 2.5,
 
   // 0.35 (owner video-diff session 2026-07-08, point 5 — see bicyclePhysics.ts
   // step I comment and reverseRatio's doc comment above for the full S+A
@@ -311,12 +320,12 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // documented in reverseSteerGain's comment above, not this term.
   reverseCorneringDragFloor: 0.35,
 
-  maxSteerAngleDeg: 16,
-  frontGripStiffness: 17.5,
+  maxSteerAngleDeg: 20,
+  frontGripStiffness: 17,
   rearGripStiffness: 2.5,
-  tireSaturationSpeed: 5,
+  tireSaturationSpeed: 4.5,
   inertiaScale: 2,
-  omegaDamping: 5,
+  omegaDamping: 4.5,
   driftMaxSlipSpeed: 8,
   omegaLeanScale: 2,
 

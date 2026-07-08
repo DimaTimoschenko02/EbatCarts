@@ -5,8 +5,11 @@ import { DEFAULT_KART_PHYSICS_PARAMS } from "../physics/types";
 import {
   applyOverrides,
   computeOverridesAtIndex,
+  countModifiedInGroup,
   diffFromDefaults,
+  formatDefaultLine,
   type HistoryEntry,
+  isParamModified,
   parseDevParamsFile,
   parseHistoryEntries,
   parseStoredOverrides,
@@ -233,5 +236,83 @@ describe("parseDevParamsFile", () => {
 
   it("tolerates a file with overrides but no history field", () => {
     expect(parseDevParamsFile({ overrides: { kDrag: 0.05 } })).toEqual({ overrides: { kDrag: 0.05 }, history: [] });
+  });
+});
+
+describe("isParamModified", () => {
+  it("is false when current equals the default exactly", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS };
+    expect(isParamModified("maxSpeed", current)).toBe(false);
+  });
+
+  it("is true for a clearly different numeric value", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS, maxSpeed: 30 };
+    expect(isParamModified("maxSpeed", current)).toBe(true);
+  });
+
+  it("tolerates float noise within epsilon (no false positive from a stray fp rounding)", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS, maxSpeed: DEFAULT_KART_PHYSICS_PARAMS.maxSpeed + 1e-12 };
+    expect(isParamModified("maxSpeed", current)).toBe(false);
+  });
+
+  it("flags a difference larger than epsilon", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS, maxSpeed: DEFAULT_KART_PHYSICS_PARAMS.maxSpeed + 1e-6 };
+    expect(isParamModified("maxSpeed", current)).toBe(true);
+  });
+
+  it("compares booleans strictly (no epsilon concept)", () => {
+    const flipped = { ...DEFAULT_KART_PHYSICS_PARAMS, autoDriftEnabled: !DEFAULT_KART_PHYSICS_PARAMS.autoDriftEnabled };
+    expect(isParamModified("autoDriftEnabled", flipped)).toBe(true);
+    expect(isParamModified("autoDriftEnabled", { ...DEFAULT_KART_PHYSICS_PARAMS })).toBe(false);
+  });
+
+  it("accepts an explicit defaults object instead of the module default", () => {
+    const customDefaults = { ...DEFAULT_KART_PHYSICS_PARAMS, maxSpeed: 30 };
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS, maxSpeed: 30 };
+    expect(isParamModified("maxSpeed", current, customDefaults)).toBe(false);
+  });
+});
+
+describe("countModifiedInGroup", () => {
+  it("returns 0 for an untouched group", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS };
+    expect(countModifiedInGroup("Скорость", current)).toBe(0);
+  });
+
+  it("counts only the changed fields within that group, ignoring changes in other groups", () => {
+    const current = {
+      ...DEFAULT_KART_PHYSICS_PARAMS,
+      maxSpeed: 30, // "Скорость"
+      accelForce: 40, // "Скорость"
+      rearGripStiffness: 5, // "Bicycle v3.0" — different group, shouldn't count
+    };
+    expect(countModifiedInGroup("Скорость", current)).toBe(2);
+    expect(countModifiedInGroup("Bicycle v3.0", current)).toBe(1);
+  });
+});
+
+describe("formatDefaultLine", () => {
+  it("shows just the default when the param is untouched", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS };
+    expect(formatDefaultLine("maxSpeed", current)).toBe(`Дефолт: ${DEFAULT_KART_PHYSICS_PARAMS.maxSpeed}m/s`);
+  });
+
+  it("shows 'default -> current' when the param has been changed", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS, maxSpeed: 30 };
+    expect(formatDefaultLine("maxSpeed", current)).toBe(`Дефолт: ${DEFAULT_KART_PHYSICS_PARAMS.maxSpeed}m/s → сейчас: 30m/s`);
+  });
+
+  it("formats a unit-less param without a trailing suffix", () => {
+    const current = { ...DEFAULT_KART_PHYSICS_PARAMS, rearGripStiffness: 5 };
+    expect(formatDefaultLine("rearGripStiffness", current)).toBe(
+      `Дефолт: ${DEFAULT_KART_PHYSICS_PARAMS.rearGripStiffness} → сейчас: 5`
+    );
+  });
+
+  it("formats a boolean param as true/false, not 1/0", () => {
+    const flipped = { ...DEFAULT_KART_PHYSICS_PARAMS, autoDriftEnabled: !DEFAULT_KART_PHYSICS_PARAMS.autoDriftEnabled };
+    expect(formatDefaultLine("autoDriftEnabled", flipped)).toBe(
+      `Дефолт: ${DEFAULT_KART_PHYSICS_PARAMS.autoDriftEnabled} → сейчас: ${!DEFAULT_KART_PHYSICS_PARAMS.autoDriftEnabled}`
+    );
   });
 });

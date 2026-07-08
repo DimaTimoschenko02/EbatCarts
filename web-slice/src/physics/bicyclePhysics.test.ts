@@ -653,6 +653,78 @@ describe("BicyclePhysics + ContinuousDrift — Fix 2 regression: reverse maneuve
   });
 });
 
+// ─── Steady-state drift-circle radius/omega guard (regression added
+// 2026-07-08 after a same-day tuning pass tripled the drift circle's radius
+// with zero test coverage noticing) ─────────────────────────────────────────
+//
+// Where the reference numbers come from (reference-videos/README.md,
+// frame-by-frame teardown, 2026-07-08):
+//   - original SmashKarts.io footage: steady drift circle ω ≈ 120 deg/s
+//     (≈2.09 rad/s), radius ≈ 3-4 kart bodies ≈ ~5 m.
+//   - our footage BEFORE this session's tuning pass (driftYawBonus constant
+//     + heavier steer angle): ω hit 211 deg/s (3.68 rad/s) at driftIntensity
+//     only 0.21, radius collapsed to ≈1.6 m — "crimping in place" instead of
+//     a real arc. That regression shipped with 78/78 green tests because none
+//     of them measured the steady-state circle shape at all.
+//   - AFTER this session's fixes (accelForce/maxSteerAngleDeg cuts, dropped
+//     driftYawBonus's constant add — see kart-physics docs/decision log): this
+//     test's own harness measures (verified against tools/diagnose_drift_circle.ts,
+//     same numbers to 3 significant figures) steady ω ≈ 1.612 rad/s (92.4
+//     deg/s), steady fwdSpeed ≈ 7.10 m/s, radius R = V/ω ≈ 4.40 m — back in
+//     the same ballpark as the original footage.
+//
+// What this guards: the failure mode that slipped through was a discrete
+// term (a flat driftYawBonus radians/sec ADD, independent of everything else)
+// making omega — and therefore the circle radius — jump by a large multiple
+// with no other symptom a speed/intensity-focused test would catch. The
+// bounds below are deliberately WIDE (not pinned tight to the exact measured
+// values above) so normal future tuning (a few percent nudge to accelForce,
+// grip stiffness, steer angle, etc.) doesn't flake this test — but a
+// multiplicative blowup like the pre-fix 3.68 rad/s / 1.6 m regression, or an
+// accidental near-zero omega (drift yaw torque silently disabled), both land
+// well outside these bounds and fail loudly.
+describe("BicyclePhysics + ContinuousDrift — steady-state drift-circle radius/omega guard (owner video-diff 2026-07-08)", () => {
+  it("holds steady ω and circle radius R=V/omega within a wide sanity band on default tuning", () => {
+    const sim = makeKartLikeSim();
+    const dt = 1 / 120;
+    // Phase 1: accelerate to cruise (3.5s) — same warmup as the other
+    // drift-circle regression tests above.
+    for (let i = 0; i < Math.round(3.5 / dt); i++) kartLikeTick(sim, dt, 0, 1);
+    // Phase 2: full steer + full throttle held for 15s — several drift
+    // circles, long enough for the circle to fully settle (steady window
+    // below is the last 4s, mirroring the Fix 1/Fix 2 tests' own windows).
+    const omegas: number[] = [];
+    const speeds: number[] = [];
+    for (let i = 0; i < Math.round(15 / dt); i++) {
+      const st = kartLikeTick(sim, dt, 1, 1);
+      omegas.push(st.omega);
+      speeds.push(Math.hypot(sim.vel.x, sim.vel.z));
+    }
+    const windowStart = Math.round(11 / dt); // last 4s of the 15s hold
+    const steadyOmega = omegas.slice(windowStart);
+    const steadySpeed = speeds.slice(windowStart);
+    const meanOmega = steadyOmega.reduce((a, b) => a + b, 0) / steadyOmega.length;
+    const meanSpeed = steadySpeed.reduce((a, b) => a + b, 0) / steadySpeed.length;
+    const radius = meanSpeed / Math.abs(meanOmega);
+
+    // Sanity: actually drifting in a circle, not stalled or going straight.
+    expect(Math.abs(meanOmega)).toBeGreaterThan(0.05);
+    expect(meanSpeed).toBeGreaterThan(0.5);
+
+    // ω band: [1.0, 2.6] rad/s (~57-149 deg/s). Measured baseline 1.612
+    // rad/s sits comfortably inside; the pre-fix 3.68 rad/s regression and a
+    // "yaw torque basically gone" collapse both land outside.
+    expect(Math.abs(meanOmega)).toBeGreaterThan(1.0);
+    expect(Math.abs(meanOmega)).toBeLessThan(2.6);
+
+    // Radius band: [2.5, 6.5] m. Measured baseline ≈4.40 m sits comfortably
+    // inside; the pre-fix ≈1.6 m "spinning in place" regression and an
+    // unreasonably wide (>6.5 m, i.e. barely turning) circle both fail.
+    expect(radius).toBeGreaterThan(2.5);
+    expect(radius).toBeLessThan(6.5);
+  });
+});
+
 describe("BicyclePhysics — reset", () => {
   it("clears omega, driftIntensity, isDrifting", () => {
     const bike = new BicyclePhysics(DEFAULT_KART_PHYSICS_PARAMS, DEFAULT_AXLE_GEOMETRY);
