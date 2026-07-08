@@ -12,6 +12,522 @@
  },
  "cells": [
   {
+   "asset": "terrain",
+   "x": 3,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 6,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 7,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 8,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 9,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 10,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 11,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 12,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 13,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 14,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 15,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 16,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 17,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 18,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 19,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 20,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 21,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 22,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 23,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 24,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 25,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 26,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 27,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 28,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 29,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 30,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 31,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 32,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 33,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 34,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 35,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 36,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 37,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 38,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 39,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 3,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 4,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 4,
+   "z": 6,
+   "y_level": 0,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 7,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 8,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 9,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 10,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 11,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 12,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 13,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 14,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 15,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 16,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 17,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 18,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 19,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 20,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 21,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 22,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 23,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 24,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 25,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 26,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 27,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 28,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 29,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 30,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 31,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 32,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 33,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 34,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 35,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 36,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 37,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 38,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 4,
+   "z": 39,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 4,
+   "z": 40,
+   "y_level": 0,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 4,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 5,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 5,
+   "z": 2,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 5,
+   "z": 3,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 5,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 5,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 5,
+   "z": 6,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
    "asset": "terrain_sideCorner",
    "x": 5,
    "z": 7,
@@ -19,220 +535,220 @@
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 8,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 9,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 10,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 11,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 12,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 13,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 14,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 15,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 16,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 17,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 18,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 19,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 20,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 21,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 22,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 23,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 24,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 25,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 26,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 27,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 28,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 29,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 31,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 32,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 33,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 34,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 35,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 36,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 37,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 5,
    "z": 38,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
@@ -243,10 +759,64 @@
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
+   "x": 5,
+   "z": 40,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 5,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 6,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 6,
+   "z": 2,
+   "y_level": 0,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 6,
+   "z": 3,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 6,
+   "z": 4,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 6,
+   "z": 5,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_sideCornerInner",
+   "x": 6,
+   "z": 6,
+   "y_level": 0,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
    "x": 6,
    "z": 7,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -436,11 +1006,37 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 6,
    "z": 39,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 6,
+   "z": 40,
    "y_level": 1,
    "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 6,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 7,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 7,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
   },
   {
    "asset": "terrain_sideCorner",
@@ -450,24 +1046,24 @@
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 7,
    "z": 4,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 7,
    "z": 5,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 7,
    "z": 6,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
@@ -664,17 +1260,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 7,
    "z": 39,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 7,
+   "z": 40,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 7,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 8,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 8,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 8,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -889,17 +1511,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 8,
    "z": 39,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 8,
+   "z": 40,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 8,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 9,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 9,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 9,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -1114,17 +1762,73 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 9,
    "z": 39,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 9,
+   "z": 40,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 9,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 9,
+   "z": 42,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 9,
+   "z": 43,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 9,
+   "z": 44,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 9,
+   "z": 45,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 9,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 10,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 10,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 10,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -1339,17 +2043,78 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 10,
    "z": 39,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_sideCornerInner",
+   "x": 10,
+   "z": 40,
+   "y_level": 0,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 10,
+   "z": 41,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 10,
+   "z": 42,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 10,
+   "z": 43,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 10,
+   "z": 44,
+   "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 10,
+   "z": 45,
+   "y_level": 0,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 10,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 11,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 11,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 11,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -1571,31 +2336,31 @@
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 11,
    "z": 40,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 11,
    "z": 41,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 11,
    "z": 42,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 11,
    "z": 43,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 90
   },
   {
@@ -1606,10 +2371,36 @@
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
+   "x": 11,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 11,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 12,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 12,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 12,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -1854,17 +2645,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 12,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 12,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 12,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 13,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 13,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -1937,334 +2754,349 @@
    "asset": "terrain",
    "x": 13,
    "z": 15,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 13,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 13,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 13,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 13,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 14,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 14,
+   "z": 3,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 4,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 5,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 6,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 7,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 8,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 9,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 10,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 11,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 12,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 13,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 14,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 15,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 14,
+   "z": 16,
    "y_level": 2
   },
   {
    "asset": "terrain_sideCornerInner",
-   "x": 13,
-   "z": 16,
+   "x": 14,
+   "z": 17,
    "y_level": 1,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 17,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
+   "asset": "terrain_side",
+   "x": 14,
    "z": 18,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 19,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 20,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 21,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 22,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 23,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCornerInner",
-   "x": 13,
-   "z": 24,
-   "y_level": 1,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 13,
-   "z": 28,
    "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 13,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 13,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 14,
-   "z": 3,
-   "y_level": 1,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 4,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 5,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 6,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 7,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 8,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 9,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 10,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 11,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 12,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 13,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 14,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 14,
-   "z": 15,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 14,
-   "z": 16,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCornerInner",
-   "x": 14,
-   "z": 17,
-   "y_level": 0,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 14,
-   "z": 18,
-   "y_level": 0,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 14,
    "z": 19,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 14,
    "z": 20,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 14,
    "z": 21,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 14,
    "z": 22,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 270
   },
   {
    "asset": "terrain_sideCornerInner",
    "x": 14,
    "z": 23,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 14,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -2382,17 +3214,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 14,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 14,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 14,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 15,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 15,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 15,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -2468,62 +3326,60 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 15,
    "z": 16,
-   "y_level": 1,
-   "rot": 180
+   "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 15,
    "z": 17,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 180
   },
   {
    "asset": "terrain",
    "x": 15,
    "z": 18,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 15,
    "z": 19,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 15,
    "z": 20,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 15,
    "z": 21,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 15,
    "z": 22,
-   "y_level": 0
+   "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 15,
    "z": 23,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 15,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -2641,17 +3497,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 15,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 15,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 15,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 16,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 16,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 16,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -2727,62 +3609,60 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 16,
    "z": 16,
-   "y_level": 1,
-   "rot": 180
+   "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 16,
    "z": 17,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 180
   },
   {
    "asset": "terrain",
    "x": 16,
    "z": 18,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 16,
    "z": 19,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 16,
    "z": 20,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 16,
    "z": 21,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 16,
    "z": 22,
-   "y_level": 0
+   "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 16,
    "z": 23,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 16,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -2900,17 +3780,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 16,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 16,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 16,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 17,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 17,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 17,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -2986,62 +3892,60 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 17,
    "z": 16,
-   "y_level": 1,
-   "rot": 180
+   "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 17,
    "z": 17,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 180
   },
   {
    "asset": "terrain",
    "x": 17,
    "z": 18,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 17,
    "z": 19,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 17,
    "z": 20,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 17,
    "z": 21,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 17,
    "z": 22,
-   "y_level": 0
+   "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 17,
    "z": 23,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 17,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -3159,17 +4063,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 17,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 17,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 17,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 18,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 18,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 18,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -3245,62 +4175,60 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 18,
    "z": 16,
-   "y_level": 1,
-   "rot": 180
+   "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 18,
    "z": 17,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 180
   },
   {
    "asset": "terrain",
    "x": 18,
    "z": 18,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 18,
    "z": 19,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 18,
    "z": 20,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 18,
    "z": 21,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 18,
    "z": 22,
-   "y_level": 0
+   "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 18,
    "z": 23,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 18,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -3418,17 +4346,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 18,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 18,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 18,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 19,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 19,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 19,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -3504,62 +4458,60 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 19,
    "z": 16,
-   "y_level": 1,
-   "rot": 180
+   "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 19,
    "z": 17,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 180
   },
   {
    "asset": "terrain",
    "x": 19,
    "z": 18,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 19,
    "z": 19,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 19,
    "z": 20,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 19,
    "z": 21,
-   "y_level": 0
+   "y_level": 1
   },
   {
    "asset": "terrain",
    "x": 19,
    "z": 22,
-   "y_level": 0
+   "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 19,
    "z": 23,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 19,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -3677,17 +4629,43 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 19,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 19,
+   "z": 45,
    "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 19,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 20,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 20,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 20,
    "z": 3,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -3763,67 +4741,65 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 20,
    "z": 16,
-   "y_level": 1,
-   "rot": 180
+   "y_level": 2
   },
   {
    "asset": "terrain_sideCornerInner",
    "x": 20,
    "z": 17,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 20,
    "z": 18,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 90
   },
   {
    "asset": "terrain_ramp",
    "x": 20,
    "z": 19,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 90
   },
   {
    "asset": "terrain_ramp",
    "x": 20,
    "z": 20,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 20,
    "z": 21,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 20,
    "z": 22,
-   "y_level": 0,
+   "y_level": 2,
    "rot": 90
   },
   {
    "asset": "terrain_sideCornerInner",
    "x": 20,
    "z": 23,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 20,
    "z": 24,
-   "y_level": 1,
-   "rot": 0
+   "y_level": 2
   },
   {
    "asset": "terrain",
@@ -3955,11 +4931,37 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 20,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 20,
+   "z": 45,
    "y_level": 1,
    "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 20,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 21,
+   "z": 2,
+   "y_level": 1,
+   "rot": 0
   },
   {
    "asset": "terrain_sideCorner",
@@ -3969,2609 +4971,2948 @@
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 21,
+   "z": 4,
+   "y_level": 2,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 21,
+   "z": 5,
+   "y_level": 2,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 21,
+   "z": 6,
+   "y_level": 2,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_sideCornerInner",
+   "x": 21,
+   "z": 7,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 8,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 9,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 10,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 11,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 12,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 13,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 14,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 15,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 21,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 21,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 21,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 21,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 22,
+   "z": 2,
+   "y_level": 0,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 22,
+   "z": 3,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 22,
    "z": 4,
    "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
-   "x": 21,
+   "asset": "terrain_sideCornerInner",
+   "x": 22,
    "z": 5,
-   "y_level": 1,
-   "rot": 270
+   "y_level": 0,
+   "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
-   "x": 21,
+   "asset": "terrain_sideCorner",
+   "x": 22,
    "z": 6,
    "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCornerInner",
-   "x": 21,
-   "z": 7,
-   "y_level": 1,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 8,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 9,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 10,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 11,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 12,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 13,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 14,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 21,
-   "z": 15,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCornerInner",
-   "x": 21,
-   "z": 16,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 21,
-   "z": 17,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 21,
-   "z": 18,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_ramp",
-   "x": 21,
-   "z": 19,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_ramp",
-   "x": 21,
-   "z": 20,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 21,
-   "z": 21,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 21,
-   "z": 22,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 21,
-   "z": 23,
-   "y_level": 1,
    "rot": 90
   },
   {
    "asset": "terrain_sideCornerInner",
-   "x": 21,
-   "z": 24,
+   "x": 22,
+   "z": 7,
    "y_level": 1,
    "rot": 270
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
+   "z": 8,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 9,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 10,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 11,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 12,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 13,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 14,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 15,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
    "z": 25,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 26,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 27,
    "y_level": 2
   },
   {
    "asset": "terrain_roadStraight",
-   "x": 21,
+   "x": 22,
    "z": 28,
    "y_level": 2,
    "rot": 90
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 29,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 30,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 31,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 32,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 33,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 34,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 35,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 36,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 37,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 38,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 39,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 40,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 41,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 42,
    "y_level": 2
   },
   {
    "asset": "terrain",
-   "x": 21,
+   "x": 22,
    "z": 43,
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
-   "x": 21,
+   "asset": "terrain_side",
+   "x": 22,
    "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 22,
+   "z": 45,
    "y_level": 1,
    "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 22,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 1,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 2,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 3,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 23,
+   "z": 7,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 8,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 9,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 10,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 11,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 12,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 13,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 14,
+   "y_level": 3,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 23,
+   "z": 15,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 23,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 23,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 23,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 24,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 24,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 24,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_side",
+   "x": 24,
+   "z": 15,
+   "y_level": 3,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 24,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 24,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 24,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 24,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 25,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 25,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 25,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_side",
+   "x": 25,
+   "z": 15,
+   "y_level": 3,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 25,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 25,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 25,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 25,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 26,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 26,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 26,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_side",
+   "x": 26,
+   "z": 15,
+   "y_level": 3,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 26,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 26,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 26,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 26,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 27,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 27,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 27,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_ramp",
+   "x": 27,
+   "z": 15,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 27,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 27,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 27,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 27,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 28,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 28,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 28,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_ramp",
+   "x": 28,
+   "z": 15,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 28,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 28,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 28,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 28,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 29,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 29,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 29,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_side",
+   "x": 29,
+   "z": 15,
+   "y_level": 3,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 29,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 29,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 29,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 29,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 30,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 30,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 30,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_side",
+   "x": 30,
+   "z": 15,
+   "y_level": 3,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 30,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 38,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 39,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 40,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 41,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 42,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 43,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_side",
+   "x": 30,
+   "z": 44,
+   "y_level": 2,
+   "rot": 180
+  },
+  {
+   "asset": "terrain_side",
+   "x": 30,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 30,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 31,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 31,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 31,
+   "z": 7,
+   "y_level": 3,
+   "rot": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 8,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 9,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 10,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 11,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 12,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 13,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 14,
+   "y_level": 3
+  },
+  {
+   "asset": "terrain_side",
+   "x": 31,
+   "z": 15,
+   "y_level": 3,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 16,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 17,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 18,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 19,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 20,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 21,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 22,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 23,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 24,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 25,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 26,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 27,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain_roadStraight",
+   "x": 31,
+   "z": 28,
+   "y_level": 2,
+   "rot": 90
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 29,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 30,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 31,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 32,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 33,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 34,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 35,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 36,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 37,
+   "y_level": 2
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 38,
+   "y_level": 2
   },
   {
    "asset": "terrain_sideCornerInner",
-   "x": 22,
-   "z": 7,
+   "x": 31,
+   "z": 39,
    "y_level": 1,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 31,
+   "z": 40,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain",
-   "x": 22,
-   "z": 8,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 9,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 10,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 11,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 12,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 13,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 14,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 15,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 22,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
+   "asset": "terrain_side",
+   "x": 31,
    "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 22,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 22,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCorner",
-   "x": 23,
-   "z": 7,
    "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 8,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 9,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 10,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 11,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 12,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 13,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 14,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCorner",
-   "x": 23,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 23,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 23,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 23,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCorner",
-   "x": 24,
-   "z": 8,
-   "y_level": 3,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 9,
-   "y_level": 3,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 10,
-   "y_level": 3,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 11,
-   "y_level": 3,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 12,
-   "y_level": 3,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 13,
-   "y_level": 3,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCorner",
-   "x": 24,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 24,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 24,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 24,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 25,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 25,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 25,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 25,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 25,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 25,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 25,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 26,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 26,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 26,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 26,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 26,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 26,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 26,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 27,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 27,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_ramp",
-   "x": 27,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_ramp",
-   "x": 27,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 27,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 27,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 27,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 28,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 28,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_ramp",
-   "x": 28,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_ramp",
-   "x": 28,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 28,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 28,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 28,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 29,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 29,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 29,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 29,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 29,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 29,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 29,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 30,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 30,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 30,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 30,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 30,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 39,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 40,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 41,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 42,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 30,
-   "z": 43,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 30,
-   "z": 44,
-   "y_level": 1,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 31,
-   "z": 7,
-   "y_level": 2,
-   "rot": 0
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 31,
-   "z": 8,
-   "y_level": 3,
-   "rot": 0
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 9,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 10,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 11,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 12,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 13,
-   "y_level": 4
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 31,
-   "z": 14,
-   "y_level": 3,
-   "rot": 180
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 31,
-   "z": 15,
-   "y_level": 2,
-   "rot": 180
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 16,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 17,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 18,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 19,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 20,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 21,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 22,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 23,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 24,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 25,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 26,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 27,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_roadStraight",
-   "x": 31,
-   "z": 28,
-   "y_level": 2,
-   "rot": 90
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 29,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 30,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 31,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 32,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 33,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 34,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 35,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 36,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 37,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain",
-   "x": 31,
-   "z": 38,
-   "y_level": 2
-  },
-  {
-   "asset": "terrain_sideCornerInner",
-   "x": 31,
-   "z": 39,
-   "y_level": 1,
-   "rot": 90
-  },
-  {
-   "asset": "terrain_sideCliff",
-   "x": 31,
-   "z": 40,
-   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
-   "x": 31,
-   "z": 41,
-   "y_level": 1,
-   "rot": 270
-  },
-  {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 31,
    "z": 42,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 31,
    "z": 43,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
@@ -6582,66 +7923,92 @@
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
+   "x": 31,
+   "z": 45,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 31,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 32,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 32,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 32,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 32,
    "z": 7,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 0
   },
   {
-   "asset": "terrain_sideCorner",
+   "asset": "terrain",
    "x": 32,
    "z": 8,
-   "y_level": 3,
-   "rot": 0
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 32,
    "z": 9,
-   "y_level": 3,
-   "rot": 270
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 32,
    "z": 10,
-   "y_level": 3,
-   "rot": 270
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 32,
    "z": 11,
-   "y_level": 3,
-   "rot": 270
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 32,
    "z": 12,
-   "y_level": 3,
-   "rot": 270
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
    "x": 32,
    "z": 13,
-   "y_level": 3,
-   "rot": 270
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCorner",
+   "asset": "terrain",
    "x": 32,
    "z": 14,
-   "y_level": 3,
-   "rot": 270
+   "y_level": 3
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 32,
    "z": 15,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 180
   },
   {
@@ -6796,11 +8163,79 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 32,
    "z": 39,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
+  },
+  {
+   "asset": "terrain_sideCornerInner",
+   "x": 32,
+   "z": 40,
+   "y_level": 0,
+   "rot": 90
+  },
+  {
+   "asset": "terrain_side",
+   "x": 32,
+   "z": 41,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 32,
+   "z": 42,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 32,
+   "z": 43,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 32,
+   "z": 44,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 32,
+   "z": 45,
+   "y_level": 0,
+   "rot": 270
+  },
+  {
+   "asset": "terrain",
+   "x": 32,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 33,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 33,
+   "z": 6,
+   "y_level": 2,
+   "rot": 0
   },
   {
    "asset": "terrain_sideCorner",
@@ -6810,52 +8245,52 @@
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 8,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 9,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 10,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 11,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 12,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 13,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 14,
-   "y_level": 2,
+   "y_level": 3,
    "rot": 270
   },
   {
@@ -6957,17 +8392,17 @@
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 31,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 32,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
@@ -6985,31 +8420,31 @@
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 35,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 36,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 37,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 33,
    "z": 38,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
@@ -7018,6 +8453,69 @@
    "z": 39,
    "y_level": 1,
    "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 33,
+   "z": 40,
+   "y_level": 1,
+   "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 42,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 43,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 44,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 45,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 33,
+   "z": 46,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 34,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 34,
+   "z": 5,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 34,
+   "z": 6,
+   "y_level": 1,
+   "rot": 0
   },
   {
    "asset": "terrain_sideCornerInner",
@@ -7159,10 +8657,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 34,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -7221,10 +8719,43 @@
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_sideCorner",
+   "x": 34,
+   "z": 40,
+   "y_level": 0,
+   "rot": 270
+  },
+  {
+   "asset": "terrain",
+   "x": 34,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 35,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 35,
+   "z": 5,
+   "y_level": 0,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_sideCornerInner",
+   "x": 35,
+   "z": 6,
+   "y_level": 0,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 35,
    "z": 7,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -7360,10 +8891,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 35,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -7415,17 +8946,48 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 35,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 35,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 35,
+   "z": 41,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 36,
+   "z": 4,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 36,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 36,
+   "z": 6,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 36,
    "z": 7,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -7561,10 +9123,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 36,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -7616,17 +9178,36 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 36,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 36,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 37,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 37,
+   "z": 6,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 37,
    "z": 7,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -7762,10 +9343,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 37,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -7817,11 +9398,30 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 37,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 37,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 38,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 38,
+   "z": 6,
+   "y_level": 1,
+   "rot": 0
   },
   {
    "asset": "terrain_sideCorner",
@@ -7831,24 +9431,24 @@
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 38,
    "z": 8,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 38,
    "z": 9,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 38,
    "z": 10,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
@@ -7967,10 +9567,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 38,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -8022,17 +9622,64 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 38,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 38,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 39,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 39,
+   "z": 6,
+   "y_level": 0,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 39,
+   "z": 7,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 39,
+   "z": 8,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 39,
+   "z": 9,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_sideCornerInner",
+   "x": 39,
+   "z": 10,
+   "y_level": 0,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 39,
    "z": 11,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -8144,10 +9791,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 39,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -8199,17 +9846,60 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 39,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 39,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 40,
+   "z": 5,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 40,
+   "z": 6,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 40,
+   "z": 7,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 40,
+   "z": 8,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 40,
+   "z": 9,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 40,
+   "z": 10,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 40,
    "z": 11,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -8321,10 +10011,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 40,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -8376,17 +10066,36 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 40,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain",
+   "x": 40,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 41,
+   "z": 9,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 41,
+   "z": 10,
+   "y_level": 1,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
    "x": 41,
    "z": 11,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 0
   },
   {
@@ -8498,10 +10207,10 @@
    "y_level": 2
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 41,
    "z": 30,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 180
   },
   {
@@ -8553,11 +10262,30 @@
    "y_level": 1
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 41,
    "z": 39,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 180
+  },
+  {
+   "asset": "terrain",
+   "x": 41,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 42,
+   "z": 9,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 42,
+   "z": 10,
+   "y_level": 1,
+   "rot": 0
   },
   {
    "asset": "terrain_sideCorner",
@@ -8567,129 +10295,129 @@
    "rot": 0
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 12,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 13,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 14,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 15,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 16,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 17,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 18,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 19,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 20,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 21,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 22,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 23,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 24,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 25,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 26,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 27,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 28,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 29,
-   "y_level": 1,
+   "y_level": 2,
    "rot": 270
   },
   {
@@ -8707,52 +10435,52 @@
    "rot": 90
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 32,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 33,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 34,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 35,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 36,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 37,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
-   "asset": "terrain_sideCliff",
+   "asset": "terrain_side",
    "x": 42,
    "z": 38,
-   "y_level": 0,
+   "y_level": 1,
    "rot": 270
   },
   {
@@ -8761,6 +10489,370 @@
    "z": 39,
    "y_level": 0,
    "rot": 270
+  },
+  {
+   "asset": "terrain",
+   "x": 42,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 9,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 43,
+   "z": 10,
+   "y_level": 0,
+   "rot": 0
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 11,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 12,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 13,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 14,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 15,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 16,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 17,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 18,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 19,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 20,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 21,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 22,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 23,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 24,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 25,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 26,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 27,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 28,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 29,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_side",
+   "x": 43,
+   "z": 30,
+   "y_level": 1,
+   "rot": 270
+  },
+  {
+   "asset": "terrain_sideCorner",
+   "x": 43,
+   "z": 31,
+   "y_level": 0,
+   "rot": 270
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 32,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 33,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 34,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 35,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 36,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 37,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 38,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 39,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 43,
+   "z": 40,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 9,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 10,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 11,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 12,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 13,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 14,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 15,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 16,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 17,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 18,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 19,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 20,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 21,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 22,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 23,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 24,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 25,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 26,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 27,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 28,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 29,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 30,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 31,
+   "y_level": 0
+  },
+  {
+   "asset": "terrain",
+   "x": 44,
+   "z": 32,
+   "y_level": 0
   }
  ],
  "props": []

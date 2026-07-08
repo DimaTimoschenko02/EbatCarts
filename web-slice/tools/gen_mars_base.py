@@ -25,42 +25,61 @@ fill(12, 30, 39, 43, 2)    # south bulge
 fill(8, 20, 4, 7, 2)       # north-west bulge
 clear(38, 41, 8, 11)       # cut NE corner (concave notch -> tests Inner)
 
-# ── Rocket platform (north-center): core lvl 4, ring lvl 3 ──────────────
+# ── Rocket platform (north-center): single raised step lvl 3 ────────────
+# Single-level steps only: multi-level concave/convex corners need corner
+# tiles stacked at two heights, which leave gaps the kit has no piece for.
 fill(24, 32, 8, 14, 3)
-fill(25, 31, 9, 13, 4)
 
-# ── Quarry pit (center-west): rim terrace lvl 1, floor lvl 0 ────────────
-fill(13, 21, 16, 24, 1)
-fill(14, 20, 17, 23, 0)
+# ── Quarry pit (center-west): single depression lvl 1 (0.5m below plateau)
+fill(14, 20, 17, 23, 1)
 
 # ── South-east lower terrace lvl 1 ───────────────────────────────────────
 fill(33, 41, 30, 38, 1)
 
-# ── Outer skirt ring: cells just outside the island get level = neighbor-1.
-# Diagonal-only neighbors included too — those become sideCorner tiles at the
-# island's convex corners (edge neighbors win when both exist, via max()).
+# ── Terraced skirt CASCADE down to level 0, then a flat level-0 border ────
+# The island can't just stop at level 2 with one skirt ring — that ring's
+# outer edge would hang over the void and the thin `side` quad shows daylight
+# underneath (jagged shards). Instead cascade rings outward, each one level
+# lower, until everything has descended to level 0, so every sloped skirt has
+# solid ground one step below/behind it. Then add ONE final ring of FLAT
+# level-0 terrain: a flat tile's edge over the void is a clean vertical drop
+# to the backdrop (no underside to show through), same as arena_slice's rim.
 DIRS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 ALL8 = DIRS + [(1, 1), (1, -1), (-1, 1), (-1, -1)]
-skirt_add = {}
+while True:
+    add = {}
+    for (x, z), lv in list(LEVEL.items()):
+        if lv <= 0:
+            continue
+        for dx, dz in ALL8:
+            c = (x + dx, z + dz)
+            if c not in LEVEL and 0 <= c[0] < N and 0 <= c[1] < N:
+                add[c] = max(add.get(c, -99), lv - 1)
+    if not add:
+        break
+    LEVEL.update(add)
+# Flat level-0 border ring (forced flat — see FLAT_BORDER below so the skirt
+# classifier leaves these as plain terrain even though they touch level-1).
+FLAT_BORDER = set()
 for (x, z), lv in list(LEVEL.items()):
     for dx, dz in ALL8:
         c = (x + dx, z + dz)
         if c not in LEVEL and 0 <= c[0] < N and 0 <= c[1] < N:
-            skirt_add[c] = max(skirt_add.get(c, -99), lv - 1)
-LEVEL.update(skirt_add)
+            LEVEL[c] = 0
+            FLAT_BORDER.add(c)
 
 # ── Ramps (rot = ascent direction per catalog: 0=+Z 90=+X 180=-Z 270=-X) ─
 def ramp(x, z, rot):
     RAMPS[(x, z)] = rot
 
-# Into the pit from the east (plateau x=22 lvl2 -> rim x=21 lvl1 -> floor x=20 lvl0)
+# Into the pit from the east: pit floor lvl1 -> plateau lvl2, single ramp cell
+# on the pit's east edge ascending +X toward the plateau.
 for z in (19, 20):
-    ramp(21, z, 90)   # rim cell, ascends +X toward plateau
-    ramp(20, z, 90)   # floor cell, ascends +X toward rim
-# Onto the rocket platform from the south (plateau z=15 -> ring z=14 -> core z=13)
+    ramp(20, z, 90)   # pit-floor edge cell, ascends +X up to the plateau
+# Onto the rocket platform (lvl3) from the south: plateau lvl2 -> platform lvl3,
+# ramp on the platform's south edge ascending -Z into it.
 for x in (27, 28):
-    ramp(x, 15, 180)  # plateau-level cell ascends -Z toward ring
-    ramp(x, 14, 180)  # ring cell ascends -Z toward core
+    ramp(x, 15, 180)  # plateau cell just south of the platform, ascends -Z onto it
 # Onto SE terrace from the west (plateau x=32 lvl2 -> terrace x=33 lvl1)
 for z in (33, 34):
     ramp(33, z, 270)  # terrace cell ascends -X toward plateau
@@ -111,6 +130,13 @@ for (x, z), lv in sorted(LEVEL.items()):
         cells.append({"asset": "terrain_ramp", "x": x, "z": z, "y_level": lv, "rot": rot})
         continue
 
+    # Forced-flat border ring: stays plain terrain even though it touches a
+    # level-1 skirt cell — this flat tile IS the ground behind that skirt, and
+    # its own outer edge over the void is a clean vertical drop to the backdrop.
+    if (x, z) in FLAT_BORDER:
+        cells.append({"asset": "terrain", "x": x, "z": z, "y_level": lv})
+        continue
+
     higher = [(dx, dz) for dx, dz in DIRS if LEVEL.get((x + dx, z + dz), -99) == lv + 1]
     too_high = [(dx, dz) for dx, dz in DIRS if LEVEL.get((x + dx, z + dz), -99) > lv + 1]
     if too_high:
@@ -118,14 +144,14 @@ for (x, z), lv in sorted(LEVEL.items()):
 
     if len(higher) == 1:
         rot = SIDE_ROT[higher[0]]
-        # terrain_sideCliff, NOT terrain_side: side is a thin tilted quad that
-        # hangs BELOW its pivot with no back wall — inside a pit its open
-        # underside faces the camera and reads as jagged shards. sideCliff is a
-        # SOLID cliff face spanning [lv, lv+0.5] ABOVE the pivot, so y_level is
-        # the LOW level (lv) not the high one, and it never shows a hole.
-        # Same +Z-ascent-at-rot0 basis as side, so SIDE_ROT is unchanged.
-        # (vertex-verified in src/assetDiag + docs/space-kit-terrain-catalog.md)
-        cells.append({"asset": "terrain_sideCliff", "x": x, "z": z, "y_level": lv, "rot": rot})
+        # terrain_side is the smooth ramp-skirt piece; it tiles seamlessly with
+        # terrain_sideCorner / terrain_sideCornerInner (one coherent family with
+        # a matching diagonal-vs-axial gradient). The kit has NO cliff corner,
+        # so terrain_sideCliff (a standalone straight cliff) can't corner and
+        # was leaving V-gaps at every corner — the smooth family is correct
+        # here. side's open underside faces AWAY from the slope (into the solid
+        # ground behind the rim), so it stays hidden on single-level steps.
+        cells.append({"asset": "terrain_side", "x": x, "z": z, "y_level": lv + 1, "rot": rot})
     elif len(higher) == 2:
         (ax, az), (bx, bz) = higher
         if (ax + bx, az + bz) == (0, 0):
