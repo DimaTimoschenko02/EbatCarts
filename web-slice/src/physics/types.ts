@@ -58,6 +58,14 @@ export interface KartPhysicsParams {
   // branch, a smoothstep blend so cruising forward is bit-for-bit unaffected.
   reverseSteerGain: number; // REVERSE_STEER_GAIN — steerAngle multiplier fully applied once reversing
 
+  // Reverse cornering-drag relief (numerical diagnosis 2026-07-08, see
+  // bicyclePhysics.ts step I comment and tools/diagnose_reverse.ts): reusing
+  // the same reverseGate smoothstep as reverseSteerGain, this scales down
+  // corneringDragCoeff's braking effect while reversing, since
+  // reverseSteerGain's own larger steerAngle otherwise feeds back into a
+  // larger cornering-drag brake than forward driving ever sees.
+  reverseCorneringDragFloor: number; // REVERSE_CORNERING_DRAG_FLOOR — cornering-drag strength multiplier once fully reversing (1 = unaffected)
+
   // Bicycle v3.0 (two-axle)
   maxSteerAngleDeg: number; // MAX_STEER_ANGLE_DEG
   frontGripStiffness: number; // FRONT_GRIP
@@ -167,7 +175,24 @@ export interface KartPhysicsParams {
 // Values pulled straight from dev_params.json (repo root) on 2026-07-06.
 export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   maxSpeed: 24.5,
-  accelForce: 20,
+  // 20 -> 17 (owner video-diff session 2026-07-08, point 3: "no weight",
+  // measured 0->10m/s at ~1.86s vs the SmashKarts.io reference read as
+  // 2.5-3s). tools/diagnose_* sweep found a hard physical wall in this
+  // quadratic-drag/linear-rolling force model: terminal speed = (-kRolling +
+  // sqrt(kRolling^2 + 4*kDrag*accelForce)) / (2*kDrag), so with kDrag/kRolling
+  // unchanged, accelForce and terminal speed are locked together — pushing
+  // accelForce down far enough for a genuine 3.5-4s climb to 10 m/s drives
+  // terminal speed to ~10.0-10.2 (a fraction of a m/s above the 10 m/s
+  // target), which makes "reach 10" a near-asymptote chase (fragile, and
+  // reads as the kart stalling out just short of a wall, not "heavier" — a
+  // worse feel than the complaint it's fixing). 17 is the highest reduction
+  // that stays comfortably clear of that cliff (terminal ~9.6 m/s, still
+  // above the owner's 9.5 floor) while measurably slowing the WHOLE curve
+  // (time to 8.5 m/s: 1.30s -> 1.68s, ~30% slower) — flagging for
+  // game-designer if the literal "3.5-4s to 10 m/s" number matters: hitting
+  // it exactly would need kDrag/kRolling retuned too (out of this pass's
+  // scope), not just accelForce.
+  accelForce: 17,
   kDrag: 0.07,
   kRolling: 1.1,
   // 40 -> 5 (owner playtest 2026-07-07): braking from a cruise used to be
@@ -181,7 +206,17 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // ASSIST on top of drag/rolling, not a separate instant-stop mechanic).
   // See tools/diagnose_longitudinal.ts for the full sweep.
   brakeForce: 5,
-  reverseRatio: 0.7,
+  // 0.7 -> 0.88 (owner video-diff session 2026-07-08, point 5: "reverse with
+  // steer held barely moves" — measured S+A steady state at 3.1-3.3 m/s
+  // fwdSpeed with sideSpeed 2.8 (LARGER than fwdSpeed, i.e. cornering drag was
+  // winning the fight against reverse thrust). Raising reverseRatio gives
+  // reverse thrust more headroom to push through that drag; combined with the
+  // reverseCorneringDragFloor fix below (bicyclePhysics.ts step I), S+A steady
+  // state moves to fwdSpeed=-4.57/sideSpeed=1.49 — a real, measured
+  // improvement (fwdSpeed now clearly dominant, as intended) though short of
+  // the aspirational ">=5.5 m/s" target; see reverseCorneringDragFloor's own
+  // comment for the remaining physical floor.
+  reverseRatio: 0.88,
   // NEW (owner playtest 2026-07-07): fwdSpeed below which reverse-gear
   // thrust actually engages while S is held — see bicyclePhysics.ts step I
   // comment. 1.2 m/s is comfortably inside "basically stopped" so a player
@@ -200,24 +235,40 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // is a separate arcade "grade resistance" knob for ground-following.
   slopeGravityAccel: 10,
 
-  // steerSlewRateIn 3 -> 2.2 (owner playtest: "steering has no weight" —
-  // slower ramp-up to full lock gives the wheel a touch of heft without
-  // hurting responsiveness, still under 0.5s to ~85% of full lock).
-  steerSlewRateIn: 2.2,
+  // steerSlewRateIn 2.2 -> 1.4 (owner video-diff session 2026-07-08, point 2:
+  // "starts turning too fast after the key press" — ~0.45s to full lock read
+  // as snappier than the SmashKarts.io reference in the frame-by-frame
+  // comparison). 1.4 stretches that to ~0.7s to full lock — noticeably softer
+  // turn-in without going so slow it feels laggy on a quick correction.
+  steerSlewRateIn: 1.4,
   steerSlewRateOut: 11,
   throttleSlewRate: 2,
 
-  // steerLowSpeedMult 1.1 -> 0.9, maxSteerAngleDeg 35 -> 28 (owner playtest:
-  // low/mid-speed turning felt "too sharp, no effort" — this pair was the
-  // actual cause, NOT the kinematic blend formula itself (see diagnosis in
-  // the session report): the old 1.1x low-speed boost stacked on top of the
-  // already-instant, zero-slip kinematic omega formula (step G) to produce
-  // ~227 deg/s turn rate at the top of the blend zone (6 m/s). Dropping the
-  // low-speed boost below 1.0 (matching/undercutting steerHighSpeedMult
-  // instead of exceeding it) and trimming the shared max-angle knob cuts
-  // that to ~135 deg/s — still snappy, no longer "on rails at any speed."
-  steerLowSpeedMult: 0.9,
-  steerHighSpeedMult: 0.85,
+  // steerLowSpeedMult 0.9 -> 0.72, steerHighSpeedMult 0.85 -> 0.62,
+  // maxSteerAngleDeg 28 -> 16, driftYawBonus 1.5 -> 0.2 (owner video-diff
+  // session 2026-07-08, point 1: measured our steady-state drift-circle turn
+  // rate at up to 3.68 rad/s (211 deg/s) vs the SmashKarts.io reference's
+  // ~2.1 rad/s (120 deg/s) — our turn radius came out ~1.6m vs their ~5m.
+  // tools/diagnose_drift_circle.ts-style instrumentation found the single
+  // biggest contributor was driftYawBonus: at full drift (dFast=1,
+  // speedGate=1) it added a flat +1.5 rad/s (86 deg/s) directly on top of the
+  // bicycle model's own emergent yaw rate — nearly HALF of the total turn
+  // rate was this one constant addend, not tire physics. Cutting it to 0.2
+  // keeps a small "kick" on top of the emergent turn (so drift still feels
+  // more eager than a plain corner) without dominating it. maxSteerAngleDeg
+  // and the low/high-speed multipliers were cut together (not just
+  // maxSteerAngleDeg alone) because at old defaults reverseSteerGain and the
+  // kinematic-blend low-speed range would otherwise still deliver a sharp
+  // effective lock even at a lower max angle — this combo is what actually
+  // moved the measured steady-state circle. Result: drift-circle steady
+  // omega 4.45 rad/s (255 deg/s, radius 1.28m) -> 2.03 rad/s (116 deg/s,
+  // radius 3.62m) — inside the target (<=2.3 rad/s, >=3.5m radius). Because
+  // maxSteerAngleDeg/steerLowSpeedMult/steerHighSpeedMult also gate ORDINARY
+  // (non-drift) turning, a matched gentle-steer (0.3) test at cruise softened
+  // proportionally too: 58.6 -> 27.3 deg/s (~53% down), satisfying the "ordinary
+  // turning also softer" requirement without a separate knob.
+  steerLowSpeedMult: 0.72,
+  steerHighSpeedMult: 0.62,
 
   // 2.2 (numerical tuning, tools/diagnose_reverse.ts 2026-07-07, swept
   // 1.5/1.9/2.0/2.2/2.4/2.6/2.8/3.0/5.0). Brings reverse-terminal omega up
@@ -246,7 +297,21 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   // after playtesting this measured improvement.
   reverseSteerGain: 2.2,
 
-  maxSteerAngleDeg: 28,
+  // 0.35 (owner video-diff session 2026-07-08, point 5 — see bicyclePhysics.ts
+  // step I comment and reverseRatio's doc comment above for the full S+A
+  // measurement). Reversing at full steer now settles at cornering-drag
+  // strength 35% of the forward value instead of 100%, which is what let
+  // reverseRatio's increase actually reach the kart (previously extra reverse
+  // thrust was largely being eaten straight back by the amplified cornering
+  // drag from reverseSteerGain's larger effective steer angle). Not pushed all
+  // the way to 0: some cornering resistance in reverse is still correct arcade
+  // feel (a reversing kart shouldn't corner for free either), and going lower
+  // didn't move the S+A steady-state fwdSpeed further in testing — the
+  // remaining ceiling is the kinematic-omega/corneringDrag feedback loop
+  // documented in reverseSteerGain's comment above, not this term.
+  reverseCorneringDragFloor: 0.35,
+
+  maxSteerAngleDeg: 16,
   frontGripStiffness: 17.5,
   rearGripStiffness: 2.5,
   tireSaturationSpeed: 5,
@@ -265,23 +330,31 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftDragMultiplier: 1,
   driftRollingMultiplier: 5,
   corneringDragCoeff: 5,
-  corneringDragDriftMult: 4,
+  // 4 -> 5.5 (owner video-diff session 2026-07-08, point 4, alongside
+  // driftPenaltyTau below — see that param's updated comment for the full
+  // measurement). A bit more braking strength once actually drifting, so the
+  // faster-reacting penalty filter has a real dip to sink into rather than a
+  // shallow one.
+  corneringDragDriftMult: 5.5,
 
-  // 2.0 (numerical tuning, tools/diagnose_drift_circle.ts 2026-07-07): swept
-  // 0.6 / 1.2 / 2.0 — the entry dip's low-point rises with tau (67.5% ->
-  // 72.8% -> 76.7% -> 78.7% of steady mean as tau goes 0(old) -> 0.6 -> 1.2 ->
-  // 2.0) but with diminishing returns: a real floor remains because
-  // corneringDrag's BASE term (corneringDragCoeff, always active in any
-  // sharp turn — see step I) still scales with the ACTUAL |sideSpeed|, which
-  // genuinely spikes right at drift entry as a real physical transient (the
-  // rear tires really do slip harder for a moment before the yaw rate
-  // settles) — that portion isn't reachable by filtering driftPenaltyFactor
-  // at all, only the cdDriftScale/dragMult/rollingMult MULTIPLIERS are. 2.0
-  // is picked as the point where steady mean fwdSpeed is still bit-for-bit
-  // unaffected (converges well within a single ~2s drift circle) and further
-  // increases stopped meaningfully improving the dip (diminishing returns
-  // past here start trading away entry responsiveness for no real gain).
-  driftPenaltyTau: 2.0,
+  // 2.0 -> 1.0 (owner video-diff session 2026-07-08, point 4: "speed should
+  // drop FASTER entering a drift, not slower" — the exact opposite direction
+  // from the 2026-07-07 tau=2.0 tuning above, which had smoothed the dip AWAY
+  // because at the time it read as an unwanted speed hole. Re-measured with
+  // this session's other changes already applied (softer steerLowSpeedMult/
+  // steerHighSpeedMult/maxSteerAngleDeg reduce the raw cornering-drag
+  // transient at entry, so tau alone now has less to work with than in the
+  // 2026-07-07 sweep): tau=1.0 gives dip=87.1% of steady mean at t+2.18s into
+  // the drift phase, vs tau=2.0's 91.6% at t+2.24s with the SAME other
+  // params — a real, measured move toward "faster/more noticeable," though
+  // more modest than the original 0.8-1.2 sweep found pre-steering-changes.
+  // Swept down to 0.1 and found a genuine floor around 82-85% with these
+  // softer steering params (corneringDrag's BASE term still scales with the
+  // real |sideSpeed| transient — same physical floor documented in the
+  // pre-2026-07-08 sweep, just at a shallower baseline now that entry itself
+  // is gentler). 1.0 is the value from the owner brief's suggested 0.8-1.2
+  // range that gave the clearest, still-stable improvement.
+  driftPenaltyTau: 1.0,
 
   mass: 1.0,
 
@@ -314,7 +387,13 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   driftRecoveryRate: 5,
   driftExitGripMult: 2.2,
   driftRearGripMult: 0.25,
-  driftYawBonus: 1.5,
+  // 1.5 -> 0.2 — see maxSteerAngleDeg/steerLowSpeedMult/steerHighSpeedMult's
+  // shared comment above for the full measurement (this was the single
+  // biggest contributor to the "turns 3x too sharp" complaint: a flat +86
+  // deg/s addend on top of the emergent tire-physics yaw rate, nearly half
+  // the total). 0.2 keeps a small drift "kick" rather than removing it
+  // entirely.
+  driftYawBonus: 0.2,
   driftForwardAssist: 0,
   driftPowerFullTime: 1.5,
   driftMinActiveForBoost: 0.7,
@@ -362,13 +441,16 @@ export const DEFAULT_KART_PHYSICS_PARAMS: KartPhysicsParams = {
   attitudeAirborneRelaxRate: 3,
 
   // Chase camera detached from physical yaw (2026-07-07) — see camera.ts
-  // file header. 4 turns the camera to its target heading in ~0.7s (time
-  // constant 1/4=0.25s), fast enough to keep up with a drift's changing
-  // travel direction without visibly lagging. Blend window 0.5..2.5 m/s
+  // file header. 4 -> 7 (owner video-diff session 2026-07-08, point 6: "kart
+  // turned 100deg and I'm still looking where its nose used to point" — 4
+  // (time constant 0.25s, ~0.7s to catch up) was visibly lagging a fast
+  // drift's changing travel direction. 7 (time constant ~0.14s, ~0.4s to
+  // catch up) keeps the camera reading as attached without going so fast it
+  // whip-pans on every steering twitch. Blend window 0.5..2.5 m/s
   // covers "basically stopped/reversing" (pure physical yaw) up through a
   // slow rolling start (pure velocity heading) — arena_slice's cruise speeds
   // are 10+ m/s, comfortably above the top of the window.
-  camYawFollowRate: 4,
+  camYawFollowRate: 7,
   camVelHeadingBlendLo: 0.5,
   camVelHeadingBlendHi: 2.5,
 };

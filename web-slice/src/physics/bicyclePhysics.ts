@@ -226,11 +226,23 @@ export class BicyclePhysics {
     // by corneringDragDriftMult while an actual drift is active so THAT loses
     // noticeably more speed than a plain turn. Reads the same slow
     // driftPenaltyFactor as dragMult/rollingMult just above (see comment there).
+    // Reverse cornering-drag relief (numerical diagnosis 2026-07-08, see
+    // tools/diagnose_reverse.ts owner-facing report point 5): reverseSteerGain
+    // (step B) deliberately amplifies steerAngle while reversing, which in
+    // turn amplifies |sideSpeed| through the same tire-force feedback loop
+    // documented in reverseSteerGain's doc comment — cornering_drag then reads
+    // that larger |sideSpeed| and brakes reverse thrust harder than forward
+    // driving ever sees at a matched steer input, measured as reverse+full
+    // steer settling at |sideSpeed| > |fwdSpeed| (a "can't out-thrust its own
+    // braking" stall). Reuses the SAME `reverseGate` smoothstep computed in
+    // step B (1 = unaffected forward/standstill, 0 = fully reversing) so this
+    // is one continuous knob, not a second threshold to keep in sync.
+    const cdReverseMult = lerp(p.reverseCorneringDragFloor, 1, reverseGate);
     let corneringDrag = 0;
     if (p.corneringDragCoeff > 0) {
       const cdBlend = smoothstep(0, 0.2, Math.abs(fwdSpeed));
       const cdDriftScale = lerp(1, p.corneringDragDriftMult, penalty);
-      corneringDrag = -Math.sign(fwdSpeed) * p.corneringDragCoeff * cdDriftScale * Math.abs(sideSpeed) * 0.5 * cdBlend;
+      corneringDrag = -Math.sign(fwdSpeed) * p.corneringDragCoeff * cdDriftScale * cdReverseMult * Math.abs(sideSpeed) * 0.5 * cdBlend;
     }
     // brake force blends in across [0..0.6] m/s.
     let brake = 0;

@@ -42,7 +42,13 @@ describe("BicyclePhysics — straight-line acceleration", () => {
     const { accelForce, kDrag, kRolling } = DEFAULT_KART_PHYSICS_PARAMS;
     const disc = kRolling * kRolling + 4 * kDrag * accelForce;
     const expectedTerminal = (-kRolling + Math.sqrt(disc)) / (2 * kDrag);
-    expect(expectedTerminal).toBeCloseTo(10.7828, 3);
+    // 10.7828 -> 9.5954 (owner video-diff session 2026-07-08, point 3:
+    // accelForce 20 -> 17 — see types.ts accelForce doc comment for the full
+    // "0->10m/s feels too fast" measurement and the hard terminal-speed/
+    // accelForce coupling this force model has). This assertion just pins the
+    // analytic equilibrium formula's value at the new default so a future
+    // accidental accelForce/kDrag/kRolling edit gets caught here too.
+    expect(expectedTerminal).toBeCloseTo(9.5954, 3);
 
     // Simulate 30 sim-seconds of full throttle, dead straight.
     const steps = Math.round(30 / DT);
@@ -549,16 +555,27 @@ function kartLikeTick(sim: KartLikeSim, dt: number, rawSteer: number, rawThrottl
 }
 
 describe("BicyclePhysics + ContinuousDrift — Fix 1 regression: drift entry no longer punches a speed dip", () => {
-  // Bound is 70%, not the original 80% goal: swept driftPenaltyTau 0.6/1.2/2.0
-  // (tools/diagnose_drift_circle.ts) and found diminishing returns above ~2.0
-  // — a real physical floor remains because corneringDrag's BASE term
-  // (corneringDragCoeff, active in ANY sharp turn) still scales with the
-  // ACTUAL |sideSpeed|, which genuinely spikes at drift entry as a real
-  // physical transient (see types.ts driftPenaltyTau default's comment for
-  // the full sweep numbers). At the tuned default (tau=2.0) the dip measures
-  // ~78.7% of steady mean (up from ~67.5% pre-fix) — 70% gives headroom
-  // below that measured value without being so loose it'd miss a real
-  // regression back toward the old ~67.5%.
+  // Bound is still 70% (unchanged) — owner video-diff session 2026-07-08
+  // point 4 wanted the OPPOSITE direction from the original 2026-07-07 fix
+  // (a FASTER/more noticeable speed drop entering a drift, not a smoothed-
+  // away one), so driftPenaltyTau went back down (2.0 -> 1.0) and
+  // corneringDragDriftMult up (4 -> 5.5) — see types.ts driftPenaltyTau's
+  // updated comment for the full re-measurement. With this session's other
+  // changes already in place (softer steerLowSpeedMult/steerHighSpeedMult/
+  // maxSteerAngleDeg reduce the raw cornering-drag transient at entry too),
+  // the dip now measures ~86% of steady mean at tau=1.0 — comfortably above
+  // 70% without needing to loosen the floor at all; a real regression back
+  // toward the pre-2026-07-07 ~67.5% would still be caught. (The brief
+  // allowed loosening this floor to 65% if genuinely needed — not needed
+  // here, so left at 70%.)
+  //
+  // Steady-state mean upper bound raised 6.3 -> 7.5: with accelForce cut
+  // (20->17, point 3) and maxSteerAngleDeg/driftYawBonus cut (point 1), the
+  // drift circle now settles at a genuinely different speed (~7.1 m/s, up
+  // from ~5.67 m/s at the old defaults, mostly because the flatter drift
+  // arc/lower yaw bonus loses less speed to cornering drag per circle) — this
+  // bound now just guards "steady mean stays in the same ballpark," not the
+  // exact pre-2026-07-08 number.
   it("fwdSpeed never dips below 70% of the eventual steady-state mean during drift entry", () => {
     const sim = makeKartLikeSim();
     const dt = 1 / 120;
@@ -574,25 +591,28 @@ describe("BicyclePhysics + ContinuousDrift — Fix 1 regression: drift entry no 
     const steadyMean = steadyWindow.reduce((a, b) => a + b, 0) / steadyWindow.length;
     const minSpeed = Math.min(...driftSpeeds);
     expect(minSpeed).toBeGreaterThanOrEqual(steadyMean * 0.7);
-    // Steady-state mean itself must stay close to the pre-fix value (~5.67
-    // m/s) — this is the "don't wreck the circle to fix the entry" guard.
+    // Steady-state mean itself must stay in the same ballpark — this is the
+    // "don't wreck the circle" guard, not a pin to an exact legacy number.
     expect(steadyMean).toBeGreaterThan(5.0);
-    expect(steadyMean).toBeLessThan(6.3);
+    expect(steadyMean).toBeLessThan(7.5);
   });
 });
 
 describe("BicyclePhysics + ContinuousDrift — Fix 2 regression: reverse maneuverability improved, with no oscillation", () => {
-  // NOT full forward/reverse parity: numerically swept reverseSteerGain
-  // 1.5..5.0 (tools/diagnose_reverse.ts) and found a genuine physical
-  // feedback-loop ceiling — see types.ts reverseSteerGain default's doc
-  // comment for the full root-cause writeup (larger steerAngle -> more
-  // corneringDrag -> less fwdSpeed -> smaller kinematic omega term, which
-  // cancels out the steer-angle increase). At the tuned default
-  // (reverseSteerGain=2.2) reverse reaches ~101 deg/s vs forward's ~171
-  // deg/s (ratio ~0.59) — a real, substantial improvement over the pre-fix
-  // ~85 deg/s (ratio ~0.5), but short of the aspirational "reverse >=
-  // forward" target. This test guards the MEASURED improvement, not the
-  // unreached aspirational target.
+  // NOT full forward/reverse parity, but MUCH closer than the 2026-07-07 fix:
+  // owner video-diff session 2026-07-08 point 5 added reverseCorneringDragFloor
+  // (bicyclePhysics.ts step I) and raised reverseRatio (0.7->0.88) to relieve
+  // the same corneringDrag feedback loop documented in reverseSteerGain's
+  // comment above, and this session's maxSteerAngleDeg cut (28->16, point 1)
+  // shrinks the absolute steer angle everywhere (so the whole feedback loop
+  // operates on smaller numbers, forward AND reverse). Combined effect
+  // measured here: forward ~1.637 rad/s (93.8 deg/s), reverse ~1.410 rad/s
+  // (80.8 deg/s), ratio ~0.86 — up from the 2026-07-07 fix's ~0.59 (101 vs 171
+  // deg/s). Absolute magnitudes are LOWER than the 2026-07-07 numbers on both
+  // sides (expected: maxSteerAngleDeg went from 28 to 16, a direct scale-down
+  // of every steer-derived yaw rate — see point 1's own regression coverage
+  // for that intentional change), so the floor below is re-pinned to the new
+  // absolute measurement instead of the old ~1.6 rad/s (85 deg/s) floor.
   it("reverse yaw rate at terminal speed is a much better fraction of forward's than the pre-fix ~0.5, and doesn't oscillate", () => {
     const dt = 1 / 120;
 
@@ -612,13 +632,17 @@ describe("BicyclePhysics + ContinuousDrift — Fix 2 regression: reverse maneuve
     const fwd = terminalManeuverOmega(1);
     const rev = terminalManeuverOmega(-1);
 
-    // Pre-fix ratio was ~0.5 (85 vs 169 deg/s). Post-fix measured ratio is
-    // ~0.59 (101 vs 171 deg/s) — require clearly above the old ratio, with
-    // margin below the measured value so normal tuning noise doesn't flake.
+    // 2026-07-07 fix's ratio was ~0.59 (101 vs 171 deg/s). This session's
+    // measured ratio is ~0.86 (80.8 vs 93.8 deg/s) — require clearly above
+    // the previous fix's ratio, with margin below the measured value so
+    // normal tuning noise doesn't flake.
     const ratio = Math.abs(rev.meanOmega) / Math.abs(fwd.meanOmega);
-    expect(ratio).toBeGreaterThan(0.55);
-    // Absolute floor: pre-fix reverse omega was ~1.483 rad/s (85 deg/s).
-    expect(Math.abs(rev.meanOmega)).toBeGreaterThan(1.6);
+    expect(ratio).toBeGreaterThan(0.75);
+    // Absolute floor: re-pinned to this session's measured ~1.410 rad/s (80.8
+    // deg/s) — see the describe-block comment above for why this is LOWER
+    // than the 2026-07-07 fix's ~1.6 rad/s floor (maxSteerAngleDeg 28->16
+    // scales every steer-derived yaw rate down, forward included).
+    expect(Math.abs(rev.meanOmega)).toBeGreaterThan(1.3);
 
     // No runaway/divergent oscillation on the reverse steady window: the
     // spread (max-min) should stay a small fraction of the mean magnitude,
